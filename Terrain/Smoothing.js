@@ -1,6 +1,5 @@
 /*
  *  Terrain Smooth Engine for Open Fodder (JavaScript version)
- *    Version 0.60
  *    Written by starwindz
  *    Special thanks to segra and drnovice
  *  ------------------------------------------------------------------
@@ -23,6 +22,7 @@
  *
  */
 
+const version = '0.61';
 //const programMode = 'debug';
 const programMode = 'release';
 
@@ -1395,7 +1395,10 @@ function CSmoothTerrain() {
   this.run = function(_game_type, _tile_type, _mode, _w, _h, _map, _limits) {
     var i, j;
 
-    printDebug('>> SmoothEngine started');
+    printDebug('>> SmoothEngine ' + version + ' started');
+    printDebug('>> Game type : ' + _game_type);
+    printDebug('>> Tile type : ' + _tile_type);
+    printDebug('>> Map size : ' + String(_w) + ' x ' + String(h));
 
     // Set Map Cols and Rows
     map_col_num = _w;
