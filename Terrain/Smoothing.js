@@ -1398,7 +1398,7 @@ function CSmoothTerrain() {
     printDebug('>> SmoothEngine ' + version + ' started');
     printDebug('>> Game type : ' + _game_type);
     printDebug('>> Tile type : ' + _tile_type);
-    printDebug('>> Map size : ' + String(_w) + ' x ' + String(h));
+    printDebug('>> Map size : ' + String(_w) + ' x ' + String(_h));
 
     // Set Map Cols and Rows
     map_col_num = _w;
