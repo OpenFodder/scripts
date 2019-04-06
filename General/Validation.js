@@ -7,21 +7,57 @@
 
 var Validation = {
 
+    /**
+     * Ensure the map can be completed
+     */
     ValidateMap: function() {
+        needHelicopter = false;
 
+        if( this.canKillAllEnemy() == false)
+            needHelicopter = true;
+
+        // If a rescue tent is placed
         if (Session.isRescueTentPlaced()) {
 
-            if(!this.ValidateHostageRescue()) {
+            // Ensure it can be completed by walking
+            if(!this.canHostageRescue()) 
+                needHelicopter = true;
+        }
 
-                Session.RescueHelicopter = Helicopters.Human.Random();
+        if(needHelicopter) {
+            if(Session.Helicopter === null)
+                Session.Helicopter = Helicopters.Human.Random();
+        }
+    },
+
+    /**
+     * Ensure a path exists between human sprites and sprites of type pSpriteType
+     */
+    WalkToSprites: function(pSpriteType) {
+        Sprites = Map.getSpritesByType(pSpriteType);
+
+        for(x = 0; x < Sprites.length; ++x) {
+            Distance = Map.calculatePathBetweenPositions(SpriteTypes.Hostage, Sprites[x].getPosition(), Session.HumanPosition);
+            if(Distance.length == 0) {
+                return false;
             }
         }
+
+        return true;
+    },
+
+    /**
+     * Can we walk to all enemy sprites
+     */
+    canKillAllEnemy: function() {
+
+        return this.WalkToSprites(SpriteTypes.Enemy);
     },
 
     /**
      * Ensure a path exists between the rescue tent, the humans, and each placed hostage
      */
-    ValidateHostageRescue: function() {
+    canHostageRescue: function() {
 
         // Calculate a walkable path the tent and the humans 
         Distance = Map.calculatePathBetweenPositions(SpriteTypes.Player, Session.RescueTentPosition, Session.HumanPosition);

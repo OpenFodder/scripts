@@ -14,7 +14,7 @@ var Session = {
     /** 
      * @var sSprite 
      */
-    RescueHelicopter: null,
+    Helicopter: null,
 
     /**
      * @var cPosition
@@ -27,7 +27,7 @@ var Session = {
     Reset: function() {
         this.HostageGroupPositions = [];
         this.RescueTentPosition = new cPosition(0, 0);
-        this.RescueHelicopter = null;
+        this.Helicopter = null;
         this.HumanPosition = new cPosition(0, 0);
     },
 
