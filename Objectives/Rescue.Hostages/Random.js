@@ -1,38 +1,8 @@
-
 /**
- * Create a helicopter, if required, to rescue hostages
- *
- * This will only create a helicopter if a hostage requires one to reach the rescue tent
+ * OpenFodder
  * 
- * @return {cPosition} Position of Helicopter
+ * Rescue Hostages
  */
-Objectives.RescueHostages.CreateHelicopter = function() {
-	needHelicopter = false;
-
-	if(Session.RescueHelicopter !== null)
-		return Session.RescueHelicopter;
-
-	// Check if a walkable path between the humans and the tent
-	Distance = Map.calculatePathBetweenPositions(SpriteTypes.Player, Session.RescueTentPosition, Session.HumanPosition);
-	if(Distance.length == 0)
-		needHelicopter = true;
-	
-	// Check if any of the hostage groups cant walk to the rescue tent
-	if(!needHelicopter) {
-		for( x = 0; x < Session.HostageGroupPositions.length; ++x) {
-			Distance = Map.calculatePathBetweenPositions(SpriteTypes.Hostage, Session.RescueTentPosition, Session.HostageGroupPositions[x]);
-			if(Distance.length == 0) {
-				needHelicopter = true;
-				break;
-			}
-		}
-	}
-
-	if(needHelicopter)
-		Session.RescueHelicopter = Helicopters.Human.RandomHoming();
-	
-	return Session.RescueHelicopter;
-};
 
 /**
  * Create a hostage rescue tent
@@ -47,11 +17,11 @@ Objectives.RescueHostages.CreateTent = function() {
 
 		print("Placing rescue tent");
 		// TODO: Loop all known groups
-		// Find a position for the tent which is more than 50 away from the first hostage group
+		// Find a position for the tent which is more than 10 away from the first hostage group
 		do {
 			Position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1);
 			++Attempts;
-		} while( Map.getDistanceBetweenPositions(Session.HostageGroupPositions[0], Position) < 50 && Attempts < 10);
+		} while( Map.getDistanceBetweenPositions(Session.HostageGroupPositions[0], Position) < 10 && Attempts < 10);
 		
 		if(Attempts == 10)
 			print("Failed finding location for rescue tent, placing anyway");
@@ -110,5 +80,4 @@ Objectives.RescueHostages.Random = function(pHostageCount) {
 
 	this.CreateHostages(pHostageCount, true);
 	this.CreateTent();
-	this.CreateHelicopter();
 };

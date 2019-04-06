@@ -29,5 +29,12 @@ var Session = {
         this.RescueTentPosition = new cPosition(0, 0);
         this.RescueHelicopter = null;
         this.HumanPosition = new cPosition(0, 0);
+    },
+
+    /**
+     * Has the rescue tent been placed?
+     */
+    isRescueTentPlaced: function() {
+        return this.RescueTentPosition.x != 0 && this.RescueTentPosition.y != 0;
     }
 };

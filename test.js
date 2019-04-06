@@ -2,12 +2,11 @@
 // Reset the map session
 Session.Reset();
 
-
-Map.Create(90, 64, Terrain.Types.Jungle, 0);
+Map.Create(80, 50, Terrain.Types.Jungle, 0);
 Terrain.Randomize();
 
 Human.RandomXY(3);
-Objectives.KillAllEnemy.Random(3);
+Objectives.KillAllEnemy.Random(10);
 
 Objectives.DestroyEnemyBuildings.Random(2);
 
@@ -15,6 +14,9 @@ Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
+
+Validation.ValidateMap();
+
 
 // Some Fun
 /*
@@ -34,6 +36,7 @@ print("Starting X: " + Session.HumanPosition.x + " Y: " + Session.HumanPosition.
 print("Tent Starting X: " + Session.RescueTentPosition.x + " Y: " + Session.RescueTentPosition.y);
 
 
+/*
 for(count = 0; count < Session.HostageGroupPositions.length; ++count) {
 
 	//Strange.PlaceSpritesOnPath(SpriteTypes.Enemy, Session.HostageGroupPositions[count], Session.HumanPosition);
@@ -45,3 +48,5 @@ for(count = 0; count < Session.HostageGroupPositions.length; ++count) {
 
 if(Session.RescueHelicopter !== null)
 	Strange.PlaceSpritesOnPath(SpriteTypes.GrenadeBox, Session.RescueHelicopter, Session.HumanPosition);
+}
+*/
