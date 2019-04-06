@@ -1,6 +1,5 @@
 /*
  *  Terrain Smooth Engine for Open Fodder (JavaScript version)
- *    Version 0.50
  *    Written by starwindz
  *    Special thanks to segra and drnovice
  *  ------------------------------------------------------------------
@@ -23,6 +22,7 @@
  *
  */
 
+const version = '0.61';
 //const programMode = 'debug';
 const programMode = 'release';
 
@@ -179,6 +179,241 @@ var bm_cf1_jungle_lightgrass_darkgrass = {
     {"bm":"11010000", "tiles": [ {"tile":"68"}  ] }
   ]
 };
+
+var bm_cf1_jungle_tree = {
+  "bitmask": 
+  [
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "11111000"} ],
+      "change_to": [ 
+                     {"matrix": [ [1, 21, 41], [2, 22, 42], [3, 23, 43], [4, 24, 44] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },
+
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "11101000"} ],
+      "change_to": [ 
+                     {"matrix": [ [202, 222, 86] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },
+
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "11110000"} ],
+      "change_to": [ 
+                     {"matrix": [ [3, 23, 43] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },
+
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "11101001"}, {"vector": "11111001"}, {"vector": "11001001"}, {"vector": "11011001"} ],
+      "change_to": [ 
+                     {"matrix": [ [144, 184, 204, 224] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },    
+
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "11110100"}, {"vector": "11111100"}, {"vector": "01110100"}, {"vector": "01111100"} ],
+      "change_to": [ 
+                     {"matrix": [ [163, 183, 203, 223] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },  
+    
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "01101000"}, {"vector": "01101001"} ],
+      "change_to": [ 
+                     {"matrix": [ [46, 66, 86] ]},
+                     {"matrix": [ [35, 35] ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },   
+    
+    {
+      "group":"BOTTOM", 
+      "detect":    [ {"vector": "11010000"}, {"vector": "11010100"} ],
+      "change_to": [ 
+                     {"matrix": [ [45, 65, 85] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [ [104, 104] ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },  
+    
+    {
+      "group":"MIDDLE", 
+      "detect":    [ {"vector": "11111111"}, {"vector": "11111011"}, {"vector": "11111110"}, {"vector": "01111111"}, {"vector": "11011111"}, {"vector": "11011011"}, {"vector": "01111110"}, {"vector": "11110110"}, {"vector": "11010111"}, {"vector": "11101011"}, {"vector": "01101111"} ],
+      "change_to": [ 
+                     {"matrix": [ [1], [2], [83], [102], [121], [122], [141], [142], [163] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },    
+
+    {
+      "group":"MIDDLE", 
+      "detect":    [ {"vector": "01001011"}, {"vector": "01101010"}, {"vector": "01101011"} ],
+      "change_to": [ 
+                     {"matrix": [ [46], [83] ]},
+                     {"matrix": [ [35] ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },
+    
+    {
+      "group":"MIDDLE", 
+      "detect":    [ {"vector": "01010110"}, {"vector": "11010010"}, {"vector": "11010110"} ],
+      "change_to": [ 
+                     {"matrix": [ [45], [25] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [ [104] ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },
+
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00011111"} ],
+      "change_to": [ 
+                     {"matrix": [ [62], [102], [144], [145] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },  
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00001111"} ],
+      "change_to": [ 
+                     {"matrix": [ [61], [100] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00010111"} ],
+      "change_to": [ 
+                     {"matrix": [ [63], [120] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },   
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00101111"} ],
+      "change_to": [ 
+                     {"matrix": [ [100] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },  
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00111111"} ],
+      "change_to": [ 
+                     {"matrix": [ [144] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    }, 
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "10010111"} ],
+      "change_to": [ 
+                     {"matrix": [ [63] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    }, 
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "10011111"} ],
+      "change_to": [ 
+                     {"matrix": [ [102] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },  
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00001011"}, {"vector": "00101011"} ],
+      "change_to": [ 
+                     {"matrix": [ [61], [100] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    },  
+    
+    {
+      "group":"TOP", 
+      "detect":    [ {"vector": "00010110"}, {"vector": "10010110"} ],
+      "change_to": [ 
+                     {"matrix": [ [63], [120] ]},
+                     {"matrix": [  ]},
+                     {"matrix": [  ]}
+                   ],
+      "change_to_cur": [ {"row":"0"}, {"row":"0"}, {"row":"0"} ]
+    } 
+    
+  ]
+}
+
+if (programMode == 'debug') {
+  /*
+  var tree_bitmask = bm_cf1_jungle_tree;
+  var a;
+  
+  a = tree_bitmask.bitmask[0].group;
+  printDebug(a);
+  a = tree_bitmask.bitmask[0].detect[0].vector;
+  printDebug(a);
+  a = tree_bitmask.bitmask[0].change_to[0].matrix;
+  printDebug(a);
+  a = tree_bitmask.bitmask[0].change_to[0].matrix[1][2];
+  printDebug(a);
+  a = tree_bitmask.bitmask[0].change_to[1].matrix.length;
+  printDebug(a);  
+  
+  printDebug(tree_bitmask.bitmask[0].change_to[0].matrix[1][2]);
+  */
+}
      
 // Delphi compatible AnsiMatchStr function
 function AnsiMatchStr(s, s_list) {
@@ -557,6 +792,7 @@ function CSmoothTerrain() {
     var _comp_false = false;
     var _comp_true = true;
     var _WC, _LC;
+    var tree_bitmask;
 
     _WC = smooth[s_step].char1;
     _LC = smooth[s_step].char2;
@@ -602,7 +838,7 @@ function CSmoothTerrain() {
               map_char[i][j] = _WC;
               found_cnt++;
               //printDebug('A' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
-			  //break;
+			        //break;
             }
           }
         }
@@ -612,7 +848,7 @@ function CSmoothTerrain() {
               map_char[i][j] = _LC;
               found_cnt++;
               //printDebug('B' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
-			  //break;
+			        //break;
             }
           }
         }
@@ -628,7 +864,7 @@ function CSmoothTerrain() {
               found_cnt++;
               //printDebug('C', _k, 'false', i, j, 'changed to', _WC);
               //printDebug('C' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
-			  //break;
+			        //break;
             }
           }
         }
@@ -638,7 +874,7 @@ function CSmoothTerrain() {
               map_char[i][j] = _LC;
               found_cnt++;
               //printDebug('D' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
-			  //break;
+			        //break;
             }
           }
         }
@@ -823,7 +1059,7 @@ function CSmoothTerrain() {
       // init
       for (j = 0; j <= map_row_num - 1; j++) {
         for (i = 0; i <= map_col_num - 1; i++) {
-
+          //map_tile[i][j] = 0;
           if (map_char[i][j] == level[0].char) {
             map_tile[i][j] = _water[getRandomInt(0, _water.length - 1)];
           } else if (map_char[i][j] == level[1].char) {
@@ -850,7 +1086,7 @@ function CSmoothTerrain() {
         }
         s_step = m;
         smoothWaterAndLandEach(_bms);
-	    printDebug('>> Smooth water and land... Step ' + m);
+	      printDebug('>> Smooth water and land... Step ' + m);
       }
 
       //printDebug('---');
@@ -889,6 +1125,254 @@ function CSmoothTerrain() {
     }
   }
 
+  function get_tree_bitmask_data(i, j) {
+    var b;
+    var _TC;
+
+    _TC = 'T';
+    b = '';
+
+    // -1 row
+    if ((i - 1) < 0 || (j - 1) < 0) {
+      b = b + '1';
+    }
+    else {
+      if (map_char[i - 1][j - 1] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    if ((j - 1) < 0) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i][j - 1] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    if ((i + 1) > (map_col_num - 1) || (j - 1) < 0) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i + 1][j - 1] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    // +0 row
+    if ((i - 1) < 0) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i - 1][j] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    if ((i + 1) > map_col_num - 1) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i + 1][j] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    // +1 row
+    if ((i - 1) < 0 || (j + 1) > (map_row_num - 1)) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i - 1][j + 1] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    if ((j + 1) > map_row_num - 1) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i][j + 1] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    if ((i + 1) > (map_col_num - 1) || (j + 1) > (map_row_num - 1)) {
+      b = b + '0';
+    }
+    else {
+      if (map_char[i + 1][j + 1] != _TC) { b = b + '0'; } else { b = b + '1'; }
+    }
+
+    return b;
+  }
+
+  function update_current_change_to(i, m) {
+    var r;
+
+    r = Number(tree_bitmask.bitmask[i].change_to_cur[m].row);
+    r++;
+
+    if (r > tree_bitmask.bitmask[i].change_to[m].matrix.length - 1) {
+      r = 0;
+    }
+    tree_bitmask.bitmask[i].change_to_cur[m].row = String(r);
+  }
+
+  function smoothLandAndTree() {
+    var i, j;
+    var bm;
+    var bm_u, bm_d;
+    var _i, _j, _k, _m, _r;
+    var _TC;
+    var found;
+
+    if ( (game_type == 'cf1') && (tile_type == 'jungle') ) {
+      tree_bitmask = bm_cf1_jungle_tree;
+    }
+    //printDebug(tree_bitmask);
+
+    //return;
+
+    _TC = 'T';
+
+    for (j = map_row_num - 1; j >=0; j--) {
+      //printDebug(String(j));
+      for (i = 0; i <= map_col_num - 1; i++) {
+  
+        if (map_char[i][j] == _TC) {  // 'T'
+  
+          bm = get_tree_bitmask_data(i, j);
+          //printDebug(String(i) + ', ' + String(j) + ' = ' + bm);
+          bm_u = bm.charAt(1);
+          bm_d = bm.charAt(6);
+          //printDebug(String(i) + ', ' + String(j) + ' = ' + bm + ' - ' + bm_u + ', ' + bm_d);
+  
+          // BOTTOM - BEGIN
+          if ((bm_u == '1') && (bm_d == '0')) { // BOTTOM
+            //printDebug('tree_bitmask.bitmask.length = ' + String(tree_bitmask.bitmask.length));
+            for (_i = 0; _i <= tree_bitmask.bitmask.length - 1; _i++) {
+              if (tree_bitmask.bitmask[_i].group == 'BOTTOM') {
+  
+                found = false;
+                for (_j = 0; _j <= tree_bitmask.bitmask[_i].detect.length - 1; _j++) {
+                  //printDebug(String(_j) + ' - ' + tree_bitmask.bitmask[_i].detect[_j].vector);
+                  if (bm == tree_bitmask.bitmask[_i].detect[_j].vector) { found = true; }
+                }
+                
+                if (found == true) {
+                  //printDebug('BOTTOM found!')
+                  
+                  // change_to[0]
+                  update_current_change_to(_i, 0);
+                  _r = Number(tree_bitmask.bitmask[_i].change_to_cur[0].row);
+                  if (j - 1 >= 0) {
+                    map_tile[i][j - 1] = tree_bitmask.bitmask[_i].change_to[0].matrix[_r][0];
+                    //console.log('mat00', tree_bitmask.bitmask[_i].change_to[0].matrix[_r][0]);
+                    //console.log('chk00', map_tile[i][j - 1]);
+                  }
+                  map_tile[i][j] = tree_bitmask.bitmask[_i].change_to[0].matrix[_r][1];
+                  if ((j + 1) <= (map_row_num - 1)) {
+                    map_tile[i][j + 1] = tree_bitmask.bitmask[_i].change_to[0].matrix[_r][2];
+                  }
+                  if (tree_bitmask.bitmask[_i].change_to[0].matrix[0].length == 4) {
+                    if ((j + 2) <= (map_row_num - 1)) {
+                      map_tile[i][j + 2] = tree_bitmask.bitmask[_i].change_to[0].matrix[_r][3];
+                    }
+                  }
+  
+                  // change_to[1]
+                  if (tree_bitmask.bitmask[_i].change_to[1].matrix.length != 0) {
+                    if ((i - 1 >= 0) && (j - 1 >= 0)) {
+                      if (j - 2 >= 0) {
+                        if (map_char[i][j - 2] == _TC) {
+                          map_tile[i - 1][j - 1] = tree_bitmask.bitmask[_i].change_to[1].matrix[0][0];
+                        }
+                      }
+                    }
+                    if (i - 1 >= 0) {
+                      map_tile[i - 1][j] = tree_bitmask.bitmask[_i].change_to[1].matrix[0][1];
+                    }
+                  }
+  
+                  // change_to[2]
+                  if (tree_bitmask.bitmask[_i].change_to[2].matrix.length != 0) {
+                    if ((i + 1 <= map_col_num - 1) && (j - 1 >= 0)) {
+                      if (j - 2 >= 0) {
+                        if (map_char[i][j - 2] == _TC) {
+                          map_tile[i + 1][j - 1] = tree_bitmask.bitmask[_i].change_to[2].matrix[0][0];
+                        }
+                      }
+                    }
+                    if (i + 1 <= map_col_num - 1) {
+                      map_tile[i + 1][j] = tree_bitmask.bitmask[_i].change_to[2].matrix[0][1];
+                    }
+                  }
+                  break;
+
+                }
+              }
+  
+            } // for _i
+  
+          }
+          // BOTTOM - END
+
+          // MIDDLE - BEGIN
+          if ((bm_u == '1') && (bm_d = '1')) { // MIDDLE
+            for (_i = 0; _i <= tree_bitmask.bitmask.length - 1; _i++) {
+  
+              if (tree_bitmask.bitmask[_i].group == 'MIDDLE') {
+                
+                found = false;
+                for (_j = 0; _j <= tree_bitmask.bitmask[_i].detect.length - 1; _j++) {
+                  if (bm == tree_bitmask.bitmask[_i].detect[_j].vector) { found = true; }
+                }
+  
+                if (found == true) {
+                  update_current_change_to(_i, 0);
+                  _r = getRandomInt(0, tree_bitmask.bitmask[_i].change_to[0].matrix.length - 1);
+                  //_r = 0;
+                  //console.log(_i, i, j, 'map_tile[i][j] = ', map_tile[i][j]);
+                  //console.log(_i, i, j);
+                  map_tile[i][j] = tree_bitmask.bitmask[_i].change_to[0].matrix[_r][0];
+  
+                  // change_to[1]
+                  if (tree_bitmask.bitmask[_i].change_to[1].matrix.length != 0) {
+                    if (i - 1 >= 0) {
+                      map_tile[i - 1][j] = tree_bitmask.bitmask[_i].change_to[1].matrix[0][0];
+                    }
+                  }
+  
+                  // change_to[2]
+                  if (tree_bitmask.bitmask[_i].change_to[2].matrix.length != 0) {
+                    if ((i + 1) <= (map_col_num - 1)) {
+                      map_tile[i + 1][j] = tree_bitmask.bitmask[_i].change_to[2].matrix[0][0];
+                    }
+                  }
+  
+                  break;
+                }
+              }
+            }
+          }
+          // MIDDLE - END
+
+          // TOP - BEGIN
+          if ((bm_u == '0') && (bm_d == '1')) { // TOP
+            for (_i = 0; _i <= tree_bitmask.bitmask.length - 1; _i++) {
+  
+              if (tree_bitmask.bitmask[_i].group == 'TOP') {
+  
+                found = false;
+                for (_j = 0; _j <= tree_bitmask.bitmask[_i].detect.length - 1; _j++) {
+                  if (bm == tree_bitmask.bitmask[_i].detect[_j].vector) { found = true; }
+                }
+  
+                if (found == true) {
+                  update_current_change_to(_i, 0);
+                  _r = getRandomInt(0, tree_bitmask.bitmask[_i].change_to[0].matrix.length - 1);
+                  //_r = 0;
+                  map_tile[i][j] = tree_bitmask.bitmask[_i].change_to[0].matrix[_r][0];
+                }
+  
+              }
+            }
+          }   
+          // TOP - END
+
+        }
+      }
+    }
+  }
+
   this.convertMapChar = function(_map_char) {
     var w, h;
   
@@ -907,11 +1391,14 @@ function CSmoothTerrain() {
 	  return map_tile[i][j];
   }
   
-  // Set up
+  // Set up and run
   this.run = function(_game_type, _tile_type, _mode, _w, _h, _map, _limits) {
     var i, j;
 
-    printDebug('>> SmoothEngine started');
+    printDebug('>> SmoothEngine ' + version + ' started');
+    printDebug('>> Game type : ' + _game_type);
+    printDebug('>> Tile type : ' + _tile_type);
+    printDebug('>> Map size : ' + String(_w) + ' x ' + String(h));
 
     // Set Map Cols and Rows
     map_col_num = _w;
@@ -981,6 +1468,9 @@ function CSmoothTerrain() {
 
 	  printDebug('>> Smooth water and land... Started');
     smoothWaterAndLand();
+
+	  printDebug('>> Smooth land and tree... Started');
+    smoothLandAndTree();
 
     return map_tile;
   }
