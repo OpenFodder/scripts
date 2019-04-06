@@ -19,7 +19,7 @@ var Validation = {
     },
 
     /**
-     * 
+     * Ensure a path exists between the rescue tent, the humans, and each placed hostage
      */
     ValidateHostageRescue: function() {
 

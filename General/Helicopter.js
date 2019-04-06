@@ -16,7 +16,7 @@ var Helicopters = {
 		GetRandomType: function() {
 			Type = SpriteTypes.Helicopter_Grenade_Human;
 
-			switch(Map.getRandomInt() % 3) {
+			switch(Map.getRandomInt(0, 2)) {
 				case 0:
 					Type = SpriteTypes.Helicopter_Grenade_Human;
 					break;
