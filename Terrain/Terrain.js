@@ -145,8 +145,8 @@ var Terrain = {
 
 		if(Map.getTileType() == this.Types.Jungle) {
 			var lev_limits = [0.17, 0.25, 0.35, 0.45, 1.00];
-			//noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
-			noises = Map.SimplexNoise(pOctaves, pScale, pLacunarity, pPersistance);
+			noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
+			//noises = Map.SimplexNoise(pOctaves, pScale, pLacunarity, pPersistance);
 
 			var st = new CSmoothTerrain();
 			st.run('cf1', 'jungle', 'level', Map.getWidth(), Map.getHeight(), noises, lev_limits);
