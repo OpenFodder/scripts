@@ -19,9 +19,9 @@ Phase.ObjectivesClear();
 Phase.SetMinAggression(4);
 Phase.SetMaxAggression(8);
 
-Objectives.PhaseAdd(Objectives.KillAllEnemy);
-Objectives.PhaseAdd(Objectives.DestroyEnemyBuildings);
-Objectives.PhaseAdd(Objectives.RescueHostages);
+Objectives.AddRequired(Objectives.KillAllEnemy);
+Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
+Objectives.AddRequired(Objectives.RescueHostages);
 
 Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
 Weapons.RandomRockets(Session.RequiredMinimumRockets() / 2);

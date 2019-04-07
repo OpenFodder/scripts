@@ -34,7 +34,12 @@ var Objectives = {
 		ID: 10
 	},
 
-	PhaseAdd: function(pObjective) {
+	/**
+	 * Set an objective as required to be completed
+	 * 
+	 * @param {object} pObjective 
+	 */
+	AddRequired: function(pObjective) {
 		Phase.ObjectiveAdd(pObjective.ID);
 	}
 };
