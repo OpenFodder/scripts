@@ -5,6 +5,9 @@ Session.Reset();
 Map.Create(80, 50, Terrain.Types.Jungle, 0);
 Terrain.Randomize();
 
+
+Phase.name = PhaseName.Generate();
+
 Human.RandomXY(3);
 Objectives.KillAllEnemy.Random(10);
 
