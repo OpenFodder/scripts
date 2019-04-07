@@ -39,8 +39,8 @@ var Session = {
         this.HostageGroupPositions = [];
         this.RescueTentPosition = new cPosition(0, 0);
         this.Helicopter = null;
-        this.HumanPosition = new cPosition(0, 0);
         this.HelicopterMinimum = -1;
+        this.HumanPosition = new cPosition(0, 0);
     },
 
     /**
