@@ -22,9 +22,13 @@
  *
  */
 
-const version = '0.61';
+const version = '0.65';
+
 //const programMode = 'debug';
 const programMode = 'release';
+
+//const isMapChar = true;
+const isMapChar = false;
 
 var bm_pre_smooth = {
   "compo": [
@@ -617,18 +621,20 @@ function CSmoothTerrain() {
   function get_bitmask_data(i, j) {
     var b;
 
-    if ( (s_step != 0) && (s_step != smooth_num - 1) ) {
-      b_list = new Array(3);
-      w_list = new Array(2);
-    } else {
+    if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
       b_list = new Array(2);
       w_list = new Array(1);
+    } else {
+      b_list = new Array(3);
+      w_list = new Array(2);
     }
     b_list[0] = smooth[s_step].char1;
     b_list[1] = smooth[s_step].char2;
     w_list[0] = smooth[s_step].char1;
 
-    if ( (s_step != 0) && (s_step != smooth_num - 1) ) {
+    if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
+    }
+    else {
       b_list[2] = smooth[s_step + 1].char1;
       w_list[1] = smooth[s_step + 1].char1;
     }
@@ -986,7 +992,7 @@ function CSmoothTerrain() {
     for (m = st; m <= ed; m++) {
       s_step = m;
       smooth_map_char_step();
-	  printDebug('>> Smooth map char... Step ' + m);
+	    printDebug('>> Smooth map char... Step ' + m);
     }
     //showMapChar();
   }
@@ -1460,11 +1466,15 @@ function CSmoothTerrain() {
     if (_mode == 'level') {    
       createMapChar();
     }
-    //showMapChar();
+    if (isMapChar == true) {
+      showMapChar();
+    }
 
 	  printDebug('>> Smooth map char... Started');
     smoothMapChar();
-    //showMapChar();
+    if (isMapChar == true) {
+      showMapChar();
+    }
 
 	  printDebug('>> Smooth water and land... Started');
     smoothWaterAndLand();
