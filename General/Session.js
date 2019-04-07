@@ -43,17 +43,26 @@ var Session = {
         this.HelicopterMinimum = -1;
     },
 
+    /**
+     * Require a helicopter of atleast pType (0 = Grenade, 1 = Missile, 2 = Homing)
+     * 
+     * @param {nunber} pType 
+     */
     RequireHelicopter: function(pType) {
-        print("Require Helicopter");
-        
         if(this.HelicopterMinimum < pType)
             this.HelicopterMinimum = pType;
     },
 
+    /**
+     * Number of grenade crates required
+     */
     RequiredMinimumGrenades: function() {
         return (this.BuildingPositions.length / 4) + 1;
     },
 
+    /**
+     * Number of rocket barrels required
+     */
     RequiredMinimumRockets: function() {
         return (this.BuildingPositions.length / 4) + 1;
     },

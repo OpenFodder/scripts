@@ -28,20 +28,20 @@ var Validation = {
      * Ensure the map can be completed
      */
     ValidateMap: function() {
-        print("Validating map objectives");
+        print("Validating objectives");
 
         this.canKillAllEnemy()
-
-        // If a rescue tent is placed
-        if (Session.isRescueTentPlaced()) {
-            this.canHostageRescue();
-        }
 
         // Can we access all buildings
         this.canDestroyEnemyBuilding();
 
+        // If a rescue tent is placed, ensure hostages can be rescued
+        this.canHostageRescue();
+
+        // Can we walk to available grenades/rockets
         this.canAccessWeapons();
 
+        // Do we require a helicopter?
         if(Session.HelicopterMinimum >= 0)
             Session.Helicopter = Helicopters.Human.Random(SpriteTypes.Helicopter_Grenade_Human + Session.HelicopterMinimum);
 
@@ -51,7 +51,8 @@ var Validation = {
      * Can we access enough weapons to complete the map
      */
     canAccessWeapons: function() {
-        print("Can we access weapons");        
+        print("Validate weapons access");
+
         // Determine if we can walk to each grenade box
         canWalkTo = 0;
         Grenades = Map.getSpritesByType(SpriteTypes.GrenadeBox);
@@ -65,12 +66,10 @@ var Validation = {
         // Can we walk to enough grenades?
         if(canWalkTo >= Session.RequiredMinimumGrenades())
             return;
-
         // If we have a helicopter, it can be used
         if(Session.HelicopterMinimum >= 0)
             return;
 
-        print("Placing Grenades");
         // Place more grenades in walkable path
         totalNades = Session.RequiredMinimumGrenades() - canWalkTo;
         Weapons.RandomGrenades(totalNades, true);
@@ -80,7 +79,7 @@ var Validation = {
      * Can we walk to all enemy sprites
      */
     canKillAllEnemy: function() {
-
+        print("Validate kill all enemy");
         // Can we walk to all enemy?
         if(!this.WalkToSprites(SpriteTypes.Enemy))
             Session.RequireHelicopter(0);
@@ -92,9 +91,7 @@ var Validation = {
      * @return true If we can walk to and destroy any buildings
      */
     canDestroyEnemyBuilding: function() {
-        print("Can the buildings be destroyed");
-
-        // Helictopers can destroy buildings
+        print("Validate destroy enemy buildings");
         if(Helicopters.Human.HaveAny())
             return;
 
@@ -113,8 +110,10 @@ var Validation = {
      * Ensure a path exists between the rescue tent, the humans, and each placed hostage
      */
     canHostageRescue: function() {
-        print("Can the hostages be rescued");
+        if (!Session.isRescueTentPlaced())
+            return;
 
+        print("Validate hostages rescue");
         // Calculate a walkable path the tent and the humans 
         Distance = Map.calculatePathBetweenPositions(SpriteTypes.Player, Session.RescueTentPosition, Session.HumanPosition);
         if(Distance.length == 0) {
@@ -130,7 +129,6 @@ var Validation = {
                 return;
             }
         }
-        print("Hostages can be rescued");
-        return; 
     }
+
 }

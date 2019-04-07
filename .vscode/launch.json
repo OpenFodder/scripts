@@ -9,7 +9,8 @@
             "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Debug\\OpenFodder.exe",
-            "args": ["--window","--window-scale 2", "--skipintro", "--random", ""],
+            "cwd": "${workspaceFolder}\\..\\..\\Run",
+            "args": ["--window","--window-scale 2", "--skipintro", "--random"],
         }
     ]
 }
