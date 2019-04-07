@@ -1,5 +1,11 @@
 
-var Strange = {
+/**
+ * OpenFodder
+ * 
+ * Strange functionality
+ */
+
+ var Strange = {
 
     /**
      * Place a sprite at every step on a path between two objects

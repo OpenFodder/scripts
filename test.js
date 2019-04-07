@@ -26,7 +26,7 @@ Validation.ValidateMap();
 RandomLast = null;
 
 for(count = 0; count < 5; ++count) {
-	Random = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1);
+	Random = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1, false);
 
 	if(RandomLast != null)
 		Strange.PlaceSpritesOnPath(SpriteTypes.GrenadeBox,Random, RandomLast);

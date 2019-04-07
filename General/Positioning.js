@@ -23,7 +23,7 @@ var Positioning = {
 
         // Find a position which can be accessed by moving
         do {
-            Position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1);
+            Position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1, false);
             Distance = Map.calculatePathBetweenPositions(pSpriteType, Position, pSpritePosition);
             ++Attempts;
         } while(Distance.length < 2 && Attempts < pMaxAttempts);

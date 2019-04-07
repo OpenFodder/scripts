@@ -8,9 +8,9 @@
             "type": "cppvsdbg",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Debug\\OpenFodder.exe",
+            "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Release\\OpenFodder.exe",
             "cwd": "${workspaceFolder}\\..\\..\\Run",
-            "args": ["--window","--window-scale 2", "--skipintro", "--random"],
+            "args": ["--window","--window-scale 2", "--skipintro", "--random", "--columns 60", "--rows 50"],
         }
     ]
 }
