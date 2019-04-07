@@ -15,6 +15,11 @@ Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 
+Phase.ObjectivesClear();
+Objectives.PhaseAdd(Objectives.KillAllEnemy);
+Objectives.PhaseAdd(Objectives.DestroyEnemyBuildings);
+Objectives.PhaseAdd(Objectives.RescueHostages);
+
 Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
 Weapons.RandomRockets(Session.RequiredMinimumRockets() / 2);
 

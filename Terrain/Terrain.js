@@ -130,14 +130,14 @@ var Terrain = {
 
 		// TODO: Rotate through available random functions
 		//pScale = Map.getRandomFloat(0.01, 0.1);
-		pLacunarity = Map.getRandomFloat(0.1, 0.5);
-		pPersistance = Map.getRandomFloat(0.1, 1.);	// higher produces more trees
+		pLacunarity = Map.getRandomFloat(0.01, 0.5);
+		pPersistance = Map.getRandomFloat(0.01, 1.);	// higher produces more trees
 		//return this.RandomSimplexNoise(pScale, pLacunarity, pPersistance, 5 );
 		pOctaves = 4;
-		pRoughness = Map.getRandomFloat(0.00, 0.5);
-		pScale = Map.getRandomFloat(0.001, 0.1);
-		pSeed = Map.getRandomInt(0, 500);
-		pEdgeFade = Map.getRandomFloat(0.1, 0.2);
+		pRoughness = Map.getRandomFloat(0.01, 0.7);
+		pScale = Map.getRandomFloat(0.02, 0.07);
+		pSeed = Map.getRandomInt(0, 255);
+		pEdgeFade = Map.getRandomFloat(0.00, 0.2);
 		if (Map.getRandomInt(0,1) == 0)
 			pRadialEnabled = false;
 		else
