@@ -16,6 +16,9 @@ Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 
 Phase.ObjectivesClear();
+Phase.SetMinAggression(4);
+Phase.SetMaxAggression(8);
+
 Objectives.PhaseAdd(Objectives.KillAllEnemy);
 Objectives.PhaseAdd(Objectives.DestroyEnemyBuildings);
 Objectives.PhaseAdd(Objectives.RescueHostages);
