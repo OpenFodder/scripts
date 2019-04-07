@@ -7,7 +7,8 @@ var Human = {
 	 * @param {number} pCount 
 	 */
 	RandomXY: function(pCount) {
-		
+		print("Placing human players");
+
 		Session.HumanPosition = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
 		// TODO: Check for enemy within X range
 
