@@ -15,6 +15,9 @@ Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 
+Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
+Weapons.RandomRockets(Session.RequiredMinimumRockets() / 2);
+
 Validation.ValidateMap();
 
 

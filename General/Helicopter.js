@@ -10,6 +10,34 @@
 var Helicopters = {
 	
 	Human: {
+
+		HaveAny: function() {
+			if(this.HaveHoming() || this.HaveGrenade() || this.HaveMissile())
+				return true;
+			return false;
+		},
+
+		/**
+		 * Does a human homing missile helicopter exist
+		 */
+		HaveHoming: function() {
+			return Map.getSpriteTypeCount(SpriteTypes.Helicopter_Homing_Human) > 0;
+		},
+
+		/**
+		 * Does a human grenade helicopter exist
+		 */
+		HaveGrenade: function() {
+			return Map.getSpriteTypeCount(SpriteTypes.Helicopter_Grenade_Human) > 0;
+		},
+
+		/**
+		 * Does a human missile helicopter exist
+		 */
+		HaveMissile: function() {
+			return Map.getSpriteTypeCount(SpriteTypes.Helicopter_Missile_Human) > 0;
+		},
+
 		/**
 		 * Get a random human helicopter type
 		 */
@@ -49,15 +77,18 @@ var Helicopters = {
 		 * Add a random human helicopter, if no position is provided, 
 		 *  a walkable path between the human player will be ensured
 		 * 
-		 * @param {cPosition} pPosition Position Where to place a random type of helicopter
+		 * @param {cPosition} pPosition Position where to place a random type of helicopter
 		 */
-		Random: function(pPosition) {
+		Random: function(pType, pPosition) {
+
+			if(pType === -1) 
+				pType = this.GetRandomType();
 
 			if(pPosition === undefined)
 				pPosition = Positioning.RandomWalkable(SpriteTypes.Player, Session.HumanPosition);
 
 			print("Placing random helicopter");
-			Map.SpriteAdd( this.GetRandomType(), pPosition.x, pPosition.y );
+			Map.SpriteAdd( pType, pPosition.x, pPosition.y );
 		}
 	}
 	

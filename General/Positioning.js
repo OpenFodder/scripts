@@ -6,19 +6,21 @@ var Positioning = {
     
     /**
      * Find a position on the map which 'SpriteType' can walk to from its location
+     * If MaxAttempts is reached, the position of pSpritePosition is returned, + 1 tile
      * 
      * @param {*} pSpriteType     Type of the sprite
      * @param {*} pSpritePosition Position of the sprite
      * @param {*} pMaxAttempts    Maximum number of attempts to find a random X/Y (default 20)
      * 
+     * @return cPosition
      */
     RandomWalkable: function(pSpriteType, pSpritePosition, pMaxAttempts) {
+        Attempts = 0;
+        Distance = [];
+
         if(pMaxAttempts === undefined)
             pMaxAttempts = 20;
 
-        Attempts = 0;
-        Distance = [];
-        
         // Find a position which can be accessed by moving
         do {
             Position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1);
