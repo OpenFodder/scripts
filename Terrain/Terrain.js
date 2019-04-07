@@ -136,7 +136,7 @@ var Terrain = {
 		pOctaves = 4;
 		pRoughness = Map.getRandomFloat(0.00, 0.5);
 		pScale = Map.getRandomFloat(0.001, 0.1);
-		pSeed = Map.getRandomInt(0, 500);
+		pSeed = Map.getRandomInt(0, 255);
 		pEdgeFade = Map.getRandomFloat(0.1, 0.2);
 		if (Map.getRandomInt(0,1) == 0)
 			pRadialEnabled = false;
@@ -146,6 +146,13 @@ var Terrain = {
 		if(Map.getTileType() == this.Types.Jungle) {
 			var lev_limits = [0.17, 0.25, 0.35, 0.45, 1.00];
 			noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
+			print('>> SimplexIslands parameters:');
+			print('>>   pOctaves = ' + pOctaves);
+			print('>>   pRoughness = ' + pRoughness.toFixed(2));
+			print('>>   pScale = ' + pScale.toFixed(2));
+			print('>>   pSeed = ' + pSeed);
+			print('>>   pRadialEnabled = ' + pRadialEnabled);
+			print('>>   pEdgeFade = ' + pEdgeFade.toFixed(2));
 			//noises = Map.SimplexNoise(pOctaves, pScale, pLacunarity, pPersistance);
 
 			var st = new CSmoothTerrain();
