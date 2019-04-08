@@ -14,6 +14,8 @@ var PhaseName = {
 
 	/**
 	 * Genereate a random phase name
+	 * 
+	 * @return {string}
 	 */
 	Generate: function() {
 

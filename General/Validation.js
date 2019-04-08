@@ -55,7 +55,8 @@ var Validation = {
 
         // Determine if we can walk to each grenade box
         canWalkTo = 0;
-        Grenades = Map.getSpritesByType(SpriteTypes.GrenadeBox);
+        var Grenades = Map.getSpritesByType(SpriteTypes.GrenadeBox);
+        
         for(count = 0; count < Grenades.length; ++count) {
             Path = Map.calculatePathBetweenPositions(SpriteTypes.Player, Grenades[count].getPosition(), Session.HumanPosition);
             if(Path.length) {

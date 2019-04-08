@@ -2,13 +2,34 @@
 // Reset the map session
 Session.Reset();
 
+var Map = Engine.getMap();
+var Mission = OpenFodder.getNextMission();
+var Phase = OpenFodder.getNextPhase();
+
 Map.Create(80, 50, Terrain.Types.Jungle, 0);
 Terrain.Randomize();
 
+/*
+Phase.map = "map1";
+Map.Create(80, 50, Terrain.Types.Jungle, 0);
+Terrain.Randomize();
+Human.RandomXY(3);
+Objectives.KillAllEnemy.Random(10);
+Objectives.AddRequired(Objectives.KillAllEnemy);
 
+Phase.SetMinAggression(4);
+Phase.SetMaxAggression(8);
+*/
+
+// Map2
+/*
+var Phase = Engine.phaseCreate();
+Phase.map = "map2";
 Phase.name = PhaseName.Generate();
+*/
 
 Human.RandomXY(3);
+
 Objectives.KillAllEnemy.Random(10);
 
 Objectives.DestroyEnemyBuildings.Random(2);
@@ -18,7 +39,6 @@ Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 Objectives.RescueHostages.Random(1);
 
-Phase.ObjectivesClear();
 Phase.SetMinAggression(4);
 Phase.SetMaxAggression(8);
 

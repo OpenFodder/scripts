@@ -12,7 +12,7 @@ var Human = {
 		Session.HumanPosition = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
 		// TODO: Check for enemy within X range
 
-		Position = new cPosition();
+		var Position = new cPosition();
 		Position.x = Session.HumanPosition.x;
 		Position.y = Session.HumanPosition.y;
 
