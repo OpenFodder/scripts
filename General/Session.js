@@ -2,9 +2,14 @@
 var Session = {
 
     /**
-     * @var {array[cPosition]}
+     * @var {array<cPosition>} HostageGroupPositions 
      */
     HostageGroupPositions: [],
+
+    /**
+     * @var {cPosition[]}
+     */
+    CivilianPositions: [],
 
     /**
      * @var {array[cPosition]} BuildingPositions

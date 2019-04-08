@@ -11,6 +11,6 @@ Objectives.DestroyEnemyBuildings.Random = function(pCount) {
 
 		Session.BuildingPositions.push(position);
 
-		Map.addBarracks( position.x, position.y );
+		Structures.PlaceBarracks( position.x, position.y );
 	}
 };
