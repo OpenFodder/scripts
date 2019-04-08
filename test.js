@@ -78,7 +78,6 @@ var Map = Engine.getMap();
 
 var Mission = OpenFodder.getNextMission();
 createPhases(1, Terrain.Types.Jungle );
-Structures.PlaceHut( 15, 15 );
 
 // Random Terrain
 //createPhases(1, Map.getRandomInt(0, 4) );

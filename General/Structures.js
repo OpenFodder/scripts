@@ -10,6 +10,22 @@ var Structures = {
         }
     },
 
+    Desert: {
+
+    },
+
+    Ice: {
+
+    },
+
+    Moors: {
+
+    },
+
+    Interior: {
+
+    },
+    
     /**
      * 
      */
