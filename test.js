@@ -33,12 +33,17 @@ function createRandom() {
  */
 function createPhases(pCount) {
 
+	var Campaign = Engine.getCampaign();
+	
+	mapname = "m" + Campaign.getMissions().length;
+
 	for(var count = 0; count < pCount; ++count) {
 		var Phase = OpenFodder.getNextPhase();
 
-		Phase.map = "phase" + count;
+		Phase.map = mapname + "p" + count;
 		Phase.SetAggression(4, 8);
 
+		
 		Map.Create(80, 50, Terrain.Types.Jungle, 0);
 		Terrain.Randomize();
 		createRandom();
@@ -65,7 +70,14 @@ Session.Reset();
 
 var Map = Engine.getMap();
 
-createMissions(2, [1, 2]);
+//createMissions(2, [1, 2]);
+
+
+var Mission = OpenFodder.getNextMission();
+var Phase = OpenFodder.getNextPhase();
+Map.Create(80, 50, Terrain.Types.Jungle, 0);
+Terrain.Randomize();
+createRandom();
 
 // Some Fun
 /*

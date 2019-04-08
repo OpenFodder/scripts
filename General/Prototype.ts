@@ -60,6 +60,11 @@ interface cMap {
     CreateRandom(pSeed:number): void;
 
     /**
+     * Create a 2D diamond square array
+     */
+    DiamondSquare(): Array<Array<number>>;
+
+    /**
      * Create a 2D simplex island array 
      * 
      * @param pOctaves 
@@ -69,7 +74,7 @@ interface cMap {
      * @param pRadialEnabled 
      * @param pEdgeFade 
      */
-    createSimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade): Array<Array<number>>;
+    SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade): Array<Array<number>>;
 
     /**
      * Create a 2D simplex noise array
@@ -79,7 +84,7 @@ interface cMap {
      * @param pLacunarity 
      * @param pPersistence 
      */
-    createSimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): Array<Array<number>>;
+    SimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): Array<Array<number>>;
 
     getTileType(): number;
     getTileSub(): number;

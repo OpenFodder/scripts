@@ -17,9 +17,9 @@ PhaseName.Jungle = {
             rnd = Map.getRandomFloat(0, 1) * this.names1.length | 0;
             name = "The " + this.names1[rnd] + " " + this.names2[rnd9];
         }else{
-            this.nameMas();
+            nMs = this.nameMas();
             while(nMs === ""){
-                this.nameMas();
+                nMs = this.nameMas();
             }
             if(i < 7){
                 name = "The " + this.names2[rnd9] + " of " + nMs;
