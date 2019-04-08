@@ -29,8 +29,6 @@ function createRandom() {
 function createPhases(pCount) {
 
 	for(var count = 0; count < pCount; ++count) {
-
-		print("Creating phase: " + count);
 		var Phase = OpenFodder.getNextPhase();
 
 		Phase.map = "phase" + count;
@@ -43,7 +41,6 @@ function createPhases(pCount) {
 function createMissions(pMissions, pPhases) {
 
 	for(var count = 0; count < pMissions; ++count) {
-		print("Creating mission: " + count);
 		var Mission = OpenFodder.getNextMission();
 
 		createPhases(pPhases[count]);
