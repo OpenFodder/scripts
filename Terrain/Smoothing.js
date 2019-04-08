@@ -22,13 +22,13 @@
  *
  */
 
-const version = '0.65';
+const version = '0.70.beta1';
 
 //const programMode = 'debug';
 const programMode = 'release';
 
-//const isMapChar = true;
-const isMapChar = false;
+//const isShowMapChar = true;
+const isShowMapChar = false;
 
 var bm_pre_smooth = {
   "compo": [
@@ -621,6 +621,7 @@ function CSmoothTerrain() {
   function get_bitmask_data(i, j) {
     var b;
 
+    /*
     if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
       b_list = new Array(2);
       w_list = new Array(1);
@@ -638,6 +639,24 @@ function CSmoothTerrain() {
       b_list[2] = smooth[s_step + 1].char1;
       w_list[1] = smooth[s_step + 1].char1;
     }
+    */
+   if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
+     b_list = new Array(2);
+     w_list = new Array(1);
+   } else {
+     b_list = new Array(3);
+     w_list = new Array(1);
+   }
+   b_list[0] = smooth[s_step].char1;
+   b_list[1] = smooth[s_step].char2;
+   w_list[0] = smooth[s_step].char1;
+
+   if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
+   }
+   else {
+     b_list[2] = smooth[s_step + 1].char1;
+   }
+
     //printDebug(i, j, w_list);
 
     // check boundary chars
@@ -1466,21 +1485,23 @@ function CSmoothTerrain() {
     if (_mode == 'level') {    
       createMapChar();
     }
-    if (isMapChar == true) {
+    if (isShowMapChar == true) {
       showMapChar();
     }
 
 	  printDebug('>> Smooth map char... Started');
     smoothMapChar();
-    if (isMapChar == true) {
+    if (isShowMapChar == true) {
       showMapChar();
     }
 
 	  printDebug('>> Smooth water and land... Started');
     smoothWaterAndLand();
-
+	  printDebug('>> Smooth water and land... Done');
+ 
 	  printDebug('>> Smooth land and tree... Started');
     smoothLandAndTree();
+	  printDebug('>> Smooth land and tree... Done');
 
     return map_tile;
   }
