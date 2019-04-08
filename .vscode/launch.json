@@ -10,7 +10,7 @@
             "name": "Launch Program",
             "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Release\\OpenFodder.exe",
             "cwd": "${workspaceFolder}\\..\\..\\Run",
-            "args": ["--window","--window-scale 2", "--skipintro", "--random", "--columns 60", "--rows 50"],
+            "args": ["--window","--window-scale 2", "--skipintro", "--cheats", "--random", "--columns 60", "--rows 50"],
         }
     ]
 }
