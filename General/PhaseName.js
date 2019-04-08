@@ -12,6 +12,14 @@ var PhaseName = {
 
 	},
 
+	Underground: {
+
+	},
+
+	Moors: {
+
+	},
+	
 	/**
 	 * Genereate a random phase name
 	 * 
@@ -27,11 +35,12 @@ var PhaseName = {
 				return this.Desert.Random();
 			case Terrain.Types.Ice:
 				return this.Ice.Random();
-
 			case Terrain.Types.Moors:
+				return this.Moors.Random();
 			case Terrain.Types.Interior:
+				return this.Underground.Random();
 			case Terrain.Types.AmigaFormat:
-
+				return this.Ice.Random();
 			default:
 				return this.Jungle.Random();
 		}

@@ -77,6 +77,7 @@ var Helicopters = {
 		 * Add a random human helicopter, if no position is provided, 
 		 *  a walkable path between the human player will be ensured
 		 * 
+		 * @param {number} pType
 		 * @param {cPosition} pPosition Position where to place a random type of helicopter
 		 */
 		Random: function(pType, pPosition) {
@@ -84,10 +85,11 @@ var Helicopters = {
 			if(pType === -1) 
 				pType = this.GetRandomType();
 
-			if(pPosition === undefined)
+			if(pPosition === undefined) {
+				print("Placing random helicopter");
 				pPosition = Positioning.RandomWalkable(SpriteTypes.Player, Session.HumanPosition);
-
-			print("Placing random helicopter");
+			}
+			
 			Map.SpriteAdd( pType, pPosition.x, pPosition.y );
 		}
 	}

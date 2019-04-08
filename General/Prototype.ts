@@ -48,10 +48,10 @@ interface cMap {
      * 
      * @param pWidth
      * @param pHeight 
-     * @param pTypeTile 
+     * @param pTileType 
      * @param pTileSub 
      */
-    Create(pWidth:number, pHeight:number, pTypeTile:number, pTileSub:number): void;
+    Create(pWidth:number, pHeight:number, pTileType:number, pTileSub:number): void;
 
     /**
      * 
