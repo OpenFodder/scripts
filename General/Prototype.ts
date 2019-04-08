@@ -1,13 +1,22 @@
+/**
+ * Position on the map
+ */
 class cPosition {
     x: number;
     y: number;
 }
 
+/**
+ * A Sprite
+ */
 class sSprite {
     x: number;
     y: number;
 }
 
+/**
+ * A Campaign
+ */
 interface cCampaign {
     name: string;
     author: string;
@@ -16,6 +25,9 @@ interface cCampaign {
     SetCustomCampaign(): void;
 }
 
+/**
+ * A map
+ */
 interface cMap {
 
     /**
@@ -47,19 +59,63 @@ interface cMap {
      */
     CreateRandom(pSeed:number): void;
 
-    createSimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade): void;
-    createSimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): void;
+    /**
+     * Create a 2D simplex island array 
+     * 
+     * @param pOctaves 
+     * @param pRoughness 
+     * @param pScale 
+     * @param pSeed 
+     * @param pRadialEnabled 
+     * @param pEdgeFade 
+     */
+    createSimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade): Array<Array<number>>;
+
+    /**
+     * Create a 2D simplex noise array
+     * 
+     * @param pOctaves 
+     * @param pFrequency 
+     * @param pLacunarity 
+     * @param pPersistence 
+     */
+    createSimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): Array<Array<number>>;
 
     getTileType(): number;
     getTileSub(): number;
 
+    /**
+     * Get map width in tiles
+     */
     getWidth(): number;
+
+    /**
+     * Get map height in tiles
+     */
     getHeight(): number;
 
+    /**
+     * Get map width in pixels
+     */
     getWidthPixels(): number;
+
+    /**
+     * Get max height in pixels
+     */
     getHeightPixels(): number;
 
+    /**
+     * Get the number of sprites matching this type
+     * 
+     * @param pSpriteType 
+     */
     getSpriteTypeCount(pSpriteType): number;
+
+    /**
+     * Get all sprites matching this type
+     * 
+     * @param pSpriteType 
+     */
     getSpritesByType(pSpriteType): Array<sSprite>;
 
     /**
@@ -145,6 +201,9 @@ interface cMap {
     calculatePathBetweenPositions(pSpriteType:number, pPos1:cPosition, pPos2:cPosition) : Array<cPosition>;
 }
 
+/**
+ * A Phase
+ */
 interface cPhase {
     /**
      * Map filename
@@ -156,14 +215,48 @@ interface cPhase {
      */
     name: string;
 
+    /**
+     * Add an objective to this phase
+     * 
+     * @param pObjectiveID 
+     */
     ObjectiveAdd(pObjectiveID): void;
+
+    /**
+     * Remove an objective from this phase
+     * @param pObjectiveID 
+     */
     ObjectiveRemove(pObjectiveID): void;
+
+    /**
+     * Clear all objectives
+     */
     ObjectivesClear(): void;
 
+    /**
+     * Set the sprite aggression level
+     * @param pMin
+     * @param pMax 
+     */
+    SetAggression(pMin: number, pMax: number): void;
+
+    /**
+     * Set the min sprite aggression
+     * 
+     * @param pMin 
+     */
     SetMinAggression(pMin): void;
+
+    /**
+     * Set the max sprite aggression
+     * @param pMax 
+     */
     setMaxAggression(pMax): void;
 }
 
+/**
+ * A Mission
+ */
 interface cMission {
     /**
      * Mission name
@@ -174,6 +267,9 @@ interface cMission {
     PhaseGet(): cPhase;
 }
 
+/**
+ * The Scripting Engine Object
+ */
 interface cScriptingEngine {
 
     /**
@@ -219,4 +315,7 @@ interface cScriptingEngine {
     mapSave() : void;
 }
 
+/**
+ * Scripting Engine
+ */
 declare var Engine: cScriptingEngine;

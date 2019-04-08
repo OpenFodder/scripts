@@ -1,4 +1,7 @@
 
+/**
+ * Create random map objectives
+ */
 function createRandom() {
 	Session.Reset();
 
@@ -13,9 +16,6 @@ function createRandom() {
 	Objectives.RescueHostages.Random(1);
 	Objectives.RescueHostages.Random(1);
 
-	Phase.SetMinAggression(4);
-	Phase.SetMaxAggression(8);
-
 	Objectives.AddRequired(Objectives.KillAllEnemy);
 	Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
 	Objectives.AddRequired(Objectives.RescueHostages);
@@ -26,18 +26,31 @@ function createRandom() {
 	Validation.ValidateMap();
 }
 
+/**
+ * Create a number of phases in the current mission
+ * 
+ * @param {number} pCount 
+ */
 function createPhases(pCount) {
 
 	for(var count = 0; count < pCount; ++count) {
 		var Phase = OpenFodder.getNextPhase();
 
 		Phase.map = "phase" + count;
+		Phase.SetAggression(4, 8);
+
 		Map.Create(80, 50, Terrain.Types.Jungle, 0);
 		Terrain.Randomize();
 		createRandom();
 	}
 }
 
+/**
+ * Create a number of missions
+ * 
+ * @param {number} pMissions 
+ * @param {Array<number>} pPhases Number of phases per mission to create
+ */
 function createMissions(pMissions, pPhases) {
 
 	for(var count = 0; count < pMissions; ++count) {
@@ -67,10 +80,6 @@ for(count = 0; count < 5; ++count) {
 	Strange.PlaceSpritesOnPath(SpriteTypes.GrenadeBox, Random, Session.HumanPosition);
 	RandomLast = Random;
 }*/
-
-print("Starting X: " + Session.HumanPosition.x + " Y: " + Session.HumanPosition.y);
-print("Tent Starting X: " + Session.RescueTentPosition.x + " Y: " + Session.RescueTentPosition.y);
-
 
 /*
 for(count = 0; count < Session.HostageGroupPositions.length; ++count) {
