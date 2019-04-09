@@ -9,8 +9,18 @@ var Human = {
 	RandomXY: function(pCount) {
 		print("Placing human players");
 
-		Session.HumanPosition = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
+		var radius = 3;
+
+		do {
+			Session.HumanPosition = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), radius, false);
 		// TODO: Check for enemy within X range
+			--radius;
+			if(radius == 0) {
+				print("Failed to find place for humans");
+				break;
+			}
+
+		} while(Session.HumanPosition.x == -1 || Session.HumanPosition.y == -1);
 
 		var Position = new cPosition();
 		Position.x = Session.HumanPosition.x;
