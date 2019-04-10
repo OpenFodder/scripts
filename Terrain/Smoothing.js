@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta1';
+const version = '0.70.beta2';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -30,6 +30,7 @@ const programMode = 'release';
 //const isShowMapChar = true;
 const isShowMapChar = false;
 
+/*
 var bm_pre_smooth = {
   "compo": [
     // < I >
@@ -113,7 +114,91 @@ var bm_pre_smooth = {
     {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"01100110"}, {"bm":"10011001"}, {"bm":"11000011"}, {"bm":"00111100"} ] }
   ]
 };
-   
+*/
+
+var bm_smooth_char = [
+  // WC
+  
+  // 000
+  // 101
+  // 111
+  '00011111',
+  
+  // 101
+  // 101
+  // 111
+  '10111111',
+
+  // 100
+  // 100
+  // 111
+  '10010111',
+  
+  // 110
+  // 100
+  // 111
+  '11010111',
+  
+  // 001
+  // 001
+  // 010 
+  '00101010',
+  
+  // 001
+  // 001
+  // 110
+  '00101110',
+  
+  // 011
+  // 000
+  // 110
+  '01100110',
+
+  // 111
+  // 101
+  // 111
+  '11111111',
+
+  // 111
+  // 000
+  // 111
+  '11100111',
+
+  // * NEW
+  // 111
+  // 101
+  // 011
+  '11111011',
+
+  // 110
+  // 101
+  // 011
+  '11011011',
+
+  // 011
+  // 101
+  // 011
+  '01111011',
+
+  // 111
+  // 000
+  // 011
+  '01111011',
+
+  // 111
+  // 001
+  // 010
+  '11101010',
+
+  // 111
+  // 100
+  // 110
+  '11101010',
+
+];
+var bm_smooth_char_all_false;
+var bm_smooth_char_all_true;
+
 var bm_cf1_jungle_water_darkgrass = {
   "bitmask": [
     {"bm":"00000011", "tiles": [ {"tile":"380"} ] },
@@ -417,6 +502,25 @@ if (programMode == 'debug') {
   
   printDebug(tree_bitmask.bitmask[0].change_to[0].matrix[1][2]);
   */
+
+  /*
+  var s = BitmaskRot('10000000', false);
+  console.log(s);
+ 
+  var f = BitmaskMatchRot('00100000', ['10000000', '00100000'], false);
+  console.log(f);
+ 
+  var f = BitmaskMatchRot('00000100', ['10000000'], false);
+  console.log(f);
+ 
+  var f = BitmaskMatchRot('11010110', ['00011111'], false);
+  console.log(f);
+  
+  var f = BitmaskMatchRot('01101001', bm_smooth_char, true);
+  console.log(f);
+
+  console.log(bm_smooth_char);
+  */
 }
      
 // Delphi compatible AnsiMatchStr function
@@ -426,6 +530,71 @@ function AnsiMatchStr(s, s_list) {
   flag = false;
   for (var i = 0; i <= s_list.length - 1; i++) {
     if (s.includes(s_list[i])) {
+	    flag = true;
+	    break;
+    }
+  }
+  return flag;
+}
+
+function BitmaskRot(bm, flip) {
+  var src = new Array(8);
+  var tar = new Array(12);
+  var i;
+  var _bm;
+  
+  // Bit Flip
+  if (flip == true) {
+    _bm = '';
+    for (i = 0; i <= 7; i++) {
+      if ( bm.charAt(i, 1) == '0' ) {
+        _bm = _bm + '1';
+      }
+      else {
+        _bm = _bm + '0';
+      }
+    }
+    bm = _bm;  
+  }
+
+  // Original
+  for (i = 0; i <= 7; i++) {
+    src[i] = bm.charAt(i, 1);
+  }  
+
+  tar[ 0] = src[0] + src[1] +  src[2] + src[3] + src[4] + src[5] + src[6] + src[7];
+  tar[ 1] = src[5] + src[3] +  src[0] + src[6] + src[1] + src[7] + src[4] + src[2];
+  tar[ 2] = src[5] + src[6] +  src[7] + src[3] + src[4] + src[0] + src[1] + src[2];
+  tar[ 3] = src[0] + src[3] +  src[5] + src[1] + src[6] + src[2] + src[4] + src[7];
+  tar[ 4] = src[2] + src[4] +  src[7] + src[1] + src[6] + src[0] + src[3] + src[5];
+  tar[ 5] = src[7] + src[6] +  src[5] + src[4] + src[3] + src[2] + src[1] + src[0];
+  
+  // Left-Right Mirrored
+  src[0] = bm.charAt(2, 1);
+  src[1] = bm.charAt(1, 1);
+  src[2] = bm.charAt(0, 1);
+  src[3] = bm.charAt(4, 1);
+  src[4] = bm.charAt(3, 1);
+  src[5] = bm.charAt(7, 1);
+  src[6] = bm.charAt(6, 1);
+  src[7] = bm.charAt(5, 1);
+  
+  tar[ 6] = src[0] + src[1] +  src[2] + src[3] + src[4] + src[5] + src[6] + src[7];
+  tar[ 7] = src[5] + src[3] +  src[0] + src[6] + src[1] + src[7] + src[4] + src[2];
+  tar[ 8] = src[5] + src[6] +  src[7] + src[3] + src[4] + src[0] + src[1] + src[2];
+  tar[ 9] = src[0] + src[3] +  src[5] + src[1] + src[6] + src[2] + src[4] + src[7];
+  tar[10] = src[2] + src[4] +  src[7] + src[1] + src[6] + src[0] + src[3] + src[5];
+  tar[11] = src[7] + src[6] +  src[5] + src[4] + src[3] + src[2] + src[1] + src[0];
+
+  return tar;
+}
+
+function BitmaskMatchRot(s, s_list, flip) {
+  var flag;
+
+  flag = false;
+  for (var i = 0; i <= s_list.length - 1; i++) {
+    if ( AnsiMatchStr(s, BitmaskRot( s_list[i], flip ) )) {
 	    flag = true;
 	    break;
     }
@@ -640,22 +809,22 @@ function CSmoothTerrain() {
       w_list[1] = smooth[s_step + 1].char1;
     }
     */
-   if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
-     b_list = new Array(2);
-     w_list = new Array(1);
-   } else {
-     b_list = new Array(3);
-     w_list = new Array(1);
-   }
-   b_list[0] = smooth[s_step].char1;
-   b_list[1] = smooth[s_step].char2;
-   w_list[0] = smooth[s_step].char1;
+    if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
+      b_list = new Array(2);
+      w_list = new Array(1);
+    } else {
+      b_list = new Array(3);
+      w_list = new Array(1);
+    }
+    b_list[0] = smooth[s_step].char1;
+    b_list[1] = smooth[s_step].char2;
+    w_list[0] = smooth[s_step].char1;
 
-   if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
-   }
-   else {
-     b_list[2] = smooth[s_step + 1].char1;
-   }
+    if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
+    }
+    else {
+      b_list[2] = smooth[s_step + 1].char1;
+    }
 
     //printDebug(i, j, w_list);
 
@@ -808,7 +977,7 @@ function CSmoothTerrain() {
     return b;
   }
 
-  function smooth_map_char_step_sub(i, j) {
+  function smooth_map_char_step_sub_old(i, j) {
     var bm;
     var _bm = new Array(4);
     var _bm_ud = '', _bm_lr = '';
@@ -982,20 +1151,278 @@ function CSmoothTerrain() {
 
   }
 
+  function removeDups(names) {
+    var unique = {};
+    names.forEach(function(i) {
+      if(!unique[i]) {
+        unique[i] = true;
+      }
+    });
+    return Object.keys(unique);
+  }
+
+  function build_bm_smooth_char_all() {
+    var b;
+
+    bm_smooth_char_all_false = [];
+    for (var i = 0; i <= bm_smooth_char.length - 1; i++) {
+      b = BitmaskRot(bm_smooth_char[i], false);
+      for (var j = 0; j <= b.length - 1; j++) {
+        bm_smooth_char_all_false.push( b[j] );  
+      }
+    }
+    bm_smooth_char_all_false = removeDups(bm_smooth_char_all_false);
+
+    bm_smooth_char_all_true = [];
+    for (var i = 0; i <= bm_smooth_char.length - 1; i++) {
+      b = BitmaskRot(bm_smooth_char[i], true);
+      for (var j = 0; j <= b.length - 1; j++) {
+        bm_smooth_char_all_true.push( b[j] );  
+      }
+    }
+    bm_smooth_char_all_true = removeDups(bm_smooth_char_all_true);
+
+    //console.log(bm_smooth_char_all_false);
+    //console.log(bm_smooth_char_all_true);
+    printDebug(
+      '>> Smooth char patterns generated: ' + 
+      String(bm_smooth_char_all_false.length + bm_smooth_char_all_true.length) + ' ' + 'from ' +
+      String(bm_smooth_char.length) + ' base patterns'
+    );
+  }
+
+  function smooth_map_char_step_sub(i, j) {
+    var bm;
+    var _bm = new Array(4);
+    var _bm_ud = '', _bm_lr = '';
+    var found_cnt = 0;
+    var _comp_char = '';
+    var _comp_false = false;
+    var _comp_true = true;
+    var _WC, _LC;
+    var tree_bitmask;
+
+    _WC = smooth[s_step].char1;
+    _LC = smooth[s_step].char2;
+
+    bm = get_bitmask_data(i, j);
+    //printDebug(i, j, bm);
+
+    if (_chk_tile != 0) {
+      return false;
+    }
+
+    /*
+    _bm[0] = bm.charAt(1, 1);
+    _bm[1] = bm.charAt(3, 1);
+    _bm[2] = bm.charAt(4, 1);
+    _bm[3] = bm.charAt(6, 1);
+    _bm_ud = _bm[0] + _bm[3];
+    _bm_lr = _bm[1] + _bm[2];
+
+    found_cnt = 0;
+
+    var _psm = bm_pre_smooth;
+    var _flag;
+    var _bma;
+    var _k;
+    var _kk;
+
+    //printDebug(b_list);
+
+    for (var _k = 0; _k <= _psm.compo.length - 1; _k++) {
+      _bma = new Array(_psm.compo[_k].bitmask.length);
+
+      for (_kk = 0; _kk <= _psm.compo[_k].bitmask.length - 1; _kk++) {
+        _bma[_kk] = _psm.compo[_k].bitmask[_kk].bm;
+      }
+
+      if (_psm.compo[_k].dir == '8') {
+
+        if (AnsiMatchStr(map_char[i][j], w_list) == false) {
+          //printDebug(_k, i, j, 'w_list detected');
+          if (_psm.compo[_k].flag == 'false') {
+            //printDebug('--->', _k, 'flag detected', bm, _bma);
+            if (AnsiMatchStr(bm, _bma) == true) {
+              map_char[i][j] = _WC;
+              found_cnt++;
+              //printDebug('A' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
+			        //break;
+            }
+          }
+        }
+        if (AnsiMatchStr(map_char[i][j], w_list) == true) {
+          if (_psm.compo[_k].flag == 'true') {
+            if (AnsiMatchStr(bm, _bma) == true) {
+              map_char[i][j] = _LC;
+              found_cnt++;
+              //printDebug('B' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
+			        //break;
+            }
+          }
+        }
+
+      }
+
+      if (_psm.compo[_k].dir == '2') {
+
+        if (AnsiMatchStr(map_char[i][j], w_list) == false) {
+          if (_psm.compo[_k].flag == 'false') {
+            if ((_bm_ud == _bma[0]) || (_bm_lr == _bma[1])) {
+              map_char[i][j] = _WC;
+              found_cnt++;
+              //printDebug('C', _k, 'false', i, j, 'changed to', _WC);
+              //printDebug('C' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
+			        //break;
+            }
+          }
+        }
+        if (AnsiMatchStr(map_char[i][j], w_list) == true) {
+          if (_psm.compo[_k].flag == 'true') {
+            if ((_bm_ud == _bma[0]) || (_bm_lr == _bma[1])) {
+              map_char[i][j] = _LC;
+              found_cnt++;
+              //printDebug('D' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
+			        //break;
+            }
+          }
+        }
+
+      }
+
+    }
+    */
+
+
+    /*
+    found_cnt = 0;
+
+    if (AnsiMatchStr(map_char[i][j], w_list) == true) {
+      for (_k = 0; _k <= bm_smooth_char.length - 1; _k++) {
+        if ( BitmaskMatchRot(bm, bm_smooth_char, false) == true ) {
+          map_char[i][j] = _LC;  
+          found_cnt++;
+          break;
+        }
+      } 
+    }
+    
+    else if (AnsiMatchStr(map_char[i][j], w_list) == false) {
+      for (_k = 0; _k <= bm_smooth_char.length - 1; _k++) {
+        if ( BitmaskMatchRot(bm, bm_smooth_char, true) == true ) {
+          map_char[i][j] = _WC;  
+          found_cnt++;
+          break;
+        }
+      } 
+    }
+    */
+
+    // New optimized smooth_char routine
+    found_cnt = 0;
+
+    if (AnsiMatchStr(map_char[i][j], w_list) == true) {
+      if ( AnsiMatchStr(bm, bm_smooth_char_all_false) == true ) {
+        map_char[i][j] = _LC;  
+        found_cnt++;
+      }
+    }
+  
+    else if (AnsiMatchStr(map_char[i][j], w_list) == false) {
+      if ( AnsiMatchStr(bm, bm_smooth_char_all_true) == true ) {
+        map_char[i][j] = _WC;  
+        found_cnt++;
+      }
+    }
+
+    // check for exiting
+    if (found_cnt == 0) {
+      return false;
+    }
+
+    //return true;
+
+    // recursion started
+    if ((i - 1 >= 0) && (j - 1 >= 0)) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i - 1, j - 1);
+    }
+
+    if (j - 1 >= 0) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i, j - 1);
+    }
+
+    if ((i + 1) <= (map_col_num - 1) && (j - 1) >= 0) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i + 1, j - 1);
+    }
+
+    if (i - 1 >= 0) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i - 1, j);
+    }
+
+    if ((i + 1) <= (map_col_num - 1)) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i + 1, j);
+    }
+
+    if ((i - 1 >= 0) && (j + 1) <= (map_row_num - 1)) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i - 1, j + 1);
+    }
+
+    if ((j + 1) <= (map_row_num - 1)) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i, j + 1);
+    }
+
+    if ((i + 1) <= (map_col_num - 1) && (j + 1) <= (map_row_num - 1)) {
+      _recursion_depth++;
+      if (_recursion_depth > _limit_recursion_depth) {
+        return false;
+      }
+      smooth_map_char_step_sub(i + 1, j + 1);
+    }
+
+  }
+
   function smooth_map_char_step() {
     var i, j;
 
-    _limit_recursion_depth = 96;
+    _limit_recursion_depth = 64;
     _max_recursion_depth = -1;
 
     for (j = 0; j <= map_row_num - 1; j++) {
       for (i = 0; i <= map_col_num - 1; i++) {
         //if ( (map_char[i][j] == smooth[s_step].char1) ) {
-          _recursion_depth = 0;
-          smooth_map_char_step_sub(i, j);
-          if (_recursion_depth > _max_recursion_depth) {
-            _max_recursion_depth = _recursion_depth;
-          }
+        _recursion_depth = 0;
+        smooth_map_char_step_sub(i, j);
+        if (_recursion_depth > _max_recursion_depth) {
+          _max_recursion_depth = _recursion_depth;
+        }
         //}
       }
     }
@@ -1008,6 +1435,9 @@ function CSmoothTerrain() {
     st = 0;
     ed = smooth_num - 1;
     //ed = 1;
+
+    build_bm_smooth_char_all();
+
     for (m = st; m <= ed; m++) {
       s_step = m;
       smooth_map_char_step();
@@ -1398,6 +1828,92 @@ function CSmoothTerrain() {
     }
   }
 
+  function getSurroundCharList(x, y) {
+    var sr_list = new Array(8);
+
+    if ((x -1 < 0) || (y - 1 < 0)) 
+      sr_list[0] = '.';
+    else
+      sr_list[0] = map_char[x - 1][y - 1];
+    
+    if (y - 1 <  0)
+      sr_list[1] = '.';
+    else
+      sr_list[1] = map_char[x][y - 1];
+    
+    if ((x + 1 > map_col_num - 1) || (y - 1 < 0)) 
+      sr_list[2] = '.';
+    else
+      sr_list[2] = map_char[x + 1][y - 1];
+    
+    if (x - 1 < 0) 
+      sr_list[3] = '.';
+    else
+      sr_list[3] = map_char[x - 1][y];
+    
+    if (x + 1 > map_col_num - 1)
+      sr_list[4] = '.';
+    else 
+      sr_list[4] = map_char[x + 1][y];
+    
+    if ((x - 1 < 0) || (y + 1 > map_row_num - 1)) 
+      sr_list[5] = '.';
+    else
+      sr_list[5] = map_char[x - 1][y + 1];
+    
+    if (y + 1 > map_row_num - 1) 
+      sr_list[6] = '.';
+    else
+      sr_list[6] = map_char[x][y + 1];
+    
+    if ((x + 1 > map_col_num - 1) || (y + 1 > map_row_num - 1)) 
+      sr_list[7] = '.';
+    else
+      sr_list[7] = map_char[x + 1][y + 1];
+    
+    return sr_list;
+  }
+
+  function fixMapChar() {
+    var i, j;
+    var sr;
+
+    if ( (game_type == 'cf1') && (tile_type == 'jungle') ) {
+      //console.log(map_col_num);
+      //console.log(map_row_num);
+      
+      for (j = 0; j <= map_row_num - 1; j++) {
+        for (i = 0; i <= map_col_num - 1; i++) {
+          sr = getSurroundCharList(i, j);  
+          //console.log(i, j, sr);
+        
+          // if center == '+' and surround == '.' then replace to '#'
+          if (map_char[i][j] == '+') {
+            if ( AnsiMatchStr('.', sr ) == true ) {
+              map_char[i][j] = '#';
+            }
+          }
+
+          // if center == '+' and surround == 'T' then replace to '#'
+          if (map_char[i][j] == '+') {
+            if ( AnsiMatchStr('T', sr ) == true ) {
+              map_char[i][j] = '#';
+            }
+          }
+
+          // if center == 'T' and surround == '.' then replace to '#'
+          if (map_char[i][j] == 'T') {
+            if ( AnsiMatchStr('.', sr ) == true ) {
+              map_char[i][j] = '#';
+            }
+          }
+
+        }        
+      }
+
+    }
+  }
+
   this.convertMapChar = function(_map_char) {
     var w, h;
   
@@ -1441,7 +1957,6 @@ function CSmoothTerrain() {
           map_level[i][j] = _map[i][j];
         }
       }
-      //normaizeMapLevel();
     }
     else if (_mode == 'char') {
       for (i = 0; i <= _w - 1; i++) {
@@ -1489,8 +2004,15 @@ function CSmoothTerrain() {
       showMapChar();
     }
 
+    //fixMapChar();
+    if (isShowMapChar == true) {
+      showMapChar();
+    }
+
 	  printDebug('>> Smooth map char... Started');
     smoothMapChar();
+    printDebug('>> Smooth map char... Done');
+    
     if (isShowMapChar == true) {
       showMapChar();
     }
@@ -1557,6 +2079,8 @@ var map = st.run('cf1', 'jungle', 'level', w, h, map_lev, lev_limits);
 */
 
 // -- 'char' mode test
+if (programMode == 'debug') {
+
 /*
 var _map_char = [
   '....................',
@@ -1747,8 +2271,7 @@ var _map_char = [
 ];
 */
 
-if (programMode == 'debug') {
-
+/*
 var _map_char = [
   '..........................',
   '..........................',
@@ -1772,6 +2295,349 @@ var _map_char = [
   '..######################..',
   '..........................',
   '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '.................#........',
+  '...........#.....#........',
+  '.....#.....#.....#........',
+  '..######################..',
+  '..######################..',
+  '..######################..',
+  '..######################..',
+  '..######+###############..',
+  '..######+###############..',
+  '..######+###############..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++##...',
+  '.####++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..####++++++++++++++++##..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++####.',
+  '..###+++#++++++++++++###..',
+  '..###+++#++++++++++++###..',
+  '..############+#########..',
+  '..######################..',
+  '......#...................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '....#.....##.....###......',
+  '..........................',
+  '....####..................',
+  '..........................',
+  '...............#.#........',
+  '.......#..................',
+  '.......##.................',
+  '..........................',
+  '.......#######............',
+  '.......#######............',
+  '.......#######............',
+  '..........................',
+  '..######################..',
+  '..######################..',
+  '..######+###############..',
+  '..######+###############..',
+  '..######+###############..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++##...',
+  '.####++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..####++++++++++++++++##..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++###..',
+  '..###++++++++++++++++####.',
+  '..###+++#++++++++++++###..',
+  '..###+++#++++++++++++###..',
+  '..############+#########..',
+  '..######################..',
+  '......#...................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '........####.#######......',
+  '.......#####.########.....',
+  '.......#####.########.....',
+  '.......#####.########.....',
+  '.......#####.########.....',
+  '.......#####.########.....',
+  '.......#####.########.....',
+  '........####.#######......',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '........####..######......',
+  '.......#####..#######.....',
+  '.......#####..#######.....',
+  '.......#####..#######.....',
+  '.......#####..#######.....',
+  '.......#####..#######.....',
+  '.......#####..#######.....',
+  '........####..######......',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '........############......',
+  '.......##############.....',
+  '.......##############.....',
+  '..........................',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '........############......',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '........############......',
+  '.......##############.....',
+  '.......##############.....',
+  '..........................',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '........############......',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '........######..####......',
+  '.......#######..#####.....',
+  '.......#######..#####.....',
+  '..........................',
+  '..........................',
+  '.......#######..#####.....',
+  '.......#######..#####.....',
+  '.......#######..#####.....',
+  '........######..####......',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '.........T.....+++........',
+  '..........................',
+  '..........................',
+  '.......#######+++####.....',
+  '.......########++####.....',
+  '.......+########+####.....',
+  '.......+#############.....',
+  '.......###+++##TTT###.....',
+  '..........................',
+  '..........................',
+  '.......#####TTT######.....',
+  '.......##TTTTTT######.....',
+  '.......#+TTTT#######T.....',
+  '.......#+##########TT.....',
+  '.......###...TT..####.....',
+  '.......###.......####.....',
+  '.......###.......####.....',
+  '.......###.......####.....',
+  '.......###..+++..####.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......#####+++######.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##TTTTT#######.....',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+/*
+var _map_char = [
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+  '.......####+###T#####.....',
+  '.......##############.....',
+  '.......########+#####.....',
+  '.......#####TTTTTTT##.....',
+  '.......#####TTTTTTT##.....',
+  '.......#####TTTTTTT##.....',
+  '.......####+TTTTTTT##.....',
+  '.......#####TTTTTTT##.....',
+  '.......#####TTTTTTT##.....',
+  '.......#####TTTTTTT##.....',
+  '.......#####TTTTTTT##.....',
+  '.......########++####.....',
+  '.......#######TTTT###.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '.......##############.....',
+  '..........................',
+  '..........................',
+  '..........................',
+  '..........................',
+];
+*/
+
+var _map_char = [
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................################################................',
+'................################################................',
+'................################################................',
+'................################################................',
+'................################################................',
+'................########++++++++++++++++########................',
+'................########++++++++++++++++########................',
+'........################++++++++++++++++################........',
+'........################++++++++++++++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........####++++++++++++++++TTTTTTTT+++++++++++++++#####........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++TTTTTTTT++++################........',
+'........################++++++++++++++++################........',
+'........################++++++++++++++++################........',
+'........################++++++++++++++++################........',
+'........################++++++++++++++++################........',
+'................################################................',
+'................################################................',
+'................################################................',
+'................################################................',
+'................################################................',
+'................################################................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
+'................................................................',
 ];
 
 var st = new CSmoothTerrain();
