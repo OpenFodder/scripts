@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta2';
+const version = '0.70.beta3';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -193,8 +193,7 @@ var bm_smooth_char = [
   // 111
   // 100
   // 110
-  '11101010',
-
+  '11110110',
 ];
 var bm_smooth_char_all_false;
 var bm_smooth_char_all_true;
@@ -730,16 +729,19 @@ function CSmoothTerrain() {
   var _chk_tile;
 
   // Show Map Char for Debugging
-  function showMapChar() {
-    var s;
+  function showMapChar(tit) {
+    if (isShowMapChar == true) {
+      var s;
 
-    printDebug('');
-    for (var j = 0; j <= map_row_num - 1; j++) {
-      s = '';
-      for (var i = 0; i <= map_col_num - 1; i++) {
-        s = s + map_char[i][j];
+      printDebug('');
+      printDebug(tit);
+      for (var j = 0; j <= map_row_num - 1; j++) {
+        s = '';
+        for (var i = 0; i <= map_col_num - 1; i++) {
+          s = s + map_char[i][j];
+        }
+        printDebug(s);
       }
-      printDebug(s);
     }
   }
 
@@ -1412,7 +1414,7 @@ function CSmoothTerrain() {
   function smooth_map_char_step() {
     var i, j;
 
-    _limit_recursion_depth = 64;
+    _limit_recursion_depth = 256;
     _max_recursion_depth = -1;
 
     for (j = 0; j <= map_row_num - 1; j++) {
@@ -1879,13 +1881,10 @@ function CSmoothTerrain() {
     var sr;
 
     if ( (game_type == 'cf1') && (tile_type == 'jungle') ) {
-      //console.log(map_col_num);
-      //console.log(map_row_num);
       
       for (j = 0; j <= map_row_num - 1; j++) {
         for (i = 0; i <= map_col_num - 1; i++) {
           sr = getSurroundCharList(i, j);  
-          //console.log(i, j, sr);
         
           // if center == '+' and surround == '.' then replace to '#'
           if (map_char[i][j] == '+') {
@@ -1908,6 +1907,33 @@ function CSmoothTerrain() {
             }
           }
 
+          // Change +(light grass) adjacement .(water) to #(dark grass)
+          if (map_char[i][j] == '+') {
+            // 0 1 2
+            // 3   4
+            // 5 6 7
+
+            // #: 1, 3 - . : 0 
+            if ( (sr[1] == '#') && (sr[3] == '#') && (sr[0] == '.') ) {
+              map_char[i][j] = '#';
+            }
+          
+            // #: 1, 4 - . : 2 
+            if ( (sr[1] == '#') && (sr[4] == '#') && (sr[2] == '.') ) {
+              map_char[i][j] = '#';
+            }
+
+            // #: 3, 6 - . : 5 
+            if ( (sr[3] == '#') && (sr[6] == '#') && (sr[5] == '.') ) {
+              map_char[i][j] = '#';
+            }
+
+            // #: 4, 6 - . : 7 
+            if ( (sr[4] == '#') && (sr[6] == '#') && (sr[7] == '.') ) {
+              map_char[i][j] = '#';
+            }
+
+          }
         }        
       }
 
@@ -1935,6 +1961,9 @@ function CSmoothTerrain() {
   // Set up and run
   this.run = function(_game_type, _tile_type, _mode, _w, _h, _map, _limits) {
     var i, j;
+    var time_a, time_b;
+
+    time_a = new Date();
 
     printDebug('>> SmoothEngine ' + version + ' started');
     printDebug('>> Game type : ' + _game_type);
@@ -2000,31 +2029,33 @@ function CSmoothTerrain() {
     if (_mode == 'level') {    
       createMapChar();
     }
-    if (isShowMapChar == true) {
-      showMapChar();
-    }
 
-    //fixMapChar();
-    if (isShowMapChar == true) {
-      showMapChar();
-    }
+    showMapChar('>> Original map char');
 
-	  printDebug('>> Smooth map char... Started');
-    smoothMapChar();
-    printDebug('>> Smooth map char... Done');
-    
-    if (isShowMapChar == true) {
-      showMapChar();
-    }
+    for (i = 0; i <= 1; i++) {
+      printDebug('>> SMOOTHING PHASE: ' + String(i));
 
-	  printDebug('>> Smooth water and land... Started');
-    smoothWaterAndLand();
-	  printDebug('>> Smooth water and land... Done');
+      printDebug('>> Fixing map char... Started');
+      fixMapChar();
+      printDebug('>> Smooth map char... Done');
+      showMapChar('>> Fixed map char');
+
+	    printDebug('>> Smooth map char... Started');
+      smoothMapChar();
+      printDebug('>> Smooth map char... Done');
+      showMapChar('>> Smoothed map char');
+
+	    printDebug('>> Smooth water and land... Started');
+      smoothWaterAndLand();
+	    printDebug('>> Smooth water and land... Done');
  
-	  printDebug('>> Smooth land and tree... Started');
-    smoothLandAndTree();
-	  printDebug('>> Smooth land and tree... Done');
+	    printDebug('>> Smooth land and tree... Started');
+      smoothLandAndTree();
+      printDebug('>> Smooth land and tree... Done');
+    }
 
+    time_b = new Date();
+    printDebug(">> Elapsed " + (time_b - time_a) / 1000 + " seconds");
     return map_tile;
   }
 
