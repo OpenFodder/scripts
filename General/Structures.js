@@ -57,8 +57,8 @@ var Structures = {
      * @param {string} pSpriteSet
      */
     Place: function(pPosition, pStructure, pSpriteSet) {
-        TileX = pPosition.x / 16;
-        TileY = pPosition.y / 16;
+        TileX = Math.floor(pPosition.x / 16);
+        TileY = Math.floor(pPosition.y / 16);
 
         Struct = pStructure.Struct;
         Sprites = pStructure.Types[pSpriteSet];
@@ -75,7 +75,7 @@ var Structures = {
 
         // Now add the sprites
         for( x = 0; x < Sprites.length; ++x ) {
-            Map.SpriteAdd(Sprites[x][2], pPosition.x + Sprites[x][0], pPosition.y + Sprites[x][1]);
+            Map.SpriteAdd(Sprites[x][2], (TileX * 16) + Sprites[x][0], (TileY * 16) + Sprites[x][1]);
         }
     },
 

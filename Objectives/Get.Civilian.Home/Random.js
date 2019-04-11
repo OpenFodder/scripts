@@ -29,7 +29,7 @@ Objectives.GetCivilianHome.CreateHome = function() {
 	do {
 		found = true;
 
-		position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 2, false);
+		position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
 		for( count = 0; count < Session.CivilianPositions.count; ++count) {
 
 			if( Map.getDistanceBetweenPositions( Session.CivilianPositions[count], position) < 100 ) {
@@ -54,6 +54,5 @@ Objectives.GetCivilianHome.Random = function(pCount) {
 	
 	this.CreateCivilian();
 	this.CreateHome();
-
 	// TODO
 };
