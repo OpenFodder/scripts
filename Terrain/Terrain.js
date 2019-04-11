@@ -144,7 +144,8 @@ var Terrain = {
 			pRadialEnabled = true;
 
 		if(Map.getTileType() == this.Types.Jungle) {
-			var lev_limits = [0.17, 0.25, 0.35, 0.45, 1.00];
+			//var lev_limits = [0.17, 0.25, 0.35, 0.45, 1.00];
+			var lev_limits = [0.20, 0.23, 0.45, 0.55, 1.00];			
 			noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
 			//noises = Map.DiamondSquare();
 			//noises = Map.SimplexNoise(pOctaves, pScale, pLacunarity, pPersistance);
