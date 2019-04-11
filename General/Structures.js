@@ -25,7 +25,7 @@ var Structures = {
     Interior: {
 
     },
-    
+
     /**
      * 
      */
@@ -50,42 +50,54 @@ var Structures = {
 		}
 	},
 
-    Place: function(pX, pY, pStructure) {
-        TileX = pX / 16;
-        TileY = pY / 16;
+    /**
+     * 
+     * @param {cPosition} pPosition 
+     * @param {sStructure} pStructure 
+     * @param {string} pSpriteSet
+     */
+    Place: function(pPosition, pStructure, pSpriteSet) {
+        TileX = pPosition.x / 16;
+        TileY = pPosition.y / 16;
+
+        Struct = pStructure.Struct;
+        Sprites = pStructure.Types[pSpriteSet];
+
+        if(Sprites === undefined && pSpriteSet !== "") {
+            print("Structure does not have sprite-set: " + pSpriteSet);
+            return;
+        }
 
         // Set the terrain tiles
-        Struct = pStructure.Struct;
         for( x = 0; x < Struct.length; ++x ) {
             Map.TileSet(TileX + Struct[x][0], TileY + Struct[x][1], Struct[x][2]);
         }
 
         // Now add the sprites
-        Sprites = pStructure.Sprites;
         for( x = 0; x < Sprites.length; ++x ) {
-            Map.SpriteAdd(Sprites[x][2], pX + Sprites[x][0], pY + Sprites[x][1]);
+            Map.SpriteAdd(Sprites[x][2], pPosition.x + Sprites[x][0], pPosition.y + Sprites[x][1]);
         }
     },
 
     /**
      * Place a civilian hut
      * 
-     * @param {number} pX 
-     * @param {number} pY 
+     * @param {cPosition} pPosition
+     * @param {string} pSpriteSet
      */
-    PlaceHut: function(pX, pY) {
+    PlaceHut: function(pPosition, pSpriteSet) {
         Struct = this.GetCurrent();
-        this.Place(pX, pY, Struct.Hut);
+        this.Place(pPosition, Struct.Hut, pSpriteSet);
     },
 
     /**
      * Place a barracks
      * 
-     * @param {number} pX 
-     * @param {number} pY 
+     * @param {cPosition} pPosition
+     * @param {string} pSpriteSet
      */
-    PlaceBarracks: function(pX, pY) {
+    PlaceBarracks: function(pPosition, pSpriteSet) {
         Struct = this.GetCurrent();
-        this.Place(pX, pY, Struct.Barracks);
+        this.Place(pPosition, Struct.Barracks, pSpriteSet);
     }
 };

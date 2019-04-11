@@ -94,7 +94,7 @@ var SpriteTypes = {
     BuildingDoor3: 88,
     Explosion2: 89,
 
-    Civilian_Door: 90,
+    Door_Civilian_Rescue: 90,
     Seal_Mine: 91,
     Spider_Mine: 92,
     Bonus_RankToGeneral: 93,

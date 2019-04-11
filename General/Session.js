@@ -54,6 +54,8 @@ var Session = {
      * @param {nunber} pType 
      */
     RequireHelicopter: function(pType) {
+        print("Require Helicopter");
+        
         if(this.HelicopterMinimum < pType)
             this.HelicopterMinimum = pType;
     },
@@ -62,6 +64,9 @@ var Session = {
      * Number of grenade crates required
      */
     RequiredMinimumGrenades: function() {
+        if(!this.BuildingPositions.length)
+            return 0;
+
         return (this.BuildingPositions.length / 4) + 1;
     },
 
@@ -69,6 +74,9 @@ var Session = {
      * Number of rocket barrels required
      */
     RequiredMinimumRockets: function() {
+        if(!this.BuildingPositions.length)
+            return 0;
+            
         return (this.BuildingPositions.length / 4) + 1;
     },
 

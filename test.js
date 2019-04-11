@@ -15,10 +15,12 @@ function createRandom() {
 	Objectives.RescueHostages.Random(1);
 	Objectives.RescueHostages.Random(1);
 	Objectives.RescueHostages.Random(1);
+	//Objectives.GetCivilianHome.Random();
 
 	Objectives.AddRequired(Objectives.KillAllEnemy);
 	Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
 	Objectives.AddRequired(Objectives.RescueHostages);
+	//Objectives.AddRequired(Objectives.ProtectCivilians);
 
 	Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
 	Weapons.RandomRockets(Session.RequiredMinimumRockets() / 2);
@@ -68,16 +70,38 @@ function createMissions(pMissions, pPhases) {
 	}
 }
 
+function createSmallMap() {
+	var Phase = OpenFodder.getNextPhase();
+	Objectives.AddRequired(Objectives.KillAllEnemy);
+	Map.Create( 40,30 , Terrain.Types.Jungle, 0);
+	Terrain.Randomize();
+
+	Human.RandomXY(3);
+	Objectives.KillAllEnemy.Random(2);
+	//Objectives.DestroyEnemyBuildings.Random(2);
+	//Objectives.RescueHostages.Random(1);
+	Objectives.GetCivilianHome.Random();
+
+	Objectives.AddRequired(Objectives.KillAllEnemy);
+	//Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
+	//Objectives.AddRequired(Objectives.RescueHostages);
+	//Objectives.AddRequired(Objectives.GetCivilianHome);
+
+	Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
+
+	Validation.ValidateMap();
+}
+
 // Reset the map session
 Session.Reset();
 
 var Map = Engine.getMap();
 
 //createMissions(2, [1, 2]);
-
-
 var Mission = OpenFodder.getNextMission();
 createPhases(1, Terrain.Types.Jungle );
+//createSmallMap();
+
 
 // Random Terrain
 //createPhases(1, Map.getRandomInt(0, 4) );

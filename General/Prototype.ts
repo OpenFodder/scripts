@@ -14,6 +14,19 @@ class sSprite {
     y: number;
 }
 
+class sStructure {
+
+    /**
+     * TileIDs to be placed for structure
+     */
+    Struct: object;
+
+    /**
+     * Types of structure which can be placed
+     */
+    Types: object;
+}
+
 /**
  * A Campaign
  */
@@ -34,14 +47,6 @@ interface cMap {
      * Save to disk
      */
     save(): void;
-
-    /**
-     * Add a barracks
-     * 
-     * @param pX 
-     * @param pY 
-     */
-    addBarracks(pX, pY): void;
 
     /**
      * Create a new map

@@ -10,9 +10,9 @@ Objectives.KillAllEnemy.CreateEnemyTroop = function(pCount) {
 
 		if(position.x == -1 || position.y == -1) {
 			print("Failed to place enemy soldier");
-			break;
+			continue;
 		}
-		
+
 		Map.SpriteAdd( SpriteTypes.Enemy, position.x, position.y );
 	}
 }

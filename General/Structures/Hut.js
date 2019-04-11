@@ -14,9 +14,21 @@ Structures.Jungle.Hut = {
         [2, 2, 297],
     ],
 
-    Sprites: [
-        [20, 27, SpriteTypes.Door_Civilian]
-    ]
+    Types: {
+        "Soldier": [
+            [20, 27, SpriteTypes.BuildingDoor2]
+        ],
+        "Civilian": [
+            [20, 27, SpriteTypes.Door_Civilian]
+        ],
+        "Civilian_Spear": [
+            [20, 27, SpriteTypes.Door_Civilian_Spear]
+        ],
+        "Civilian_Rescue": [
+            [20, 43, SpriteTypes.Door_Civilian_Rescue]
+        ]
+    }
+
 };
 
 Structures.Desert.Hut = {
@@ -41,9 +53,20 @@ Structures.Desert.Hut = {
        [3, 3, 78]
     ],
 
-    Sprites: [
-        [35, 40, SpriteTypes.BuildingDoor2]
-    ]
+    Types: {
+        "Soldier": [
+            [35, 40, SpriteTypes.BuildingDoor2]
+        ],
+        "Civilian": [
+            [35, 40, SpriteTypes.Door_Civilian]
+        ],
+        "Civilian_Spear": [
+            [35, 40, SpriteTypes.Door_Civilian_Spear]
+        ],
+        "Civilian_Rescue": [
+            [35, 40, SpriteTypes.Door_Civilian_Rescue]
+        ]
+    }
 };
 
 Structures.Ice.Hut = {
@@ -64,10 +87,24 @@ Structures.Ice.Hut = {
         [ 3, 2, 283]
     ],
 
-    Sprites: [
-        [20, 1, SpriteTypes.Shrub],
-        [12, 23, SpriteTypes.Door_Civilian]      
-    ]
+    Types: {
+        "Soldier": [
+            [20, 1, SpriteTypes.Shrub], // In this case 'Shrub' is roof
+            [12, 23, SpriteTypes.BuildingDoor2]    
+        ],
+        "Civilian": [
+            [20, 1, SpriteTypes.Shrub], // In this case 'Shrub' is roof
+            [12, 23, SpriteTypes.Door_Civilian]  
+        ],
+        "Civilian_Spear": [
+            [20, 1, SpriteTypes.Shrub], // In this case 'Shrub' is roof
+            [12, 23, SpriteTypes.Door_Civilian_Spear]  
+        ],
+        "Civilian_Rescue": [
+            [20, 1, SpriteTypes.Shrub], // In this case 'Shrub' is roof
+            [12, 23, SpriteTypes.Door_Civilian_Rescue]  
+        ]
+    }
 };
 
 Structures.Moors.Hut = {
@@ -99,9 +136,21 @@ Structures.Moors.Hut = {
        [3, 4, 323]
         
     ],
-    Sprites: [
-        [28, 65, SpriteTypes.BuildingDoor2]   
-    ]
+
+    Types: {
+        "Soldier": [
+            [28, 65, SpriteTypes.BuildingDoor2]   
+        ],
+        "Civilian": [
+            [28, 65, SpriteTypes.Door_Civilian]   
+        ],
+        "Civilian_Spear": [
+            [28, 65, SpriteTypes.Door_Civilian_Spear]    
+        ],
+        "Civilian_Rescue": [
+            [28, 65, SpriteTypes.Door_Civilian_Rescue]   
+        ]
+    }
 };
 
 Structures.Interior.Hut = {
@@ -110,7 +159,19 @@ Structures.Interior.Hut = {
         [0, 0, 246],
         [0, 1, 266]
     ],
-    Sprites: [
-        [3, 5, SpriteTypes.BuildingDoor2]   
-    ]
+
+    Types: {
+        "Soldier": [
+            [3, 5, SpriteTypes.BuildingDoor2]     
+        ],
+        "Civilian": [
+            [3, 5, SpriteTypes.Door_Civilian]   
+        ],
+        "Civilian_Spear": [
+            [3, 5, SpriteTypes.Door_Civilian_Spear]    
+        ],
+        "Civilian_Rescue": [
+            [3, 5, SpriteTypes.Door_Civilian_Rescue]   
+        ]
+    }
 };

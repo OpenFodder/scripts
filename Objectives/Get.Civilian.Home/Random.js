@@ -8,17 +8,11 @@
 Objectives.GetCivilianHome.CreateCivilian = function() {
 	print("Placing civilian");
 
-	if(pHostageCount == 0)
-		++pHostageCount;
-
-	if(pHasEnemyGuard == undefined)
-	pHasEnemyGuard = true;
-
 	// Place a 'groups' of hostages
 	var CivilianPosition = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 2, true);
 	Session.CivilianPositions.push(CivilianPosition);
 
-	Map.SpriteAdd( SpriteTypes.Civilian, position.x, position.y );
+	Map.SpriteAdd( SpriteTypes.Civilian_Spear, position.x, position.y );
 
 	return CivilianPosition;
 }
@@ -30,6 +24,30 @@ Objectives.GetCivilianHome.CreateCivilian = function() {
  */
 Objectives.GetCivilianHome.CreateHome = function() {
 
+	found = false;
+
+	do {
+		found = true;
+
+		position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 2, false);
+		for( count = 0; count < Session.CivilianPositions.count; ++count) {
+
+			if( Map.getDistanceBetweenPositions( Session.CivilianPositions[count], position) < 100 ) {
+				found = false;
+				break;
+			}
+
+			var path = Map.calculatePathBetweenPositions( SpriteTypes.Civilian, position, Session.HumanPosition );
+			if(!path.length) {
+				found = false;
+				break;
+			}
+		}
+
+	} while( found == false );
+
+	Map.SpriteAdd(SpriteTypes.Tank_Human,  Session.HumanPosition.x,  Session.HumanPosition.y);
+	Structures.PlaceHut( position, "Civilian_Rescue" );
 }
 
 Objectives.GetCivilianHome.Random = function(pCount) {

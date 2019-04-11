@@ -86,8 +86,8 @@ var Helicopters = {
 				pType = this.GetRandomType();
 
 			if(pPosition === undefined) {
-				print("Placing random helicopter");
 				pPosition = Positioning.RandomWalkable(SpriteTypes.Player, Session.HumanPosition);
+				print("Placing random helicopter: x: " + pPosition.x + " y: " + pPosition.y);
 			}
 			
 			Map.SpriteAdd( pType, pPosition.x, pPosition.y );
