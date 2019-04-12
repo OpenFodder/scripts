@@ -96,8 +96,8 @@ var Validation = {
         if(Helicopters.Human.HaveAny())
             return;
 
-        for(count = 0; count < Session.BuildingPositions.length; ++count) {
-            Path = Map.calculatePathBetweenPositions(SpriteTypes.Player, Session.BuildingPositions[count], Session.HumanPosition);
+        for(count = 0; count < Session.BarracksPositions.length; ++count) {
+            Path = Map.calculatePathBetweenPositions(SpriteTypes.Player, Session.BarracksPositions[count], Session.HumanPosition);
             if(Path.length == 0) {
                 Session.RequireHelicopter(0);
                 return;

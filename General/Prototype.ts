@@ -14,6 +14,9 @@ class sSprite {
     y: number;
 }
 
+/**
+ * A Structure
+ */
 class sStructure {
 
     /**
@@ -59,12 +62,6 @@ interface cMap {
     Create(pWidth:number, pHeight:number, pTileType:number, pTileSub:number): void;
 
     /**
-     * 
-     * @param pSeed 
-     */
-    CreateRandom(pSeed:number): void;
-
-    /**
      * Create a 2D diamond square array
      */
     DiamondSquare(): Array<Array<number>>;
@@ -91,7 +88,14 @@ interface cMap {
      */
     SimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): Array<Array<number>>;
 
+    /**
+     * Get the current tile type
+     */
     getTileType(): number;
+
+    /**
+     * Get the current tile sub
+     */
     getTileSub(): number;
 
     /**

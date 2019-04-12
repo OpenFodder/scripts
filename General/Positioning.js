@@ -35,5 +35,46 @@ var Positioning = {
         }
 
         return Position;
+    },
+
+    /**
+     * 
+     * @param {Array<number>} pTerrainFeatures 
+     * @param {number} pRadius 
+     * @param {cPosition} pPositions 
+     * @param {number} pDistance
+     * @param {number} pMaxAttempts 
+     * 
+     * @return cPosition
+     */
+    PositionAwayFrom: function(pTerrainFeatures, pRadius, pPositions, pDistance, pMaxAttempts) {
+        found = false;
+        Attempts = 0;
+        Distance = [];
+
+        if(pMaxAttempts === undefined)
+            pMaxAttempts = 20;
+
+        if(pDistance === undefined)
+            pDistance = 10;
+
+        do {
+            Position = Map.getRandomXYByFeatures(pTerrainFeatures, pRadius, false);
+            found = true;
+
+            for(x = 0; x < pPositions.length; ++x) {
+                Distance = Map.getDistanceBetweenPositions(Position, pPositions[x]);
+                if(Distance < pDistance)
+                    found = false;    
+            }
+            ++Attempts;
+        } while(found == false && Attempts < pMaxAttempts);
+
+        if(Attempts >= pMaxAttempts) {
+            Position = new cPosition(-1, -1);
+            print("Failed to find a position");
+        }
+
+        return Position;
     }
 }

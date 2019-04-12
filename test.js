@@ -72,7 +72,6 @@ function createMissions(pMissions, pPhases) {
 
 function createSmallMap() {
 	var Phase = OpenFodder.getNextPhase();
-	Objectives.AddRequired(Objectives.KillAllEnemy);
 	Map.Create( 40,30 , Terrain.Types.Jungle, 0);
 	Terrain.Randomize();
 
@@ -125,7 +124,7 @@ for(count = 0; count < 5; ++count) {
 	RandomLast = Random;
 }*/
 
-
+/*
 for(count = 0; count < Session.HostageGroupPositions.length; ++count) {
 
 	//Strange.PlaceSpritesOnPath(SpriteTypes.Enemy, Session.HostageGroupPositions[count], Session.HumanPosition);
@@ -139,3 +138,4 @@ Map.SpriteAdd(SpriteTypes.Helicopter_Missile_Human,  Session.HumanPosition.x,  S
 if(Session.RescueHelicopter !== null)
 	Strange.PlaceSpritesOnPath(SpriteTypes.GrenadeBox, Session.RescueHelicopter, Session.HumanPosition);
 
+*/

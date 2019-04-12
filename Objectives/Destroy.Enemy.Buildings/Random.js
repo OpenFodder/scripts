@@ -9,7 +9,7 @@ Objectives.DestroyEnemyBuildings.Random = function(pCount) {
 		
 		position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
 
-		Session.BuildingPositions.push(position);
+		Session.BarracksPositions.push(position);
 
 		Structures.PlaceBarracks( position, "Soldier" );
 	}

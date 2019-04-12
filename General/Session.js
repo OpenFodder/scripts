@@ -12,10 +12,15 @@ var Session = {
     CivilianPositions: [],
 
     /**
-     * @var {array[cPosition]} BuildingPositions
+     * @var {Array<cPosition>} BarracksPositions
      */
-    BuildingPositions: [],
+    BarracksPositions: [],
 
+    /**
+     * @var {Array<cPosition>} HutPositions
+     */
+    HutPositions: [],
+    
     /**
      * @var {cPosition}
      */
@@ -40,7 +45,7 @@ var Session = {
      * Reset all properties
      */
     Reset: function() {
-        this.BuildingPositions = [];
+        this.BarracksPositions = [];
         this.HostageGroupPositions = [];
         this.RescueTentPosition = new cPosition(0, 0);
         this.Helicopter = null;
@@ -64,20 +69,20 @@ var Session = {
      * Number of grenade crates required
      */
     RequiredMinimumGrenades: function() {
-        if(!this.BuildingPositions.length)
+        if(!this.BarracksPositions.length)
             return 0;
 
-        return (this.BuildingPositions.length / 4) + 1;
+        return (this.BarracksPositions.length / 4) + 1;
     },
 
     /**
      * Number of rocket barrels required
      */
     RequiredMinimumRockets: function() {
-        if(!this.BuildingPositions.length)
+        if(!this.BarracksPositions.length)
             return 0;
             
-        return (this.BuildingPositions.length / 4) + 1;
+        return (this.BarracksPositions.length / 4) + 1;
     },
 
     /**
