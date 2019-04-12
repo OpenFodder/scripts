@@ -310,6 +310,17 @@ interface cScriptingEngine {
     getMission() : cMission;
 
     /**
+     * Print a string to the screen
+     * 
+     * @param pText 
+     * @param pX 
+     * @param pY 
+     * @param pLarge 
+     * @param pUnderline 
+     */
+    guiPrintString(pText:string, pX:number, pY:number, pLarge:boolean, pUnderline:boolean) : void;
+
+    /**
      * Create a new mission
      */
     missionCreate() : cMission;

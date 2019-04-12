@@ -15,7 +15,7 @@ function createRandom() {
 	Objectives.RescueHostages.Random(1);
 	Objectives.RescueHostages.Random(1);
 	Objectives.RescueHostages.Random(1);
-	//Objectives.GetCivilianHome.Random();
+	Objectives.GetCivilianHome.Random();
 
 	Objectives.AddRequired(Objectives.KillAllEnemy);
 	Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
@@ -78,7 +78,7 @@ function createSmallMap() {
 
 	Human.RandomXY(3);
 	Objectives.KillAllEnemy.Random(2);
-	//Objectives.DestroyEnemyBuildings.Random(2);
+	Objectives.DestroyEnemyBuildings.Random(2);
 	//Objectives.RescueHostages.Random(1);
 	Objectives.GetCivilianHome.Random();
 
@@ -98,6 +98,8 @@ Session.Reset();
 var Map = Engine.getMap();
 
 //createMissions(2, [1, 2]);
+
+OpenFodder.printLarge("PLEASE WAIT", 0, 15);
 var Mission = OpenFodder.getNextMission();
 createPhases(1, Terrain.Types.Jungle );
 //createSmallMap();
