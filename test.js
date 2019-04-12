@@ -101,6 +101,7 @@ var Map = Engine.getMap();
 
 OpenFodder.printLarge("PLEASE WAIT", 0, 15);
 var Mission = OpenFodder.getNextMission();
+OpenFodder.printSmall("Creating Phases", 0, 45);
 createPhases(1, Terrain.Types.Jungle );
 //createSmallMap();
 
@@ -124,7 +125,7 @@ for(count = 0; count < 5; ++count) {
 	RandomLast = Random;
 }*/
 
-/*
+
 for(count = 0; count < Session.HostageGroupPositions.length; ++count) {
 
 	//Strange.PlaceSpritesOnPath(SpriteTypes.Enemy, Session.HostageGroupPositions[count], Session.HumanPosition);
@@ -133,8 +134,8 @@ for(count = 0; count < Session.HostageGroupPositions.length; ++count) {
 	//Strange.PlaceSpritesOnPath(SpriteTypes.Enemy, Session.HostageGroupPositions[count], Session.RescueTentPosition);
 	Strange.PlaceSpritesOnPath(SpriteTypes.GrenadeBox, Session.HostageGroupPositions[count], Session.RescueTentPosition);
 }
+Map.SpriteAdd(SpriteTypes.Helicopter_Missile_Human,  Session.HumanPosition.x,  Session.HumanPosition.y);
 
 if(Session.RescueHelicopter !== null)
 	Strange.PlaceSpritesOnPath(SpriteTypes.GrenadeBox, Session.RescueHelicopter, Session.HumanPosition);
-}
-*/
+

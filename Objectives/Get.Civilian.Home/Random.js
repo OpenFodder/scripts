@@ -46,7 +46,6 @@ Objectives.GetCivilianHome.CreateHome = function() {
 
 	} while( found == false );
 
-	Map.SpriteAdd(SpriteTypes.Tank_Human,  Session.HumanPosition.x,  Session.HumanPosition.y);
 	Structures.PlaceHut( position, "Civilian_Rescue" );
 }
 
