@@ -92,7 +92,7 @@ function createSmallMap() {
 }
 
 // Reset the map session
-Session.Reset(10817);
+Session.Reset();
 
 var Map = Engine.getMap();
 
