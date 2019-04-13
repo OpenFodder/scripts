@@ -69,13 +69,13 @@ var Structures = {
         }
 
         // Set the terrain tiles
-        for( x = 0; x < Struct.length; ++x ) {
-            Map.TileSet(TileX + Struct[x][0], TileY + Struct[x][1], Struct[x][2]);
+        for( var count = 0; count < Struct.length; ++count ) {
+            Map.TileSet(TileX + Struct[count][0], TileY + Struct[count][1], Struct[count][2]);
         }
 
         // Now add the sprites
-        for( x = 0; x < Sprites.length; ++x ) {
-            Map.SpriteAdd(Sprites[x][2], (TileX * 16) + Sprites[x][0], (TileY * 16) + Sprites[x][1]);
+        for( var count = 0; count < Sprites.length; ++count ) {
+            Map.SpriteAdd(Sprites[count][2], (TileX * 16) + Sprites[count][0], (TileY * 16) + Sprites[count][1]);
         }
     },
 
@@ -83,16 +83,17 @@ var Structures = {
      * Place a civilian hut
      * 
      * @param {cPosition} pPosition
-     * @param {string} pSpriteSet
+     * @param {string} pHutType
      */
-    PlaceHut: function(pPosition, pSpriteSet) {
+    PlaceHut: function(pPosition, pHutType) {
         Struct = this.GetCurrent();
-        this.Place(pPosition, Struct.Hut, pSpriteSet);
+        this.Place(pPosition, Struct.Hut, pHutType);
     },
 
     /**
+     * Place a civlian hut randomly
      * 
-     * @param {*} pHutType 
+     * @param {string} pHutType 
      */
     PlaceHutRandom: function(pHutType) {
 
@@ -101,6 +102,14 @@ var Structures = {
 
             Session.HutPositions.push(position);
             this.PlaceHut(position, pHutType);
+        }
+    },
+
+    PlaceHuts: function(pHutType, pCount) {
+        print("Placing Random Huts");
+        
+        for(var x = 0; x < 10; x+=1) {
+            Structures.PlaceHutRandom(pHutType);
         }
     },
 

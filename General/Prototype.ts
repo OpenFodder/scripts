@@ -89,6 +89,11 @@ interface cMap {
     SimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): Array<Array<number>>;
 
     /**
+     * Get the starting random seed
+     */
+    getSeed(): number;
+
+    /**
      * Get the current tile type
      */
     getTileType(): number;

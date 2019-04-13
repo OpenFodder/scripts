@@ -62,8 +62,8 @@ var Positioning = {
             Position = Map.getRandomXYByFeatures(pTerrainFeatures, pRadius, false);
             found = true;
 
-            for(x = 0; x < pPositions.length; ++x) {
-                Distance = Map.getDistanceBetweenPositions(Position, pPositions[x]);
+            for(var count = 0; count < pPositions.length; ++count) {
+                Distance = Map.getDistanceBetweenPositions(Position, pPositions[count]);
                 if(Distance < pDistance)
                     found = false;    
             }

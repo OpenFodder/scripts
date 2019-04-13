@@ -23,7 +23,7 @@ Objectives.RescueHostages.CreateTent = function() {
 			++Attempts;
 		} while( Map.getDistanceBetweenPositions(Session.HostageGroupPositions[0], Position) < 10 && Attempts < 10);
 		
-		if(Attempts == 10)
+		if(Attempts == 10) 
 			print("Failed finding location for rescue tent, placing anyway");
 
 		Session.RescueTentPosition = Position;
