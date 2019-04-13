@@ -7,10 +7,18 @@
         {
             "type": "cppvsdbg",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch with 40x30",
             "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Release\\OpenFodder.exe",
             "cwd": "${workspaceFolder}\\..\\..\\Run",
             "args": ["--window","--window-scale" ,"2", "--skipintro", "--cheats", "--random", "--columns", "40", "--rows","30"],
+        },
+        {
+            "type": "cppvsdbg",
+            "request": "launch",
+            "name": "Launch with 100x50",
+            "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Release\\OpenFodder.exe",
+            "cwd": "${workspaceFolder}\\..\\..\\Run",
+            "args": ["--window","--window-scale" ,"1", "--skipintro", "--cheats", "--random", "--columns", "151", "--rows","90", "--script", "Scenario/Intro.js"],
         }
     ]
 }

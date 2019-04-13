@@ -74,7 +74,11 @@ var Structures = {
 		}
 	},
 
-    GetSessionPositions(pStructType) {
+    /**
+     * 
+     * @param {string} pStructType
+     */
+    GetStructPositions(pStructType) {
 
         switch(pStructType.toLowerCase()) {
             case "barracks":
@@ -89,6 +93,7 @@ var Structures = {
     },
 
     /**
+     * Place a structure
      * 
      * @param {cPosition} pPosition 
      * @param {sStructure} pStructure 
@@ -144,14 +149,25 @@ var Structures = {
         Session.BarracksPositions.push(pPosition);
     },
 
-    PlaceRandom: function(pStructType, pSpriteType, pCount) {
+    /**
+     *
+     * Place a number of 'pStructType' at random locations, at a minimum of 'pMinDistance' from each other
+     *
+     * @param {string} pStructType
+     * @param {string} pSpriteType
+     * @param {number} pCount
+     * @param {number} pMinDistance
+     */
+    PlaceRandom: function(pStructType, pSpriteType, pCount, pMinDistance) {
+
+        if(pMinDistance === undefined)
+            pMinDistance = 250;
 
         for(var x = 0; x < pCount; ++x) {
-            existingPositions = this.GetSessionPositions(pStructType);
+            existingPositions = this.GetStructPositions(pStructType);
+            position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, pMinDistance);
 
-            position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, 250);
             if(position.x != -1 && position.y != -1) {
-
                 Struct = this.GetCurrent();
                 existingPositions.push(position);
 

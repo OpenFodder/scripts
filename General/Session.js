@@ -1,13 +1,39 @@
 
 var Session = {
 
-    
+    /**
+     * @var {object}
+     */
     Background: {
+
+        /**
+         * @var {Array<cPosition>} TreePositions
+         */
         TreePositions: [],
+
+        /**
+         * @var {Array<cPosition>} Bush1Positions
+         */
         Bush1Positions: [],
+
+        /**
+         * @var {Array<cPosition>} Bush2Positions
+         */
         Bush2Positions: [],
+
+        /**
+         * @var {Array<cPosition>} BloomPositions
+         */
         BloomPositions: [],
+
+        /**
+         * @var {Array<cPosition>} LittleShrub1Positions
+         */
         LittleShrub1Positions: [],
+
+        /**
+         * @var {Array<cPosition>} LittleShrub2Positions
+         */
         LittleShrub2Positions: []
     },
 
@@ -64,6 +90,13 @@ var Session = {
         this.Helicopter = null;
         this.HelicopterMinimum = -1;
         this.HumanPosition = new cPosition(0, 0);
+
+        this.Background.BloomPositions = [];
+        this.Background.Bush1Positions = [];
+        this.Background.Bush2Positions = [];
+        this.Background.LittleShrub1Positions = [];
+        this.Background.LittleShrub2Positions = [];
+        this.Background.TreePositions = [];
 
         if (pSeed !== undefined)
             Engine.getMap().seed = pSeed;
