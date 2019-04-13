@@ -92,12 +92,11 @@ function createSmallMap() {
 }
 
 // Reset the map session
-Session.Reset();
+Session.Reset(10817);
 
 var Map = Engine.getMap();
 
 //createMissions(2, [1, 2]);
-//Map.seed = -27949;
 
 OpenFodder.printLarge("PLEASE WAIT", 0, 15);
 var Mission = OpenFodder.getNextMission();
