@@ -46,6 +46,7 @@ var Session = {
      */
     Reset: function() {
         this.BarracksPositions = [];
+        this.HutPositions = [];
         this.HostageGroupPositions = [];
         this.RescueTentPosition = new cPosition(0, 0);
         this.Helicopter = null;

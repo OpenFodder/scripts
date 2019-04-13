@@ -96,7 +96,7 @@ var Structures = {
      */
     PlaceHutRandom: function(pHutType) {
 
-        position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, Session.HutPositions, 150);
+        position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, Session.HutPositions, 250);
         if(position.x != -1 && position.y != -1) {
 
             Session.HutPositions.push(position);

@@ -16,13 +16,13 @@ Structures.Jungle.Hut = {
 
     Types: {
         "Soldier": [
-            [20, 27, SpriteTypes.BuildingDoor2]
+            [20, 43, SpriteTypes.BuildingDoor2]
         ],
         "Civilian": [
-            [20, 27, SpriteTypes.Door_Civilian]
+            [20, 43, SpriteTypes.Door_Civilian]
         ],
         "Civilian_Spear": [
-            [20, 27, SpriteTypes.Door_Civilian_Spear]
+            [20, 43, SpriteTypes.Door_Civilian_Spear]
         ],
         "Civilian_Rescue": [
             [20, 43, SpriteTypes.Door_Civilian_Rescue]
