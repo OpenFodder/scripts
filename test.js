@@ -6,6 +6,9 @@ function createRandom() {
 	Session.Reset();
 
 	Human.RandomXY(3);
+	Background.RandomPalms(10);
+	Background.RandomBushes1(10);
+	Background.RandomBlooms(5);
 
 	Objectives.KillAllEnemy.Random(10);
 

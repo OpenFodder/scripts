@@ -45,7 +45,9 @@ var Terrain = {
 			QuickSand: 167,
 			Land: 123,
 			Tree: 82
-		}
+		},
+		LightGrassTiles: [0, 20, 40, 18, 19],
+		DarkGrassTiles: [123, 124, 68, 240, 365]
 	},
 
 	Desert: {
@@ -134,8 +136,8 @@ var Terrain = {
 		pPersistance = Map.getRandomFloat(0.01, 1.);	// higher produces more trees
 		//return this.RandomSimplexNoise(pScale, pLacunarity, pPersistance, 5 );
 		pOctaves = 4;
-		pRoughness = Map.getRandomFloat(0.01, 0.7);
-		pScale = Map.getRandomFloat(0.02, 0.07);
+		pRoughness = Map.getRandomFloat(0.01, 0.3);
+		pScale = Map.getRandomFloat(0.02, 0.04);
 		pSeed = Map.getRandomInt(0, 255);
 		pEdgeFade = Map.getRandomFloat(0.00, 0.2);
 		if (Map.getRandomInt(0,1) == 0)
@@ -145,7 +147,7 @@ var Terrain = {
 
 		if(Map.getTileType() == this.Types.Jungle) {
 			//var lev_limits = [0.17, 0.25, 0.35, 0.45, 1.00];
-			var lev_limits = [0.20, 0.23, 0.45, 0.55, 1.00];			
+			var lev_limits = [0.20, 0.23, 0.55, 0.65, 1.00];			
 			noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
 			//noises = Map.DiamondSquare();
 			//noises = Map.SimplexNoise(pOctaves, pScale, pLacunarity, pPersistance);

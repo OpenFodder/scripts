@@ -1,6 +1,16 @@
 
 var Session = {
 
+    
+    Background: {
+        TreePositions: [],
+        Bush1Positions: [],
+        Bush2Positions: [],
+        BloomPositions: [],
+        LittleShrub1Positions: [],
+        LittleShrub2Positions: []
+    },
+
     /**
      * @var {array<cPosition>} HostageGroupPositions 
      */
