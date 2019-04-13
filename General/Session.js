@@ -53,7 +53,7 @@ var Session = {
         this.HelicopterMinimum = -1;
         this.HumanPosition = new cPosition(0, 0);
 
-        print("Starting Seed: " + Engine.getMap().getSeed());
+        print("Starting Seed: " + Engine.getMap().seed);
     },
 
     /**

@@ -97,7 +97,7 @@ Session.Reset();
 var Map = Engine.getMap();
 
 //createMissions(2, [1, 2]);
-Engine.reset(10);
+//Map.seed = -27949;
 
 OpenFodder.printLarge("PLEASE WAIT", 0, 15);
 var Mission = OpenFodder.getNextMission();
