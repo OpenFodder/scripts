@@ -20,7 +20,7 @@ Structures.Jungle.Barracks = {
 
     
     Types: {
-        "Soldier": [
+        "soldier": [
             [ 12, 18, SpriteTypes.BuildingRoof ],
             [ 8, 49, SpriteTypes.BuildingDoor ] 
         ]

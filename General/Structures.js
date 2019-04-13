@@ -11,19 +11,43 @@ var Structures = {
     },
 
     Desert: {
+        Hut: {
 
+        },
+
+        Barracks: {
+
+        }
     },
 
     Ice: {
+        Hut: {
 
+        },
+
+        Barracks: {
+
+        }
     },
 
     Moors: {
+        Hut: {
 
+        },
+
+        Barracks: {
+
+        }
     },
 
     Interior: {
+        Hut: {
 
+        },
+
+        Barracks: {
+
+        }
     },
 
     /**
@@ -50,6 +74,20 @@ var Structures = {
 		}
 	},
 
+    GetSessionPositions(pStructType) {
+
+        switch(pStructType.toLowerCase()) {
+            case "barracks":
+                return Session.BarracksPositions;
+
+            case "huts":
+                return Session.HutPositions;
+
+            default:
+                return [];
+        }
+    },
+
     /**
      * 
      * @param {cPosition} pPosition 
@@ -60,8 +98,11 @@ var Structures = {
         TileX = Math.floor(pPosition.x / 16);
         TileY = Math.floor(pPosition.y / 16);
 
+        if(pStructure === undefined || pStructure.Struct === undefined || pStructure.Types === undefined)
+            return;
+
         Struct = pStructure.Struct;
-        Sprites = pStructure.Types[pSpriteSet];
+        Sprites = pStructure.Types[pSpriteSet.toLowerCase()];
 
         if(Sprites === undefined && pSpriteSet !== "") {
             print("Structure does not have sprite-set: " + pSpriteSet);
@@ -88,39 +129,47 @@ var Structures = {
     PlaceHut: function(pPosition, pHutType) {
         Struct = this.GetCurrent();
         this.Place(pPosition, Struct.Hut, pHutType);
-    },
-
-    /**
-     * Place a civlian hut randomly
-     * 
-     * @param {string} pHutType 
-     */
-    PlaceHutRandom: function(pHutType) {
-
-        position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, Session.HutPositions, 250);
-        if(position.x != -1 && position.y != -1) {
-
-            Session.HutPositions.push(position);
-            this.PlaceHut(position, pHutType);
-        }
-    },
-
-    PlaceHuts: function(pHutType, pCount) {
-        print("Placing Random Huts");
-        
-        for(var x = 0; x < 10; x+=1) {
-            Structures.PlaceHutRandom(pHutType);
-        }
+        Session.HutPositions.push(pPosition);
     },
 
     /**
      * Place a barracks
-     * 
+     *
      * @param {cPosition} pPosition
      * @param {string} pSpriteSet
      */
     PlaceBarracks: function(pPosition, pSpriteSet) {
         Struct = this.GetCurrent();
         this.Place(pPosition, Struct.Barracks, pSpriteSet);
+        Session.BarracksPositions.push(pPosition);
+    },
+
+    PlaceRandom: function(pStructType, pSpriteType, pCount) {
+
+        for(var x = 0; x < pCount; ++x) {
+            existingPositions = this.GetSessionPositions(pStructType);
+
+            position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, 250);
+            if(position.x != -1 && position.y != -1) {
+
+                Struct = this.GetCurrent();
+                existingPositions.push(position);
+
+                switch(pStructType.toLowerCase()) {
+                    case "barracks":
+                        this.Place(position, Struct.Barracks, pSpriteType);
+                        break;
+
+                    case "hut":
+                        this.Place(position, Struct.Hut, pSpriteType);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
     }
+
 };
