@@ -22,99 +22,13 @@
  *
  */
 
-const version = '0.70.beta3';
+const version = '0.70.beta4';
 
 //const programMode = 'debug';
 const programMode = 'release';
 
 //const isShowMapChar = true;
 const isShowMapChar = false;
-
-/*
-var bm_pre_smooth = {
-  "compo": [
-    // < I >
-    //  000
-    //  010
-    //  111
-    {"flag":"false", "dir":"8", "bitmask": [ {"bm":"00000111"}, {"bm":"00101001"}, {"bm":"11100000"}, {"bm":"10010100"} ] },
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"11111000"}, {"bm":"11010110"}, {"bm":"00011111"}, {"bm":"01101011"} ] },
-       
-    // < II >
-    //  100
-    //  100
-    //  111
-    //  ---
-    //  111
-    //  100
-    //  100
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"10010111"}, {"bm":"11110100"}, {"bm":"11101001"}, {"bm":"00101111"}, {"bm":"11110100"}, {"bm":"11101001"}, {"bm":"00101111"}, {"bm":"10010111"} ] },
-   
-    // < III >
-    //  000
-    //  011
-    //  001
-    {"flag":"false", "dir":"8", "bitmask": [ {"bm":"00001001"}, {"bm":"00000110"}, {"bm":"10010000"}, {"bm":"01100000"} ] },
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"11110110"}, {"bm":"11111001"}, {"bm":"01101111"}, {"bm":"10011111"} ] },
-       
-    // < IV >
-    //  001
-    //  011
-    //  000    
-    {"flag":"false", "dir":"8", "bitmask": [ {"bm":"00101000"}, {"bm":"00000011"}, {"bm":"00010100"}, {"bm":"11000000"} ] },
-    //  110
-    //  100
-    //  111   
-    {"flag":"true", "dir":"8", "bitmask": [ {"bm":"11010111"}, {"bm":"11111100"}, {"bm":"11101011"}, {"bm":"00111111"} ] },
-       
-    // < V >
-    //  -1-
-    //  101
-    //  -1-
-    //{"flag":"true",  "dir":"2", "bitmask": [ {"bm":"11"}, {"bm":"11"} ] },
-    //  -0-
-    //  010
-    //  -0-   
-    //{"flag":"false", "dir":"2", "bitmask": [ {"bm":"00"}, {"bm":"00"} ] },
-       
-    // < VI-1 >
-    //  001  001  100  110
-    //  001  100  000  000
-    //  100  100  011  001
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"00101100"}, {"bm":"00110100"}, {"bm":"10000011"}, {"bm":"11000001"} ] },
-         
-    // < VI-2 >
-    //  100  100  001  011
-    //  100  001  000  000
-    //  001  001  110  100
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"10010001"}, {"bm":"10001001"}, {"bm":"00100110"}, {"bm":"01100100"} ] },
-   
-    // < VI-3 >
-    //  000  100  011  010
-    //  001  100  100  001
-    //  110  010  000  001
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"00001110"}, {"bm":"10010010"}, {"bm":"01110000"}, {"bm":"01001001"} ] },
-   
-    // < VI-4 >
-    //  000  001  110  010
-    //  100  001  001  100
-    //  011  010  000  100    
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"00010011"}, {"bm":"00101010"}, {"bm":"11001000"}, {"bm":"01010100"} ] },
-       
-    // < VII >
-    //  100  011  110  001
-    //  100  100  001  001
-    //  011  100  001  110
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"10010011"}, {"bm":"01110100"}, {"bm":"11001001"}, {"bm":"00101110"} ] },
-   
-    // < VIII >
-    //  011  100  110  001
-    //  000  101  000  101
-    //  110  001  011  100
-    {"flag":"true",  "dir":"8", "bitmask": [ {"bm":"01100110"}, {"bm":"10011001"}, {"bm":"11000011"}, {"bm":"00111100"} ] }
-  ]
-};
-*/
 
 var bm_smooth_char = [
   // WC
@@ -194,6 +108,21 @@ var bm_smooth_char = [
   // 100
   // 110
   '11110110',
+
+  // 111
+  // 000
+  // 011
+  '11100011',
+
+  // 000
+  // 101
+  // 011
+  '00011011',
+
+  // 110
+  // 101
+  // 001
+  '11011001',
 ];
 var bm_smooth_char_all_false;
 var bm_smooth_char_all_true;
@@ -727,6 +656,7 @@ function CSmoothTerrain() {
   var _max_recursion_depth;
   var _recursion_depth;
   var _chk_tile;
+  var _smooth_map_char_cnt;
 
   // Show Map Char for Debugging
   function showMapChar(tit) {
@@ -783,34 +713,11 @@ function CSmoothTerrain() {
         }
       }
     }
-
-    //printDebug(map_char);
-    //printDebug("AAA");
-    //showMapChar();
   }
 
   function get_bitmask_data(i, j) {
     var b;
 
-    /*
-    if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
-      b_list = new Array(2);
-      w_list = new Array(1);
-    } else {
-      b_list = new Array(3);
-      w_list = new Array(2);
-    }
-    b_list[0] = smooth[s_step].char1;
-    b_list[1] = smooth[s_step].char2;
-    w_list[0] = smooth[s_step].char1;
-
-    if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
-    }
-    else {
-      b_list[2] = smooth[s_step + 1].char1;
-      w_list[1] = smooth[s_step + 1].char1;
-    }
-    */
     if ( (smooth_num == 1) || (s_step == smooth_num - 1) ) {
       b_list = new Array(2);
       w_list = new Array(1);
@@ -979,180 +886,6 @@ function CSmoothTerrain() {
     return b;
   }
 
-  function smooth_map_char_step_sub_old(i, j) {
-    var bm;
-    var _bm = new Array(4);
-    var _bm_ud = '', _bm_lr = '';
-    var found_cnt = 0;
-    var _comp_char = '';
-    var _comp_false = false;
-    var _comp_true = true;
-    var _WC, _LC;
-    var tree_bitmask;
-
-    _WC = smooth[s_step].char1;
-    _LC = smooth[s_step].char2;
-
-    bm = get_bitmask_data(i, j);
-    //printDebug(i, j, bm);
-
-    if (_chk_tile != 0) {
-      return false;
-    }
-
-    _bm[0] = bm.charAt(1, 1);
-    _bm[1] = bm.charAt(3, 1);
-    _bm[2] = bm.charAt(4, 1);
-    _bm[3] = bm.charAt(6, 1);
-    _bm_ud = _bm[0] + _bm[3];
-    _bm_lr = _bm[1] + _bm[2];
-
-    found_cnt = 0;
-
-    var _psm = bm_pre_smooth;
-    var _flag;
-    var _bma;
-    var _k;
-    var _kk;
-
-    //printDebug(b_list);
-
-    for (var _k = 0; _k <= _psm.compo.length - 1; _k++) {
-      _bma = new Array(_psm.compo[_k].bitmask.length);
-
-      for (_kk = 0; _kk <= _psm.compo[_k].bitmask.length - 1; _kk++) {
-        _bma[_kk] = _psm.compo[_k].bitmask[_kk].bm;
-      }
-
-      if (_psm.compo[_k].dir == '8') {
-
-        if (AnsiMatchStr(map_char[i][j], w_list) == false) {
-          //printDebug(_k, i, j, 'w_list detected');
-          if (_psm.compo[_k].flag == 'false') {
-            //printDebug('--->', _k, 'flag detected', bm, _bma);
-            if (AnsiMatchStr(bm, _bma) == true) {
-              map_char[i][j] = _WC;
-              found_cnt++;
-              //printDebug('A' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
-			        //break;
-            }
-          }
-        }
-        if (AnsiMatchStr(map_char[i][j], w_list) == true) {
-          if (_psm.compo[_k].flag == 'true') {
-            if (AnsiMatchStr(bm, _bma) == true) {
-              map_char[i][j] = _LC;
-              found_cnt++;
-              //printDebug('B' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
-			        //break;
-            }
-          }
-        }
-
-      }
-
-      if (_psm.compo[_k].dir == '2') {
-
-        if (AnsiMatchStr(map_char[i][j], w_list) == false) {
-          if (_psm.compo[_k].flag == 'false') {
-            if ((_bm_ud == _bma[0]) || (_bm_lr == _bma[1])) {
-              map_char[i][j] = _WC;
-              found_cnt++;
-              //printDebug('C', _k, 'false', i, j, 'changed to', _WC);
-              //printDebug('C' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
-			        //break;
-            }
-          }
-        }
-        if (AnsiMatchStr(map_char[i][j], w_list) == true) {
-          if (_psm.compo[_k].flag == 'true') {
-            if ((_bm_ud == _bma[0]) || (_bm_lr == _bma[1])) {
-              map_char[i][j] = _LC;
-              found_cnt++;
-              //printDebug('D' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
-			        //break;
-            }
-          }
-        }
-
-      }
-
-    }
-
-
-    // check for exiting
-    if (found_cnt == 0) {
-      return false;
-    }
-
-    //return true;
-    // recursion started
-    if ((i - 1 >= 0) && (j - 1 >= 0)) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i - 1, j - 1);
-    }
-
-    if (j - 1 >= 0) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i, j - 1);
-    }
-
-    if ((i + 1) <= (map_col_num - 1) && (j - 1) >= 0) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i + 1, j - 1);
-    }
-
-    if (i - 1 >= 0) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i - 1, j);
-    }
-
-    if ((i + 1) <= (map_col_num - 1)) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i + 1, j);
-    }
-
-    if ((i - 1 >= 0) && (j + 1) <= (map_row_num - 1)) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i - 1, j + 1);
-    }
-
-    if ((j + 1) <= (map_row_num - 1)) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i, j + 1);
-    }
-
-    if ((i + 1) <= (map_col_num - 1) && (j + 1) <= (map_row_num - 1)) {
-      _recursion_depth++;
-      if (_recursion_depth > _limit_recursion_depth) {
-        return false;
-      }
-      smooth_map_char_step_sub(i + 1, j + 1);
-    }
-
-  }
-
   function removeDups(names) {
     var unique = {};
     names.forEach(function(i) {
@@ -1214,112 +947,6 @@ function CSmoothTerrain() {
       return false;
     }
 
-    /*
-    _bm[0] = bm.charAt(1, 1);
-    _bm[1] = bm.charAt(3, 1);
-    _bm[2] = bm.charAt(4, 1);
-    _bm[3] = bm.charAt(6, 1);
-    _bm_ud = _bm[0] + _bm[3];
-    _bm_lr = _bm[1] + _bm[2];
-
-    found_cnt = 0;
-
-    var _psm = bm_pre_smooth;
-    var _flag;
-    var _bma;
-    var _k;
-    var _kk;
-
-    //printDebug(b_list);
-
-    for (var _k = 0; _k <= _psm.compo.length - 1; _k++) {
-      _bma = new Array(_psm.compo[_k].bitmask.length);
-
-      for (_kk = 0; _kk <= _psm.compo[_k].bitmask.length - 1; _kk++) {
-        _bma[_kk] = _psm.compo[_k].bitmask[_kk].bm;
-      }
-
-      if (_psm.compo[_k].dir == '8') {
-
-        if (AnsiMatchStr(map_char[i][j], w_list) == false) {
-          //printDebug(_k, i, j, 'w_list detected');
-          if (_psm.compo[_k].flag == 'false') {
-            //printDebug('--->', _k, 'flag detected', bm, _bma);
-            if (AnsiMatchStr(bm, _bma) == true) {
-              map_char[i][j] = _WC;
-              found_cnt++;
-              //printDebug('A' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
-			        //break;
-            }
-          }
-        }
-        if (AnsiMatchStr(map_char[i][j], w_list) == true) {
-          if (_psm.compo[_k].flag == 'true') {
-            if (AnsiMatchStr(bm, _bma) == true) {
-              map_char[i][j] = _LC;
-              found_cnt++;
-              //printDebug('B' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
-			        //break;
-            }
-          }
-        }
-
-      }
-
-      if (_psm.compo[_k].dir == '2') {
-
-        if (AnsiMatchStr(map_char[i][j], w_list) == false) {
-          if (_psm.compo[_k].flag == 'false') {
-            if ((_bm_ud == _bma[0]) || (_bm_lr == _bma[1])) {
-              map_char[i][j] = _WC;
-              found_cnt++;
-              //printDebug('C', _k, 'false', i, j, 'changed to', _WC);
-              //printDebug('C' + ' ' + _k + ' false' + ' '  + i + ' ' + j + ' changed to ' + _WC);
-			        //break;
-            }
-          }
-        }
-        if (AnsiMatchStr(map_char[i][j], w_list) == true) {
-          if (_psm.compo[_k].flag == 'true') {
-            if ((_bm_ud == _bma[0]) || (_bm_lr == _bma[1])) {
-              map_char[i][j] = _LC;
-              found_cnt++;
-              //printDebug('D' + ' ' + _k + ' true' + ' '  + i + ' ' + j + ' changed to ' + _LC);
-			        //break;
-            }
-          }
-        }
-
-      }
-
-    }
-    */
-
-
-    /*
-    found_cnt = 0;
-
-    if (AnsiMatchStr(map_char[i][j], w_list) == true) {
-      for (_k = 0; _k <= bm_smooth_char.length - 1; _k++) {
-        if ( BitmaskMatchRot(bm, bm_smooth_char, false) == true ) {
-          map_char[i][j] = _LC;  
-          found_cnt++;
-          break;
-        }
-      } 
-    }
-    
-    else if (AnsiMatchStr(map_char[i][j], w_list) == false) {
-      for (_k = 0; _k <= bm_smooth_char.length - 1; _k++) {
-        if ( BitmaskMatchRot(bm, bm_smooth_char, true) == true ) {
-          map_char[i][j] = _WC;  
-          found_cnt++;
-          break;
-        }
-      } 
-    }
-    */
-
     // New optimized smooth_char routine
     found_cnt = 0;
 
@@ -1327,6 +954,7 @@ function CSmoothTerrain() {
       if ( AnsiMatchStr(bm, bm_smooth_char_all_false) == true ) {
         map_char[i][j] = _LC;  
         found_cnt++;
+        _smooth_map_char_cnt++;
       }
     }
   
@@ -1334,6 +962,7 @@ function CSmoothTerrain() {
       if ( AnsiMatchStr(bm, bm_smooth_char_all_true) == true ) {
         map_char[i][j] = _WC;  
         found_cnt++;
+        _smooth_map_char_cnt++;
       }
     }
 
@@ -1439,13 +1068,15 @@ function CSmoothTerrain() {
     //ed = 1;
 
     build_bm_smooth_char_all();
-
+    
+    _smooth_map_char_cnt = 0;
     for (m = st; m <= ed; m++) {
       s_step = m;
       smooth_map_char_step();
 	    printDebug('>> Smooth map char... Step ' + m);
     }
     //showMapChar();
+    printDebug('>> Smooth map char... change count ' + _smooth_map_char_cnt);
   }
 
   function smoothWaterAndLandEach(_bms) {
@@ -1876,15 +1507,26 @@ function CSmoothTerrain() {
     return sr_list;
   }
 
+  function getBM(arr) {
+    s = '';
+    for (var i = 0; i <= arr.length - 1; i++) {
+      s = s + arr[i];
+    }
+    return s;
+  }
+
   function fixMapChar() {
+    //return;
     var i, j;
-    var sr;
+    var sr, _sr1, _sr2;
+    var b, _b1, _b2;
 
     if ( (game_type == 'cf1') && (tile_type == 'jungle') ) {
       
       for (j = 0; j <= map_row_num - 1; j++) {
         for (i = 0; i <= map_col_num - 1; i++) {
           sr = getSurroundCharList(i, j);  
+          b  = getBM(sr);
         
           // if center == '+' and surround == '.' then replace to '#'
           if (map_char[i][j] == '+') {
@@ -1893,12 +1535,14 @@ function CSmoothTerrain() {
             }
           }
 
+          /*
           // if center == '+' and surround == 'T' then replace to '#'
           if (map_char[i][j] == '+') {
             if ( AnsiMatchStr('T', sr ) == true ) {
               map_char[i][j] = '#';
             }
           }
+          */
 
           // if center == 'T' and surround == '.' then replace to '#'
           if (map_char[i][j] == 'T') {
@@ -1907,6 +1551,14 @@ function CSmoothTerrain() {
             }
           }
 
+          // if center == 'T' and surround == '+' then replace to '#'
+          if (map_char[i][j] == 'T') {
+            if ( AnsiMatchStr('+', sr ) == true ) {
+              map_char[i][j] = '#';
+            }
+          }
+
+          ///*
           // Change +(light grass) adjacement .(water) to #(dark grass)
           if (map_char[i][j] == '+') {
             // 0 1 2
@@ -1932,12 +1584,143 @@ function CSmoothTerrain() {
             if ( (sr[4] == '#') && (sr[6] == '#') && (sr[7] == '.') ) {
               map_char[i][j] = '#';
             }
+          }
+
+          // Change T(light grass) adjacement +(light grass) to #(dark grass)
+          if (map_char[i][j] == 'T') {
+            // 0 1 2
+            // 3   4
+            // 5 6 7
+
+            ///*
+            // #: 1, 3 - . : 0 
+            if ( (sr[1] == '#') && (sr[3] == '#') && (sr[0] == '+') ) {
+              map_char[i][j] = '#';
+            }
+          
+            // #: 1, 4 - . : 2 
+            if ( (sr[1] == '#') && (sr[4] == '#') && (sr[2] == '+') ) {
+              map_char[i][j] = '#';
+            }
+
+            // #: 3, 6 - . : 5 
+            if ( (sr[3] == '#') && (sr[6] == '#') && (sr[5] == '+') ) {
+              map_char[i][j] = '#';
+            }
+
+            // #: 4, 6 - . : 7 
+            if ( (sr[4] == '#') && (sr[6] == '#') && (sr[7] == '+') ) {
+              map_char[i][j] = '#';
+            }
 
           }
+
+          ///*
+          // ..##     ..#     .##
+          // #..#  -> #..  +  ..#
+          // ##..     ##.     #..
+          if ( (i < map_col_num - 2) && (map_char[i][j] == '.') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i + 1, j);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '..##.##.') && (_b2 == '.##.##..') ) {
+              map_char[i][j] = '#';  
+              map_char[i + 1][j] = '#';  
+            }
+          }
+
+          // ##..     ##.     #..
+          // #..#  -> #..  +  ..#
+          // ..##     ..#     .##
+          if ( (i < map_col_num - 2) && (map_char[i][j] == '.') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i + 1, j);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '##.#...#') && (_b2 == '#...#.##') ) {
+              map_char[i][j] = '#';  
+              map_char[i + 1][j] = '#';  
+            }
+          }
+
+          // .##     .##     ..#
+          // ..#  -> ..#  +  #..
+          // #..     #..     ##.
+          // ##.     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '.') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '.##.##..') && (_b2 == '..##.##.') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          // ##.     ##.     #..
+          // #..  -> #..  +  ..#
+          // ..#     ..#     .##
+          // .##     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '.') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '##.#...#') && (_b2 == '#....#.##') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          // ??? (Not confirmed)
+          // #..     #..     #..
+          // #..  -> #..  +  ..#
+          // ..#     ..#     ..#
+          // ..#     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '.') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '#..#...#') && (_b2 == '#...#..#') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          //*/
         }        
       }
 
     }
+
+    /*
+    if ( (game_type == 'cf1') && (tile_type == 'jungle') ) {
+      
+      for (j = 0; j <= map_row_num - 1; j++) {
+        for (i = 0; i <= map_col_num - 1; i++) {
+          sr = getSurroundCharList(i, j);  
+          b  = getBM(sr);
+        
+          if (map_char[i][j] == 'T') {
+            //if (b == '########') map_char[i][j] = '#';
+          }
+        }
+      }
+    }
+    */
   }
 
   this.convertMapChar = function(_map_char) {
@@ -1963,6 +1746,9 @@ function CSmoothTerrain() {
     var i, j;
     var time_a, time_b;
 
+    if (programMode == 'release') {
+      OpenFodder.printSmall('SMOOTHING TERRAIN OF ' + String(_w) + ' x ' + String(_h) + ' MAP', 0, 100, true);
+    }
     time_a = new Date();
 
     printDebug('>> SmoothEngine ' + version + ' started');
@@ -2033,9 +1819,15 @@ function CSmoothTerrain() {
     showMapChar('>> Original map char');
 
     for (i = 0; i <= 1; i++) {
-      printDebug('>> SMOOTHING PHASE: ' + String(i));
+      if (programMode == 'release') {
+        OpenFodder.printSmall('PROCESSING STEP ' + String(i + 1), 0, 130 + i * 15, true);
+      }
+
+      printDebug('>>');
+      printDebug('>> SMOOTHING PROCESS: ' + String(i));
 
       printDebug('>> Fixing map char... Started');
+      fixMapChar();
       fixMapChar();
       printDebug('>> Smooth map char... Done');
       showMapChar('>> Fixed map char');
@@ -2054,8 +1846,14 @@ function CSmoothTerrain() {
       printDebug('>> Smooth land and tree... Done');
     }
 
+    if (programMode == 'release') {
+      OpenFodder.printSmall('DONE', 0, 160, true);
+    }
+
     time_b = new Date();
+    printDebug('>>');
     printDebug(">> Elapsed " + (time_b - time_a) / 1000 + " seconds");
+    printDebug('>>');
     return map_tile;
   }
 
