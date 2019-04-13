@@ -1829,7 +1829,7 @@ function CSmoothTerrain() {
       printDebug('>> Fixing map char... Started');
       fixMapChar();
       fixMapChar();
-      printDebug('>> Smooth map char... Done');
+      printDebug('>> Fixing map char... Done');
       showMapChar('>> Fixed map char');
 
 	    printDebug('>> Smooth map char... Started');
