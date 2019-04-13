@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta4';
+const version = '0.70.beta5';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -590,7 +590,14 @@ function pads(n, width) {
 }
 
 function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+  if (programMode == 'debug') {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+  else {
+    var _rnd = Math.floor(Map.getRandomInt(min, max));
+    //printDebug('min = ' + String(min) + ', ' + 'max = ' + String(max) + ', _rnd = ' + String(_rnd));
+    return _rnd;
+  }
 }
 
 // Delphi to JavaScript Syntax Conversion Test
@@ -1747,7 +1754,7 @@ function CSmoothTerrain() {
     var time_a, time_b;
 
     if (programMode == 'release') {
-      OpenFodder.printSmall('SMOOTHING TERRAIN OF ' + String(_w) + ' x ' + String(_h) + ' MAP', 0, 100, true);
+      OpenFodder.printSmall('SMOOTHING TERRAIN FOR ' + String(_w) + ' x ' + String(_h) + ' MAP', 0, 100, true);
     }
     time_a = new Date();
 
@@ -1854,6 +1861,7 @@ function CSmoothTerrain() {
     printDebug('>>');
     printDebug(">> Elapsed " + (time_b - time_a) / 1000 + " seconds");
     printDebug('>>');
+
     return map_tile;
   }
 
