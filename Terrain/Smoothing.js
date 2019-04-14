@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta5';
+const version = '0.70.beta6';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -30,8 +30,9 @@ const programMode = 'release';
 //const isShowMapChar = true;
 const isShowMapChar = false;
 
+// bitmask data for smoothChar
 var bm_smooth_char = [
-  // WC
+  // centter 0 is always char1 (usually water)
   
   // 000
   // 101
@@ -127,6 +128,7 @@ var bm_smooth_char = [
 var bm_smooth_char_all_false;
 var bm_smooth_char_all_true;
 
+// bitmask data for water-darkgrass (jungle tileset)
 var bm_cf1_jungle_water_darkgrass = {
   "bitmask": [
     {"bm":"00000011", "tiles": [ {"tile":"380"} ] },
@@ -162,6 +164,7 @@ var bm_cf1_jungle_water_darkgrass = {
   ]
 };
    
+// bitmask data for lightgrass-darkgrass (jungle tileset)
 var bm_cf1_jungle_lightgrass_darkgrass = {
   "bitmask": [
     {"bm":"00000011", "tiles": [ {"tile":"228"} ] },
@@ -194,6 +197,114 @@ var bm_cf1_jungle_lightgrass_darkgrass = {
     {"bm":"00010110", "tiles": [ {"tile":"205"} ] },
     {"bm":"01101000", "tiles": [ {"tile":"67"}  ] },
     {"bm":"11010000", "tiles": [ {"tile":"68"}  ] }
+  ]
+};
+
+// bitmask data for deepwater-shallowwater (ice tileset)
+var bm_cf1_ice_deepwater_shallowwater = {
+  "bitmask": [
+    {"bm":"00000011", "tiles": [ {"tile":"132"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"103"}, {"tile":"104"} ] }, 
+    {"bm":"00000110", "tiles": [ {"tile":"135"} ] },
+    {"bm":"00001001", "tiles": [ {"tile":"159"} ] },
+    {"bm":"00010100", "tiles": [ {"tile":"158"} ] },
+    {"bm":"00101001", "tiles": [ {"tile":"109"}, {"tile":"110"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"107"}, {"tile":"108"} ] },
+    {"bm":"00101000", "tiles": [ {"tile":"177"} ] },
+    {"bm":"10010000", "tiles": [ {"tile":"176"} ] },
+    {"bm":"01100000", "tiles": [ {"tile":"138"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"105"}, {"tile":"106"} ] },
+    {"bm":"11000000", "tiles": [ {"tile":"137"} ] },
+         
+    {"bm":"11110000", "tiles": [ {"tile":"136"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"105"}, {"tile":"106"} ] }, 
+    {"bm":"11101000", "tiles": [ {"tile":"139"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"156"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"157"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"107"}, {"tile":"108"} ] },
+    {"bm":"01101001", "tiles": [ {"tile":"109"}, {"tile":"110"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"178"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"179"} ] },
+    {"bm":"10010110", "tiles": [ {"tile":"134"} ] },
+    {"bm":"00101011", "tiles": [ {"tile":"103"}, {"tile":"104"} ] },
+    {"bm":"00010111", "tiles": [ {"tile":"133"} ] },
+         
+    {"bm":"00001011", "tiles": [ {"tile":"119"} ] },
+    {"bm":"00010110", "tiles": [ {"tile":"118"} ] },
+    {"bm":"01101000", "tiles": [ {"tile":"117"} ] },
+    {"bm":"11010000", "tiles": [ {"tile":"116"} ] }
+  ]
+};
+
+// bitmask data for wetice-shallowwater (ice tileset)
+var bm_cf1_ice_wetice_shallowwater = {
+  "bitmask": [
+    {"bm":"00000011", "tiles": [ {"tile":"82"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"85"} ] }, 
+    {"bm":"00000110", "tiles": [ {"tile":"87"} ] },
+    {"bm":"00001001", "tiles": [ {"tile":"131"} ] },
+    {"bm":"00010100", "tiles": [ {"tile":"129"} ] },
+    {"bm":"00101001", "tiles": [ {"tile":"112"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"113"} ] },
+    {"bm":"00101000", "tiles": [ {"tile":"150"} ] },
+    {"bm":"10010000", "tiles": [ {"tile":"148"} ] },
+    {"bm":"01100000", "tiles": [ {"tile":"94"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"96"} ] },
+    {"bm":"11000000", "tiles": [ {"tile":"99"} ] },
+         
+    {"bm":"11110000", "tiles": [ {"tile":"98"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"96"} ] }, 
+    {"bm":"11101000", "tiles": [ {"tile":"95"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"128"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"130"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"113"} ] },
+    {"bm":"01101001", "tiles": [ {"tile":"112"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"149"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"151"} ] },
+    {"bm":"10010110", "tiles": [ {"tile":"86"} ] },
+    {"bm":"00101011", "tiles": [ {"tile":"85"} ] },
+    {"bm":"00010111", "tiles": [ {"tile":"83"} ] },
+         
+    {"bm":"00001011", "tiles": [ {"tile":"80"}, {"tile":"81"} ] },
+    {"bm":"00010110", "tiles": [ {"tile":"88"}, {"tile":"89"} ] },
+    {"bm":"01101000", "tiles": [ {"tile":"92"}, {"tile":"93"} ] },
+    {"bm":"11010000", "tiles": [ {"tile":"90"}, {"tile":"91"} ] }
+  ]
+};
+
+// bitmask data for dryice-wetice (ice tileset)
+var bm_cf1_ice_dryice_wetice = {
+  "bitmask": [
+    {"bm":"00000011", "tiles": [ {"tile":"5"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"7"} ] }, 
+    {"bm":"00000110", "tiles": [ {"tile":"9"} ] },
+    {"bm":"00001001", "tiles": [ {"tile":"22"} ] },
+    {"bm":"00010100", "tiles": [ {"tile":"24"} ] },
+    {"bm":"00101001", "tiles": [ {"tile":"62"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"63"} ] },
+    {"bm":"00101000", "tiles": [ {"tile":"43"} ] },
+    {"bm":"10010000", "tiles": [ {"tile":"45"} ] },
+    {"bm":"01100000", "tiles": [ {"tile":"15"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"17"} ] },
+    {"bm":"11000000", "tiles": [ {"tile":"19"} ] },
+         
+    {"bm":"11110000", "tiles": [ {"tile":"18"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"17"} ] }, 
+    {"bm":"11101000", "tiles": [ {"tile":"16"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"25"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"23"} ] },
+    {"bm":"11010100", "tiles": [ {"tile":"63"} ] },
+    {"bm":"01101001", "tiles": [ {"tile":"62"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"44"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"42"} ] },
+    {"bm":"10010110", "tiles": [ {"tile":"8"} ] },
+    {"bm":"00101011", "tiles": [ {"tile":"7"} ] },
+    {"bm":"00010111", "tiles": [ {"tile":"6"} ] },
+         
+    {"bm":"00001011", "tiles": [ {"tile":"3"}, {"tile":"4"} ] },
+    {"bm":"00010110", "tiles": [ {"tile":"10"}, {"tile":"11"} ] },
+    {"bm":"01101000", "tiles": [ {"tile":"14"} ] },
+    {"bm":"11010000", "tiles": [ {"tile":"12"}, {"tile":"13"} ] }
   ]
 };
 
@@ -711,8 +822,8 @@ function CSmoothTerrain() {
       for (j = 0; j <= map_row_num - 1; j++) {
         for (k = 0; k <= level_num - 1; k++) {
 
-          if ((map_level[i][j] >= _range[k]) &&
-            (map_level[i][j] < _range[k + 1])) {
+          if ( (map_level[i][j] >= _range[k]) &&
+               (map_level[i][j] <  _range[k + 1]) ) {
             map_char[i][j] = level[k].char;
             break;
           }
@@ -927,7 +1038,7 @@ function CSmoothTerrain() {
     //console.log(bm_smooth_char_all_false);
     //console.log(bm_smooth_char_all_true);
     printDebug(
-      '>> Smooth char patterns generated: ' + 
+      '>> Smoothing char patterns generated: ' + 
       String(bm_smooth_char_all_false.length + bm_smooth_char_all_true.length) + ' ' + 'from ' +
       String(bm_smooth_char.length) + ' base patterns'
     );
@@ -1080,10 +1191,10 @@ function CSmoothTerrain() {
     for (m = st; m <= ed; m++) {
       s_step = m;
       smooth_map_char_step();
-	    printDebug('>> Smooth map char... Step ' + m);
+	    printDebug('>> Smoothing map char... Step ' + m);
     }
     //showMapChar();
-    printDebug('>> Smooth map char... change count ' + _smooth_map_char_cnt);
+    printDebug('>> Smoothing map char... change count ' + _smooth_map_char_cnt);
   }
 
   function smoothWaterAndLandEach(_bms) {
@@ -1181,7 +1292,7 @@ function CSmoothTerrain() {
         }
         s_step = m;
         smoothWaterAndLandEach(_bms);
-	      printDebug('>> Smooth water and land... Step ' + m);
+	      printDebug('>> Smoothing water and land... Step ' + m);
       }
 
       //printDebug('---');
@@ -1535,7 +1646,9 @@ function CSmoothTerrain() {
           sr = getSurroundCharList(i, j);  
           b  = getBM(sr);
         
-          // if center == '+' and surround == '.' then replace to '#'
+          // for exception in case not continuing map char issue (sequence: upper to lower order)
+          //  ( . # + # T )
+          // -- if center == '+' and surround == '.' then replace to '#'
           if (map_char[i][j] == '+') {
             if ( AnsiMatchStr('.', sr ) == true ) {
               map_char[i][j] = '#';
@@ -1543,7 +1656,7 @@ function CSmoothTerrain() {
           }
 
           /*
-          // if center == '+' and surround == 'T' then replace to '#'
+          // -- if center == '+' and surround == 'T' then replace to '#'
           if (map_char[i][j] == '+') {
             if ( AnsiMatchStr('T', sr ) == true ) {
               map_char[i][j] = '#';
@@ -1551,23 +1664,27 @@ function CSmoothTerrain() {
           }
           */
 
-          // if center == 'T' and surround == '.' then replace to '#'
+          // -- if center == 'T' and surround == '.' then replace to '#'
           if (map_char[i][j] == 'T') {
             if ( AnsiMatchStr('.', sr ) == true ) {
               map_char[i][j] = '#';
             }
           }
 
-          // if center == 'T' and surround == '+' then replace to '#'
+          // -- if center == 'T' and surround == '+' then replace to '#'
           if (map_char[i][j] == 'T') {
             if ( AnsiMatchStr('+', sr ) == true ) {
               map_char[i][j] = '#';
             }
           }
 
+          // for exception in case diagonal map char issue
           ///*
           // Change +(light grass) adjacement .(water) to #(dark grass)
           if (map_char[i][j] == '+') {
+            // .#
+            // #+ 
+
             // 0 1 2
             // 3   4
             // 5 6 7
@@ -1595,6 +1712,9 @@ function CSmoothTerrain() {
 
           // Change T(light grass) adjacement +(light grass) to #(dark grass)
           if (map_char[i][j] == 'T') {
+            // +#
+            // #T 
+
             // 0 1 2
             // 3   4
             // 5 6 7
@@ -1622,6 +1742,7 @@ function CSmoothTerrain() {
 
           }
 
+          // for exception, 2 lines diagonal passage
           ///*
           // ..##     ..#     .##
           // #..#  -> #..  +  ..#
@@ -1707,6 +1828,129 @@ function CSmoothTerrain() {
             }
           }
 
+          // ??? (Not confirmed)
+          // ..#     ..#     ..#
+          // ..#  -> ..#  +  #..
+          // #..     #..     #..
+          // #..     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '.') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '..#.##..') && (_b2 == '..##.#..') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          //*/
+          
+          // ****** NEW ******
+          ///*
+          // ++##     ++#     +##
+          // #++#  -> #++  +  ++#
+          // ##++     ##+     #++
+          if ( (i < map_col_num - 2) && (map_char[i][j] == '+') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i + 1, j);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '++##+##+') && (_b2 == '+##+##++') ) {
+              map_char[i][j] = '#';  
+              map_char[i + 1][j] = '#';  
+            }
+          }
+
+          // ##++     ##+     #++
+          // #++#  -> #++  +  ++#
+          // ++##     ++#     +##
+          if ( (i < map_col_num - 2) && (map_char[i][j] == '+') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i + 1, j);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '##+#+++#') && (_b2 == '#+++#+##') ) {
+              map_char[i][j] = '#';  
+              map_char[i + 1][j] = '#';  
+            }
+          }
+
+          // +##     +##     ++#
+          // ++#  -> ++#  +  #++
+          // #++     #++     ##+
+          // ##+     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '+') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '+##+##++') && (_b2 == '++##+##+') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          // ##+     ##+     #++
+          // #++  -> #++  +  ++#
+          // ++#     ++#     +##
+          // +##     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '+') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '##+#+++#') && (_b2 == '#++++#+##') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          // ??? (Not confirmed)
+          // #++     #++     #++
+          // #++  -> #++  +  ++#
+          // ++#     ++#     ++#
+          // ++#     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '+') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '#++#+++#') && (_b2 == '#+++#++#') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
+
+          // ??? (Not confirmed)
+          // ++#     ++#     ++#
+          // ++#  -> ++#  +  #++
+          // #++     #++     #++
+          // #++     
+          if ( (j < map_row_num - 2) && (map_char[i][j] == '+') ) {
+            _sr1 = getSurroundCharList(i, j);  
+            _b1  = getBM(_sr1);  
+
+            _sr2 = getSurroundCharList(i, j + 1);  
+            _b2  = getBM(_sr2);
+            
+            if ( (_b1 == '++#+##++') && (_b2 == '++##+#++') ) {
+              map_char[i][j] = '#';  
+              map_char[i][j + 1] = '#';  
+            }
+          }
           //*/
         }        
       }
@@ -1839,18 +2083,18 @@ function CSmoothTerrain() {
       printDebug('>> Fixing map char... Done');
       showMapChar('>> Fixed map char');
 
-	    printDebug('>> Smooth map char... Started');
+	    printDebug('>> Smoothing map char... Started');
       smoothMapChar();
-      printDebug('>> Smooth map char... Done');
+      printDebug('>> Smoothing map char... Done');
       showMapChar('>> Smoothed map char');
 
-	    printDebug('>> Smooth water and land... Started');
+	    printDebug('>> Smoothing water and land... Started');
       smoothWaterAndLand();
-	    printDebug('>> Smooth water and land... Done');
+	    printDebug('>> Smoothing water and land... Done');
  
-	    printDebug('>> Smooth land and tree... Started');
+	    printDebug('>> Smoothing land and tree... Started');
       smoothLandAndTree();
-      printDebug('>> Smooth land and tree... Done');
+      printDebug('>> Smoothing land and tree... Done');
     }
 
     if (programMode == 'release') {
