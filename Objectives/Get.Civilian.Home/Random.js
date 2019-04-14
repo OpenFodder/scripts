@@ -50,8 +50,9 @@ Objectives.GetCivilianHome.CreateHome = function() {
 }
 
 Objectives.GetCivilianHome.Random = function(pCount) {
-	
-	this.CreateCivilian();
+
+	for( var count = 0; count < pCount; ++count)
+		this.CreateCivilian();
+
 	this.CreateHome();
-	// TODO
 };

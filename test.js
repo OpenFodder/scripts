@@ -9,20 +9,25 @@ function createRandom() {
 
 	Background.Random( Settings.GetBackgroundObjectCount() );
 
-	Objectives.KillAllEnemy.Random(Settings.GetEnemyCount());
+	// Randomize kill all enemy?
+	if(Settings.hasObjective(Objectives.KillAllEnemy))
+		Objectives.KillAllEnemy.Random(Settings.GetEnemyCount());
 
-	Objectives.DestroyEnemyBuildings.Random(Settings.GetEnemyBuildingCount());
+	// Randomsize Destroy enemy buildings
+	if(Settings.hasObjective(Objectives.DestroyEnemyBuildings))
+		Objectives.DestroyEnemyBuildings.Random(Settings.GetEnemyBuildingCount());
 
-	for(var x = 0; x < Settings.GetHostageCount(); ++x) {
-		Objectives.RescueHostages.Random(Settings.GetHostageGroupSize());
+	// Random Rescue Hostages
+	if(Settings.hasObjective(Objectives.RescueHostages)) {
+		for(var x = 0; x < Settings.GetHostageCount(); ++x) {
+			Objectives.RescueHostages.Random(Settings.GetHostageGroupSize());
+		}
 	}
 
-	Objectives.GetCivilianHome.Random();
-
-	Objectives.AddRequired(Objectives.KillAllEnemy);
-	Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
-	Objectives.AddRequired(Objectives.RescueHostages);
-	//Objectives.AddRequired(Objectives.ProtectCivilians);
+	// Random Get Civilian home
+	if(Settings.hasObjective(Objectives.GetCivilianHome)) {
+		Objectives.GetCivilianHome.Random();
+	}
 
 	Weapons.RandomGrenades(Settings.GetMinimumGrenades());
 	Weapons.RandomRockets(Settings.GetMinimumRockets() / 2);
@@ -56,7 +61,7 @@ function createPhases(pCount) {
 /**
  * Create a number of missions
  * 
- * @param {number} pMissions 
+ * @param {number} pMissions
  * @param {Array<number>} pPhases Number of phases per mission to create
  */
 function createMissions(pMissions, pPhases) {
@@ -70,23 +75,14 @@ function createMissions(pMissions, pPhases) {
 
 function createSmallMap() {
 	var Phase = OpenFodder.getNextPhase();
-	Map.Create( 40,30 , Terrain.Types.Ice, 0);
-	Terrain.Randomize();
 
-	Human.RandomXY(3);
-	Objectives.KillAllEnemy.Random(2);
-	Objectives.DestroyEnemyBuildings.Random(2);
-	//Objectives.RescueHostages.Random(1);
-	Objectives.GetCivilianHome.Random();
+	Settings.Width = 40;
+	Settings.Height = 30;
+	Settings.Terrain =Terrain.Types.Ice;
 
-	Objectives.AddRequired(Objectives.KillAllEnemy);
-	//Objectives.AddRequired(Objectives.DestroyEnemyBuildings);
-	//Objectives.AddRequired(Objectives.RescueHostages);
-	//Objectives.AddRequired(Objectives.GetCivilianHome);
+	Settings.Objectives = [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings];
 
-	Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
-
-	Validation.ValidateMap();
+	createPhases(1);
 }
 
 // Reset the map session

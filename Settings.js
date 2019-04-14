@@ -24,6 +24,11 @@ var Settings = {
     },
 
     /**
+     * @var {Array<number>} Objectives
+     */
+    Objectives: [],
+
+    /**
      * @var {string}
      */
     TerrainAlgorithm: "islands",
@@ -81,8 +86,42 @@ var Settings = {
         this.TerrainAlgorithm = "islands";
         this.TerrainType = Terrain.Types.Jungle;
 
+        this.RandomObjectives();
+
         // Randomise the terrain algorithm settings
         this.RandomNoise();
+    },
+
+    /**
+     * Set random objectives
+     */
+    RandomObjectives: function() {
+        this.Objectives = [];
+
+        this.addObjective(Objectives.KillAllEnemy);
+	    this.addObjective(Objectives.DestroyEnemyBuildings);
+        this.addObjective(Objectives.RescueHostages);
+        this.addObjective(Objectives.GetCivilianHome);
+
+        Objectives.AddSet( this.Objectives );
+    },
+
+    /**
+     * Add an objective
+     * 
+     * @param {object} pObjective
+     */
+    addObjective: function(pObjective) {
+        this.Objectives.push(pObjective.ID);
+    },
+
+    /**
+     * Do we have this objective
+     *
+     * @param {number} pObjective
+     */
+    hasObjective: function(pObjective) {
+        return this.Objectives.indexOf(pObjective.ID) != -1;
     },
 
     /**

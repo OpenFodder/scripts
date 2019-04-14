@@ -39,7 +39,20 @@ var Objectives = {
 	 * 
 	 * @param {object} pObjective 
 	 */
-	AddRequired: function(pObjective) {
-		Phase.ObjectiveAdd(pObjective.ID);
+	Add: function(pObjective) {
+		Engine.getPhase().ObjectiveAdd(pObjective);
+	},
+
+	/**
+	 *
+	 * @param {Array<Number>} pObjectives
+	 */
+	AddSet: function(pObjectives) {
+		Engine.getPhase().ObjectivesClear();
+
+		for( var x = 0; x < pObjectives.length; ++x) {
+			this.Add(pObjectives[x]);
+		}
 	}
+
 };
