@@ -5,10 +5,9 @@
 function createRandom() {
 	Session.Reset();
 
-	Human.RandomXY(3);
-	Background.RandomPalms(10);
-	Background.RandomBushes1(10);
-	Background.RandomBlooms(5);
+	Human.RandomXY(Settings.GetPlayerCount());
+
+	Background.Random( Settings.GetBackgroundObjectCount() );
 
 	Objectives.KillAllEnemy.Random(Settings.GetEnemyCount());
 

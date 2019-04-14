@@ -72,7 +72,7 @@ var Settings = {
         this.Height = Map.getRandomInt(40, 150);
 
         this.Aggression.Min = Map.getRandomInt(2, 4);
-        this.Aggression.Max = Map.getRandomInt(4, 8);
+        this.Aggression.Max = Map.getRandomInt(this.Aggression.Min, 8);
 
         // TODO: Random this
         this.TerrainAlgorithm = "islands";
@@ -92,7 +92,7 @@ var Settings = {
 
         this.TerrainSettings = {
             lev_limits: [0.20, 0.23, 0.55, 0.65, 1.00],
-            //lev_limits: [0.17, 0.25, 0.35, 0.45, 1.00],   Old values
+            //lev_limits: [0.17, 0.25, 0.35, 0.45, 1.00],   //Old values
 
             Octaves: 4,
             Roughness: Map.getRandomFloat(0.01, 0.3),
@@ -195,6 +195,24 @@ var Settings = {
         return Map.DiamondSquare();
     },
 
+    /**
+     * Number of players
+     */
+    GetPlayerCount: function() {
+        return Map.getRandomInt(1,8);
+    },
+
+    /**
+     * Return the background item count
+     */
+    GetBackgroundObjectCount: function() {
+
+        return {
+            Palms: 10,
+            Bushes1: 10,
+            Blooms: 5
+        };
+    },
     /**
      * Calculate the number of hostages to create
      */

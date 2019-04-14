@@ -101,5 +101,16 @@ var Background = {
                 
             }
         }
+    },
+
+    /**
+     * 
+     * @param {Array<Array<number>>} pCounts
+     */
+    Random: function(pCounts) {
+
+        this.RandomPalms(pCounts.Palms);
+        this.RandomBushes1(pCounts.Bushes1);
+        this.RandomBlooms(pCounts.Blooms);
     }
 }
