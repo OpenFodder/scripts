@@ -81,6 +81,7 @@ var Settings = {
         this.TerrainAlgorithm = "islands";
         this.TerrainType = Terrain.Types.Jungle;
 
+        // Randomise the terrain algorithm settings
         this.RandomNoise();
     },
 
@@ -199,26 +200,38 @@ var Settings = {
      */
     GetHostageCount: function() {
 
-        // TODO: Algorithm to decide number of hostages
+        // TODO: Algorithm to decide number of hostage group
         return 4;
     },
 
+    /**
+     * Number of hostages per placement
+     */
     GetHostageGroupSize: function() {
-        // TODO: Algorithm to decide number of hostages
+        // TODO: Algorithm to decide number of hostages per group
         return 1;
     },
 
+    /**
+     * Number of enemies which should be placed
+     */
     GetEnemyCount: function() {
-        // TODO: Algorithm to decide number of hostages
+        // TODO: Algorithm to decide number of enemys
         return 10;
 
     },
 
+    /**
+     * Number of enemy buildings to be placed
+     */
     GetEnemyBuildingCount: function() {
-        // TODO: Algorithm to decide number of hostages
+        // TODO: Algorithm to decide number of buildings
         return 2;
     },
 
+    /**
+     * Minimum number of grenades required for this mission
+     */
     GetMinimumGrenades: function() {
         return 1 + (Session.TotalStructures() / 4);
     },
