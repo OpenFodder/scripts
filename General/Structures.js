@@ -182,6 +182,20 @@ var Structures = {
                 }
             }
         }
+    },
+
+    /**
+     * 
+     * @param {object} pBuildings
+     */
+    PlaceBuildings: function(pBuildings) {
+
+        for (var building in pBuildings) {
+            for(var sprite in pBuildings[building]) {
+                Structures.PlaceRandom(building, sprite, pBuildings[building][sprite]);
+            };
+        };
+
     }
 
 };

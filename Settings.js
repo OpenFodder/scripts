@@ -101,7 +101,7 @@ var Settings = {
         this.addObjective(Objectives.KillAllEnemy);
 	    this.addObjective(Objectives.DestroyEnemyBuildings);
         this.addObjective(Objectives.RescueHostages);
-        //this.addObjective(Objectives.GetCivilianHome);
+        this.addObjective(Objectives.GetCivilianHome);
     },
 
     /**
@@ -299,10 +299,32 @@ var Settings = {
      */
     GetEnemyBuildingCount: function() {
         // TODO: Algorithm to decide number of buildings
+
         return {
-                    "barracks": {"soldier": 2},
-                    "bunker": {"soldier": 1}
+                    "barracks": {
+                        "soldier": 2,
+                        "soldier_reinforced": 0
+                    },
+                    "bunker":   {
+                        "soldier": 0
+                    },
+                    "hut":      {
+                        "soldier": 0
+                    },
                 };
+    },
+
+    /**
+     * Get the civilian buildings to be placed
+     */
+    GetCivilianBuildingCount: function() {
+        return {
+            "hut":  {
+                "civilian": 3,
+                "civilian_spear": 1,
+                "civilian_rescue": 0
+            },
+        };
     },
 
     /**
