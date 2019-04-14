@@ -101,14 +101,25 @@ var Settings = {
         this.addObjective(Objectives.KillAllEnemy);
 	    this.addObjective(Objectives.DestroyEnemyBuildings);
         this.addObjective(Objectives.RescueHostages);
-        this.addObjective(Objectives.GetCivilianHome);
+        //this.addObjective(Objectives.GetCivilianHome);
+    },
 
-        Objectives.AddSet( this.Objectives );
+    /**
+     * St the phase objectives
+     *
+     * @param {Array<object>} pObjectives
+     */
+    setObjectives: function(pObjectives) {
+        this.Objectives = [];
+
+        for(var x = 0; x < pObjectives.length; ++x) {
+            this.addObjective(pObjectives[x]);
+        }
     },
 
     /**
      * Add an objective
-     * 
+     *
      * @param {object} pObjective
      */
     addObjective: function(pObjective) {
@@ -122,6 +133,11 @@ var Settings = {
      */
     hasObjective: function(pObjective) {
         return this.Objectives.indexOf(pObjective.ID) != -1;
+    },
+
+    setPhaseObjectives: function() {
+
+        Objectives.AddSet( this.Objectives );
     },
 
     /**
@@ -283,7 +299,10 @@ var Settings = {
      */
     GetEnemyBuildingCount: function() {
         // TODO: Algorithm to decide number of buildings
-        return 2;
+        return {
+                    "barracks": {"soldier": 2},
+                    "bnker": {"soldier": 1}
+                };
     },
 
     /**

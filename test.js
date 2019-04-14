@@ -80,7 +80,8 @@ function createSmallMap() {
 	Settings.Height = 30;
 	Settings.Terrain =Terrain.Types.Ice;
 
-	Settings.Objectives = [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings];
+	Settings.Objectives = [];
+	Settings.setObjectives( [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings, Objectives.GetCivilianHome] );
 
 	createPhases(1);
 }
@@ -97,8 +98,6 @@ createPhases(1);
 //createSmallMap();
 // Random Terrain
 //createPhases(1, Map.getRandomInt(0, 4) );
-
-
 
 // Some Fun
 /*

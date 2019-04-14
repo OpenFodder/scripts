@@ -45,6 +45,8 @@ var Validation = {
         if(Session.HelicopterMinimum >= 0)
             Session.Helicopter = Helicopters.Human.Random(SpriteTypes.Helicopter_Grenade_Human + Session.HelicopterMinimum);
 
+        // Ensure objectives are set in the phase
+        Settings.setPhaseObjectives();
     },
 
     /**
@@ -65,7 +67,7 @@ var Validation = {
         }
 
         // TODO: Check objective and see if destroy all buildings is set
-        
+
         // Can we walk to enough grenades?
         if(canWalkTo >= Session.RequiredMinimumGrenades())
             return;
