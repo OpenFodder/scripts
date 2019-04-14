@@ -47,6 +47,7 @@ var OpenFodder = {
     },
     
     /**
+     * Print a string using the small font
      * 
      * @param {string} pText 
      * @param {number} pX X location to draw (0 will centre)

@@ -34,7 +34,19 @@ var Session = {
         /**
          * @var {Array<cPosition>} LittleShrub2Positions
          */
-        LittleShrub2Positions: []
+        LittleShrub2Positions: [],
+
+        /**
+         * Reset to defaults
+         */
+        Reset: function() {
+            this.BloomPositions = [];
+            this.Bush1Positions = [];
+            this.Bush2Positions = [];
+            this.LittleShrub1Positions = [];
+            this.LittleShrub2Positions = [];
+            this.TreePositions = [];
+        }
     },
 
     /**
@@ -51,6 +63,11 @@ var Session = {
      * @var {Array<cPosition>} BarracksPositions
      */
     BarracksPositions: [],
+
+    /**
+     * @var {Array<cPosition>} BunkerPositions
+     */
+    BunkerPositions: [],
 
     /**
      * @var {Array<cPosition>} HutPositions
@@ -84,19 +101,16 @@ var Session = {
      */
     Reset: function(pSeed) {
         this.BarracksPositions = [];
+        this.BunkerPositions = [];
         this.HutPositions = [];
+
         this.HostageGroupPositions = [];
         this.RescueTentPosition = new cPosition(0, 0);
         this.Helicopter = null;
         this.HelicopterMinimum = -1;
         this.HumanPosition = new cPosition(0, 0);
 
-        this.Background.BloomPositions = [];
-        this.Background.Bush1Positions = [];
-        this.Background.Bush2Positions = [];
-        this.Background.LittleShrub1Positions = [];
-        this.Background.LittleShrub2Positions = [];
-        this.Background.TreePositions = [];
+        this.Background.Reset();
 
         if (pSeed !== undefined)
             Engine.getMap().seed = pSeed;

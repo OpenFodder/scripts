@@ -1,53 +1,33 @@
 var Structures = {
-
     Jungle: {
-        Hut: {
-
-        },
-
-        Barracks: {
-
-        }
+        Hut: {},
+        Barracks: {},
+        Bunker: {}
     },
-
     Desert: {
-        Hut: {
-
-        },
-
-        Barracks: {
-
-        }
+        Hut: {},
+        Barracks: {},
+        Bunker: {}
     },
-
     Ice: {
-        Hut: {
-
-        },
-
-        Barracks: {
-
-        }
+        Hut: {},
+        Barracks: {},
+        Bunker: {}
     },
-
     Moors: {
-        Hut: {
-
-        },
-
-        Barracks: {
-
-        }
+        Hut: {},
+        Barracks: {},
+        Bunker: {}
     },
-
     Interior: {
-        Hut: {
-
-        },
-
-        Barracks: {
-
-        }
+        Hut: {},
+        Barracks: {},
+        Bunker: {}
+    },
+    AmigaFormat: {
+        Hut: {},
+        Barracks: {},
+        Bunker: {}
     },
 
     /**
@@ -87,6 +67,9 @@ var Structures = {
             case "huts":
                 return Session.HutPositions;
 
+            case "bunker":
+                return Session.BunkerPositions;
+
             default:
                 return [];
         }
@@ -94,7 +77,7 @@ var Structures = {
 
     /**
      * Place a structure
-     * 
+     *
      * @param {cPosition} pPosition 
      * @param {sStructure} pStructure 
      * @param {string} pSpriteSet
@@ -150,6 +133,18 @@ var Structures = {
     },
 
     /**
+     * Place a bunker
+     *
+     * @param {cPosition} pPosition
+     * @param {string} pSpriteSet
+     */
+    PlaceBunker: function(pPosition, pSpriteSet) {
+        Struct = this.GetCurrent();
+        this.Place(pPosition, Struct.Bunker, pSpriteSet);
+        Session.BunkerPositions.push(pPosition);
+    },
+
+    /**
      *
      * Place a number of 'pStructType' at random locations, at a minimum of 'pMinDistance' from each other
      *
@@ -159,11 +154,12 @@ var Structures = {
      * @param {number} pMinDistance
      */
     PlaceRandom: function(pStructType, pSpriteType, pCount, pMinDistance) {
-
         if(pMinDistance === undefined)
             pMinDistance = 250;
 
         for(var x = 0; x < pCount; ++x) {
+
+            // Get the positions of the existing similar type structures
             existingPositions = this.GetStructPositions(pStructType);
             position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, pMinDistance);
 
@@ -175,17 +171,17 @@ var Structures = {
                     case "barracks":
                         this.Place(position, Struct.Barracks, pSpriteType);
                         break;
-
                     case "hut":
                         this.Place(position, Struct.Hut, pSpriteType);
                         break;
-
+                    case "bunker":
+                        this.Place(position, Struct.Bunker, pSpriteType);
+                        break;
                     default:
                         break;
                 }
             }
         }
-
     }
 
 };
