@@ -64,6 +64,8 @@ var Validation = {
             }
         }
 
+        // TODO: Check objective and see if destroy all buildings is set
+        
         // Can we walk to enough grenades?
         if(canWalkTo >= Session.RequiredMinimumGrenades())
             return;

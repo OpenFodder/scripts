@@ -10,14 +10,14 @@ function createRandom() {
 	Background.RandomBushes1(10);
 	Background.RandomBlooms(5);
 
-	Objectives.KillAllEnemy.Random(10);
+	Objectives.KillAllEnemy.Random(Settings.GetEnemyCount());
 
-	Objectives.DestroyEnemyBuildings.Random(2);
+	Objectives.DestroyEnemyBuildings.Random(Settings.GetEnemyBuildingCount());
 
-	Objectives.RescueHostages.Random(1);
-	Objectives.RescueHostages.Random(1);
-	Objectives.RescueHostages.Random(1);
-	Objectives.RescueHostages.Random(1);
+	for(var x = 0; x < Settings.GetHostageCount(); ++x) {
+		Objectives.RescueHostages.Random(Settings.GetHostageGroupSize());
+	}
+
 	Objectives.GetCivilianHome.Random();
 
 	Objectives.AddRequired(Objectives.KillAllEnemy);
@@ -25,8 +25,8 @@ function createRandom() {
 	Objectives.AddRequired(Objectives.RescueHostages);
 	//Objectives.AddRequired(Objectives.ProtectCivilians);
 
-	Weapons.RandomGrenades(Session.RequiredMinimumGrenades());
-	Weapons.RandomRockets(Session.RequiredMinimumRockets() / 2);
+	Weapons.RandomGrenades(Settings.GetMinimumGrenades());
+	Weapons.RandomRockets(Settings.GetMinimumRockets() / 2);
 
 	Validation.ValidateMap();
 }

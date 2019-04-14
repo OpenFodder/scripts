@@ -74,6 +74,7 @@ var Settings = {
         this.Aggression.Min = Map.getRandomInt(2, 4);
         this.Aggression.Max = Map.getRandomInt(4, 8);
 
+        // TODO: Random this
         this.TerrainAlgorithm = "islands";
         this.TerrainType = Map.getRandomInt(Terrain.Types.Jungle, Terrain.Types.Interior);
 
@@ -192,4 +193,37 @@ var Settings = {
     GetDiamondSquare: function() {
         return Map.DiamondSquare();
     },
+
+    /**
+     * Calculate the number of hostages to create
+     */
+    GetHostageCount: function() {
+
+        // TODO: Algorithm to decide number of hostages
+        return 4;
+    },
+
+    GetHostageGroupSize: function() {
+        // TODO: Algorithm to decide number of hostages
+        return 1;
+    },
+
+    GetEnemyCount: function() {
+        // TODO: Algorithm to decide number of hostages
+        return 10;
+
+    },
+
+    GetEnemyBuildingCount: function() {
+        // TODO: Algorithm to decide number of hostages
+        return 2;
+    },
+
+    GetMinimumGrenades: function() {
+        return 1 + (Session.TotalStructures() / 4);
+    },
+
+    GetMinimumRockets: function() {
+        return 1 + (Session.TotalStructures() / 4);
+    }
 };
