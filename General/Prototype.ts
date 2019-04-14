@@ -45,6 +45,7 @@ interface cCampaign {
  * A map
  */
 interface cMap {
+    seed: number;
 
     /**
      * Save to disk
@@ -72,7 +73,7 @@ interface cMap {
      * @param pOctaves 
      * @param pRoughness 
      * @param pScale 
-     * @param pSeed 
+     * @param pSeed
      * @param pRadialEnabled 
      * @param pEdgeFade 
      */
@@ -87,11 +88,6 @@ interface cMap {
      * @param pPersistence 
      */
     SimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistence): Array<Array<number>>;
-
-    /**
-     * Get the starting random seed
-     */
-    getSeed(): number;
 
     /**
      * Get the current tile type

@@ -11,7 +11,7 @@ var Weapons = {
         if(pWalkable === undefined)
             pWalkable = false;
 
-        for(count = 0; count < pCount; ++count ) {
+        for(var count = 0; count < pCount; ++count ) {
             if(pWalkable)
                 Position = Positioning.RandomWalkable(SpriteTypes.Player, Session.HumanPosition);
             else
@@ -30,13 +30,13 @@ var Weapons = {
         if(pWalkable === undefined)
             pWalkable = false;
 
-        for(count = 0; count < pCount; ++count ) {
+        for(var count = 0; count < pCount; ++count ) {
             if(pWalkable)
                 Position = Positioning.RandomWalkable(SpriteTypes.Player, Session.HumanPosition);
             else
                 Position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1, true);
                 
-            Map.SpriteAdd( SpriteTypes.GrenadeBox, Position.x, Position.y );
+            Map.SpriteAdd( SpriteTypes.RocketBox, Position.x, Position.y );
         }
     }
 }

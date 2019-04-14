@@ -130,43 +130,16 @@ var Terrain = {
 	 */
 	Randomize: function() {
 
-		// TODO: Rotate through available random functions
-		//pScale = Map.getRandomFloat(0.01, 0.1);
-		pLacunarity = Map.getRandomFloat(0.01, 0.5);
-		pPersistance = Map.getRandomFloat(0.01, 1.);	// higher produces more trees
-		//return this.RandomSimplexNoise(pScale, pLacunarity, pPersistance, 5 );
-		pOctaves = 4;
-		pRoughness = Map.getRandomFloat(0.01, 0.3);
-		pScale = Map.getRandomFloat(0.02, 0.04);
-		pSeed = Map.getRandomInt(0, 255);
-		pEdgeFade = Map.getRandomFloat(0.00, 0.2);
-		if (Map.getRandomInt(0,1) == 0)
-			pRadialEnabled = false;
-		else
-			pRadialEnabled = true;
-
 		if(Map.getTileType() == this.Types.Jungle) {
-			//var lev_limits = [0.17, 0.25, 0.35, 0.45, 1.00];
-			var lev_limits = [0.20, 0.23, 0.55, 0.65, 1.00];			
-			noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
-			//noises = Map.DiamondSquare();
-			//noises = Map.SimplexNoise(pOctaves, pScale, pLacunarity, pPersistance);
-
-			print('>> SimplexIslands parameters:');
-			print('>>   pOctaves = ' + pOctaves);
-			print('>>   pRoughness = ' + pRoughness.toFixed(2));
-			print('>>   pScale = ' + pScale.toFixed(2));
-			print('>>   pSeed = ' + pSeed);
-			print('>>   pRadialEnabled = ' + pRadialEnabled);
-			print('>>   pEdgeFade = ' + pEdgeFade.toFixed(2));
+			noises = Settings.GetNoise();
 
 			var st = new CSmoothTerrain();
-			st.run('cf1', 'jungle', 'level', Map.getWidth(), Map.getHeight(), noises, lev_limits);
+			st.run('cf1', 'jungle', 'level', Settings.Width, Settings.Height, noises, Settings.TerrainSettings.lev_limits);
 
-			for (var y = 0; y < Map.getHeight() ; y++) {
-				for (var x = 0; x < Map.getWidth(); x++) {
+			for (var y = 0; y < Settings.Height; y++) {
+				for (var x = 0; x < Settings.Width; x++) {
 
-					Map.TileSet( x, y, st.getMapTile(x, y) );	  
+					Map.TileSet( x, y, st.getMapTile(x, y) );
 				}
 			}
 
@@ -188,10 +161,10 @@ var Terrain = {
 	 */
 	RandomSimplexIslands: function(pRoughness, pScale, pSeed, pOctaves, pRadialEnabled, pEdgeFade) {
 		Tiles = this.GetTiles();
-		noises = Map.SimplexIslands(pOctaves, pRoughness, pScale, pSeed, pRadialEnabled, pEdgeFade);
-		
-		for( x = 0; x < Map.getWidth(); ++x ) {
-			for( y = 0; y < Map.getHeight(); ++y) {
+		noises = Settings.GetNoise();
+
+		for( x = 0; x < Settings.Width; ++x ) {
+			for( y = 0; y < Settings.Height; ++y) {
 	
 				noise =  noises[x][y];
 				TileID = 0;
@@ -222,11 +195,10 @@ var Terrain = {
 	RandomSimplexNoise: function(pFrequency, pLacunarity, pPersistance, pOctaves ) {
 		Tiles = this.GetTiles();
 
-		print("SimplexNoise. frequency: " + pFrequency + " lac: " + pLacunarity + " per: " + pPersistance + " octaves:" + pOctaves);
-		noises = Map.SimplexNoise(pOctaves, pFrequency, pLacunarity, pPersistance);
-		
-		for( y = 0; y < Map.getHeight(); ++y) {
-			for( x = 0; x < Map.getWidth(); ++x ) {
+		noises = Settings.GetNoise();
+
+		for( y = 0; y < Settings.Height; ++y) {
+			for( x = 0; x < Settings.Width; ++x ) {
 				noise = noises[x][y];
 				TileID = 0;
 

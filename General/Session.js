@@ -96,10 +96,8 @@ var Session = {
 
     /**
      * Reset all properties
-     * 
-     * @param {number} pSeed
      */
-    Reset: function(pSeed) {
+    Reset: function() {
         this.BarracksPositions = [];
         this.BunkerPositions = [];
         this.HutPositions = [];
@@ -111,11 +109,6 @@ var Session = {
         this.HumanPosition = new cPosition(0, 0);
 
         this.Background.Reset();
-
-        if (pSeed !== undefined)
-            Engine.getMap().seed = pSeed;
-
-        print("Starting Seed: " + Engine.getMap().seed);
     },
 
     /**

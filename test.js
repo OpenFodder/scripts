@@ -33,24 +33,21 @@ function createRandom() {
 
 /**
  * Create a number of phases in the current mission
- * 
- * @param {number} pCount 
- * @param {number} pTileType 
+ *
+ * @param {number} pCount
  */
-function createPhases(pCount, pTileType) {
-
+function createPhases(pCount) {
 	var Campaign = Engine.getCampaign();
-	
+
 	mapname = "m" + Campaign.getMissions().length;
 
 	for(var count = 0; count < pCount; ++count) {
 
-		Map.Create( Map.getRandomInt(40, 150), Map.getRandomInt(40, 150), pTileType, 0);
+		Map.Create( Settings.Width, Settings.Height, Settings.TerrainType, 0);
 
 		var Phase = OpenFodder.getNextPhase();
-
 		Phase.map = mapname + "p" + count;
-		Phase.SetAggression(4, 8);
+		Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
 
 		Terrain.Randomize();
 		createRandom();
@@ -67,7 +64,6 @@ function createMissions(pMissions, pPhases) {
 
 	for(var count = 0; count < pMissions; ++count) {
 		var Mission = OpenFodder.getNextMission();
-		Terrain.Types.Jungle
 
 		createPhases(pPhases[count], Map.getRandomInt(0, 4));
 	}
@@ -75,7 +71,7 @@ function createMissions(pMissions, pPhases) {
 
 function createSmallMap() {
 	var Phase = OpenFodder.getNextPhase();
-	Map.Create( 40,30 , Terrain.Types.Jungle, 0);
+	Map.Create( 40,30 , Terrain.Types.Ice, 0);
 	Terrain.Randomize();
 
 	Human.RandomXY(3);
@@ -95,19 +91,15 @@ function createSmallMap() {
 }
 
 // Reset the map session
-Session.Reset();
-
-var Map = Engine.getMap();
-
-//createMissions(2, [1, 2]);
+Settings.Reset();
 
 OpenFodder.printLarge("PLEASE WAIT", 0, 15);
 var Mission = OpenFodder.getNextMission();
 OpenFodder.printSmall("Creating Phases", 0, 45);
-createPhases(1, Terrain.Types.Jungle );
+
+//createMissions(2, [1, 2]);
+createPhases(1);
 //createSmallMap();
-
-
 // Random Terrain
 //createPhases(1, Map.getRandomInt(0, 4) );
 
