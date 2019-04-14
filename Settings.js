@@ -301,7 +301,7 @@ var Settings = {
         // TODO: Algorithm to decide number of buildings
         return {
                     "barracks": {"soldier": 2},
-                    "bnker": {"soldier": 1}
+                    "bunker": {"soldier": 1}
                 };
     },
 

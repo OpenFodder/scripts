@@ -2,14 +2,14 @@
 /**
  * 
  */
-Objectives.DestroyEnemyBuildings.Random = function(pBuildingCount) {
+Objectives.DestroyEnemyBuildings.Random = function(pEnemyBuildings) {
 	print("Placing enemy buildings");
 
-	for (var building in pBuildingCount) {
+	for (var building in pEnemyBuildings) {
 
-		for(var sprite in pBuildingCount[building]) {
+		for(var sprite in pEnemyBuildings[building]) {
 
-			Structures.PlaceRandom(building, sprite, pBuildingCount[building][sprite]);
+			Structures.PlaceRandom(building, sprite, pEnemyBuildings[building][sprite]);
 		};
 	};
 
