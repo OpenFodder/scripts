@@ -119,6 +119,14 @@ var Session = {
     },
 
     /**
+     * Total number of structures which have been placed
+     */
+    TotalStructures: function() {
+
+        return (this.BunkerPositions.length + this.BarracksPositions.length + this.HutPositions.length);
+    },
+
+    /**
      * Require a helicopter of atleast pType (0 = Grenade, 1 = Missile, 2 = Homing)
      * 
      * @param {nunber} pType 
@@ -134,20 +142,22 @@ var Session = {
      * Number of grenade crates required
      */
     RequiredMinimumGrenades: function() {
-        if(!this.BarracksPositions.length)
+        if(!this.TotalStructures())
             return 0;
 
-        return (this.BarracksPositions.length / 4) + 1;
+            // 4 Grenades per case
+        return (this.TotalStructures() / 4) + 1;
     },
 
     /**
      * Number of rocket barrels required
      */
     RequiredMinimumRockets: function() {
-        if(!this.BarracksPositions.length)
+        if(!this.TotalStructures())
             return 0;
-            
-        return (this.BarracksPositions.length / 4) + 1;
+
+            // 4 Rockets per barrel
+        return (this.TotalStructures() / 4) + 1;
     },
 
     /**
