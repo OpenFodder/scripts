@@ -34,16 +34,17 @@ function createMapContent() {
 }
 
 function createSmallMap() {
-	var Phase = OpenFodder.getNextPhase();
-
 	Settings.Width = 40;
 	Settings.Height = 30;
 	Settings.Terrain =Terrain.Types.Ice;
 
 	Settings.Objectives = [];
-	Settings.setObjectives( [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings, Objectives.GetCivilianHome] );
+	Settings.setObjectives( [Objectives.KillAllEnemy] );
 
-	createPhases(1);
+	OpenFodder.createPhases(1, function() {
+		Human.RandomXY(Settings.GetPlayerCount());
+		Objectives.KillAllEnemy.Random(Settings.GetEnemyCount());
+	});
 }
 
 // Reset the map session

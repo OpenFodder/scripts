@@ -111,6 +111,11 @@ var Session = {
         this.Background.Reset();
     },
 
+    getEnemyBuildings: function() {
+
+        return this.BunkerPositions.concat(this.BarracksPositions);
+    },
+
     /**
      * Total number of structures which have been placed
      */

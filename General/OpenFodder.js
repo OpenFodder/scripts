@@ -1,6 +1,29 @@
 var OpenFodder = {
 
     /**
+     * Reset/Randomize settings
+     *
+     * @param {number} pPhaseNumber Current phase number
+     */
+    prepareMapSettings: function( pPhaseNumber ) {
+
+        Settings.Random();
+    },
+
+    /**
+     * 
+     * @param {Array<number>} pObjectives
+     */
+    prepareMapObjectives: function( pObjectives ) {
+
+		Engine.getPhase().ObjectivesClear();
+
+		for( var x = 0; x < pObjectives.length; ++x) {40
+			Engine.getPhase().ObjectiveAdd(pObjectives[x]);
+		}
+    },
+
+    /**
      * Reset the session, and create a map and prepare terrain
      */
     createMap: function() {
@@ -8,6 +31,23 @@ var OpenFodder = {
         Session.Reset();
         Map.Create( Settings.Width, Settings.Height, Settings.TerrainType, Settings.TerrainTypeSub);
         Terrain.RandomSmooth();
+
+        this.prepareMapObjectives( Settings.Objectives );
+    },
+
+    /**
+     * 
+     * @param {function} pCreateContent
+     */
+    createPhase: function(pPhaseNumber, pCreateContent) {
+
+        var Phase = OpenFodder.getNextPhase();
+        Phase.map = mapname + "p" + pPhaseNumber;
+        Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
+
+        this.createMap();
+        pCreateContent();
+        Validation.ValidateMap();
     },
 
     /**
@@ -15,24 +55,21 @@ var OpenFodder = {
      *
      * @param {number} pCount
      * @param {function} pCreateContent
+     * @param {function} pPrepareMapSettings
+     *
      */
-    createPhases: function(pCount, pCreateContent) {
+    createPhases: function(pCount, pCreateContent, pPrepareMapSettings) {
         var Campaign = Engine.getCampaign();
 
         mapname = "m" + Campaign.getMissions().length;
-    
+
+        if(pPrepareMapSettings === undefined)
+            pPrepareMapSettings = this.prepareMapSettings;
+
         for(var count = 0; count < pCount; ++count) {
-    
-            this.createMap();
-            var Phase = OpenFodder.getNextPhase();
-            Phase.map = mapname + "p" + count;
-            Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
 
-            Objectives.AddSet( Settings.Objectives );
-
-            pCreateContent();
-
-	        Validation.ValidateMap();
+            pPrepareMapSettings(count);
+            this.createPhase(count,pCreateContent);
         }
     },
 
@@ -42,14 +79,16 @@ var OpenFodder = {
      * @param {number} pMissions
      * @param {Array<number>} pPhases Number of phases per mission to create
      * @param {function} pCreateContent Callback to create the content of the map
+     * @param {function} pPrepareMapSettings Callback to configure the settings of the next map
+     *
      */
-    createMissions: function(pMissions, pPhases, pCreateContent) {
+    createMissions: function(pMissions, pPhases, pCreateContent, pPrepareMapSettings) {
 
         for(var count = 0; count < pMissions; ++count) {
             var Mission = OpenFodder.getNextMission();
 
             Settings.TerrainType = Map.getRandomInt(0, 4);
-            createPhases(pPhases[count], pCreateContent);
+            createPhases(pPhases[count], pCreateContent, pPrepareMapSettings);
         }
     },
 

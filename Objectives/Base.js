@@ -32,27 +32,6 @@ var Objectives = {
 	},
 	RescueHostage: {
 		ID: 10
-	},
-
-	/**
-	 * Set an objective as required to be completed
-	 * 
-	 * @param {object} pObjective 
-	 */
-	Add: function(pObjective) {
-		Engine.getPhase().ObjectiveAdd(pObjective);
-	},
-
-	/**
-	 *
-	 * @param {Array<Number>} pObjectives
-	 */
-	AddSet: function(pObjectives) {
-		Engine.getPhase().ObjectivesClear();
-
-		for( var x = 0; x < pObjectives.length; ++x) {
-			this.Add(pObjectives[x]);
-		}
 	}
-
+	
 };

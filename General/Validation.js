@@ -63,7 +63,9 @@ var Validation = {
             }
         }
 
-        // TODO: Check objective and see if destroy all buildings is set
+        // If we're not destroying all buildings
+        if(!Settings.hasObjective(Objectives.DestroyEnemyBuildings))
+            return;
 
         // Can we walk to enough grenades?
         if(canWalkTo >= Session.RequiredMinimumGrenades())
@@ -81,6 +83,9 @@ var Validation = {
      * Can we walk to all enemy sprites
      */
     canKillAllEnemy: function() {
+        if(!Settings.hasObjective(Objectives.KillAllEnemy))
+            return;
+
         print("Validate kill all enemy");
         // Can we walk to all enemy?
         if(!this.WalkToSprites(SpriteTypes.Enemy))
@@ -93,12 +98,17 @@ var Validation = {
      * @return true If we can walk to and destroy any buildings
      */
     canDestroyEnemyBuilding: function() {
+        if(!Settings.hasObjective(Objectives.DestroyEnemyBuildings))
+            return;
+
         print("Validate destroy enemy buildings");
         if(Helicopters.Human.HaveAny())
             return;
 
-        for(count = 0; count < Session.BarracksPositions.length; ++count) {
-            Path = Map.calculatePathBetweenPositions(SpriteTypes.Player, Session.BarracksPositions[count], Session.HumanPosition);
+        var Buildings = Session.getEnemyBuildings();
+
+        for(count = 0; count < Buildings.length; ++count) {
+            Path = Map.calculatePathBetweenPositions(SpriteTypes.Player, Buildings[count], Session.HumanPosition);
             if(Path.length == 0) {
                 Session.RequireHelicopter(0);
                 return;
@@ -112,6 +122,8 @@ var Validation = {
      * Ensure a path exists between the rescue tent, the humans, and each placed hostage
      */
     canHostageRescue: function() {
+        if(!Settings.hasObjective(Objectives.RescueHostages) && !Settings.hasObjective(Objectives.RescueHostage))
+            return;
         if (!Session.isRescueTentPlaced())
             return;
 

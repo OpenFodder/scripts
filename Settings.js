@@ -67,15 +67,13 @@ var Settings = {
         Session.Reset();
 
         this.Seed = Engine.getMap().seed;
-        this.Random();
+        print("Starting Seed: " + this.Seed);
     },
 
     /**
      * Randomize all settings
      */
     Random: function() {
-        print("Starting Seed: " + Map.seed);
-
         this.Width = Map.getRandomInt(40, 150);
         this.Height = Map.getRandomInt(40, 150);
 
@@ -132,7 +130,7 @@ var Settings = {
     /**
      * Do we have this objective
      *
-     * @param {number} pObjective
+     * @param {object} pObjective
      */
     hasObjective: function(pObjective) {
         return this.Objectives.indexOf(pObjective.ID) != -1;
