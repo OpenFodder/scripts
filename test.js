@@ -1,12 +1,10 @@
 
 /**
- * Create random map objectives
+ * Randomize the map contents
  */
-function createRandom() {
-	Session.Reset();
+function createMapContent() {
 
 	Human.RandomXY(Settings.GetPlayerCount());
-
 	Background.Random( Settings.GetBackgroundObjectCount() );
 
 	// Randomize kill all enemy?
@@ -33,46 +31,6 @@ function createRandom() {
 
 	Weapons.RandomGrenades(Settings.GetMinimumGrenades());
 	Weapons.RandomRockets(Settings.GetMinimumRockets() / 2);
-
-	Validation.ValidateMap();
-}
-
-/**
- * Create a number of phases in the current mission
- *
- * @param {number} pCount
- */
-function createPhases(pCount) {
-	var Campaign = Engine.getCampaign();
-
-	mapname = "m" + Campaign.getMissions().length;
-
-	for(var count = 0; count < pCount; ++count) {
-
-		Map.Create( Settings.Width, Settings.Height, Settings.TerrainType, 0);
-
-		var Phase = OpenFodder.getNextPhase();
-		Phase.map = mapname + "p" + count;
-		Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
-
-		Terrain.Randomize();
-		createRandom();
-	}
-}
-
-/**
- * Create a number of missions
- * 
- * @param {number} pMissions
- * @param {Array<number>} pPhases Number of phases per mission to create
- */
-function createMissions(pMissions, pPhases) {
-
-	for(var count = 0; count < pMissions; ++count) {
-		var Mission = OpenFodder.getNextMission();
-
-		createPhases(pPhases[count], Map.getRandomInt(0, 4));
-	}
 }
 
 function createSmallMap() {
@@ -95,8 +53,9 @@ OpenFodder.printLarge("PLEASE WAIT", 0, 15);
 var Mission = OpenFodder.getNextMission();
 OpenFodder.printSmall("Creating Phases", 0, 45);
 
-//createMissions(2, [1, 2]);
-createPhases(1);
+OpenFodder.createPhases(1, createMapContent);
+
+//OpenFodder.createMissions(2, [1, 2], createMapContent);
 //createSmallMap();
 // Random Terrain
 //createPhases(1, Map.getRandomInt(0, 4) );

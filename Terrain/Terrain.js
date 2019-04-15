@@ -126,9 +126,9 @@ var Terrain = {
 	},
 	
 	/**
-	 * Create a random map layout
+	 * Create a random map
 	 */
-	Randomize: function() {
+	RandomSmooth: function() {
 
 		if(Map.getTileType() == this.Types.Jungle) {
 			noises = Settings.GetNoise();
@@ -146,20 +146,13 @@ var Terrain = {
 			return;
 		}
 
-		this.RandomSimplexIslands(pRoughness, pScale, pSeed, 4, pRadialEnabled, pEdgeFade);
+		this.Random();
 	},
 	
 	/**
-	 * Create random simplex islands, with basic tiles
-	 * 
-	 * @param {number} pRoughness 
-	 * @param {number} pScale 
-	 * @param {number} pSeed 
-	 * @param {number} pOctaves 
-	 * @param {boolean} pRadialEnabled 
-	 * @param {number} pEdgeFade
+	 * Create random, with basic tiles
 	 */
-	RandomSimplexIslands: function(pRoughness, pScale, pSeed, pOctaves, pRadialEnabled, pEdgeFade) {
+	Random: function() {
 		Tiles = this.GetTiles();
 		noises = Settings.GetNoise();
 
@@ -182,57 +175,5 @@ var Terrain = {
 				Map.TileSet( x, y, TileID );
 			}
 		}
-	},
-
-	/**
-	 * Create a random simplex noise map, with basic tiles
-	 * 
-	 * @param {number} pFrequency 
-	 * @param {number} pLacunarity 
-	 * @param {number} pPersistance 
-	 * @param {number} pOctaves 
-	 */
-	RandomSimplexNoise: function(pFrequency, pLacunarity, pPersistance, pOctaves ) {
-		Tiles = this.GetTiles();
-
-		noises = Settings.GetNoise();
-
-		for( y = 0; y < Settings.Height; ++y) {
-			for( x = 0; x < Settings.Width; ++x ) {
-				noise = noises[x][y];
-				TileID = 0;
-
-				if (noise < -0.500) {
-					TileID = Tiles.Water;
-				}
-				else if (noise < -0.020) {
-					TileID = Tiles.Water;
-				}
-				else if (noise < -0.000) {
-					TileID = Tiles.Land;
-				}
-				else if (noise < 0.005) {
-					TileID = Tiles.Land;
-				}
-				else if (noise > 0.300 && noise < 0.400) {
-					TileID = Tiles.Land;// TileQuickSand;
-				}
-				else if (noise < 0.500) {
-					TileID = Tiles.Land;
-				}
-				else if (noise < 0.700) {
-					TileID = Tiles.Land;
-				}
-				else if (noise < 0.900) {
-					TileID = Tiles.Tree;
-				}
-				else {
-					TileID = Tiles.Tree;
-				}
-
-				Map.TileSet( x, y, TileID );
-			}
-		}
 	}
-	
 };

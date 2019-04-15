@@ -16,6 +16,11 @@ var Settings = {
     TerrainType: Terrain.Types.Jungle,
 
     /**
+     * @var {number}
+     */
+    TerrainTypeSub: 0,
+
+    /**
      * @var {object}
      */
     Aggression: {
@@ -59,7 +64,6 @@ var Settings = {
      */
     Reset: function() {
         Map = Engine.getMap();
-
         Session.Reset();
 
         this.Seed = Engine.getMap().seed;
@@ -70,7 +74,6 @@ var Settings = {
      * Randomize all settings
      */
     Random: function() {
-
         print("Starting Seed: " + Map.seed);
 
         this.Width = Map.getRandomInt(40, 150);
@@ -105,7 +108,7 @@ var Settings = {
     },
 
     /**
-     * St the phase objectives
+     * Set the phase objectives
      *
      * @param {Array<object>} pObjectives
      */
@@ -133,11 +136,6 @@ var Settings = {
      */
     hasObjective: function(pObjective) {
         return this.Objectives.indexOf(pObjective.ID) != -1;
-    },
-
-    setPhaseObjectives: function() {
-
-        Objectives.AddSet( this.Objectives );
     },
 
     /**
@@ -268,11 +266,11 @@ var Settings = {
             Blooms: 5
         };
     },
+
     /**
      * Calculate the number of hostages to create
      */
     GetHostageCount: function() {
-
         // TODO: Algorithm to decide number of hostage group
         return 4;
     },
@@ -299,25 +297,25 @@ var Settings = {
      */
     GetEnemyBuildingCount: function() {
         // TODO: Algorithm to decide number of buildings
-
         return {
-                    "barracks": {
-                        "soldier": 2,
-                        "soldier_reinforced": 0
-                    },
-                    "bunker":   {
-                        "soldier": 0
-                    },
-                    "hut":      {
-                        "soldier": 0
-                    },
-                };
+                "barracks": {
+                    "soldier": 2,
+                    "soldier_reinforced": 0
+                },
+                "bunker":   {
+                    "soldier": 0
+                },
+                "hut":      {
+                    "soldier": 0
+                },
+            };
     },
 
     /**
      * Get the civilian buildings to be placed
      */
     GetCivilianBuildingCount: function() {
+        // TODO: Algorithm to decide number of buildings
         return {
             "hut":  {
                 "civilian": 3,

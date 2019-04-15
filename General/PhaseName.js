@@ -1,23 +1,18 @@
 var PhaseName = {
 
 	Jungle: {
-
 	},
 
 	Desert: {
-
 	},
 
 	Ice: {
-
 	},
 
 	Underground: {
-
 	},
 
 	Moors: {
-
 	},
 	
 	/**

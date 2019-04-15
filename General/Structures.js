@@ -178,6 +178,7 @@ var Structures = {
                         this.Place(position, Struct.Bunker, pSpriteType);
                         break;
                     default:
+                        print("Invalid structure: " + pStructType);
                         break;
                 }
             }
@@ -196,6 +197,6 @@ var Structures = {
             };
         };
 
-    }
+    },
 
 };

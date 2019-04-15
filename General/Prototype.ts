@@ -110,6 +110,11 @@ interface cMap {
     getHeight(): number;
 
     /**
+     * Get the total map area in tiles
+     */
+    getArea(): number;
+
+    /**
      * Get map width in pixels
      */
     getWidthPixels(): number;
@@ -118,6 +123,11 @@ interface cMap {
      * Get max height in pixels
      */
     getHeightPixels(): number;
+
+    /**
+     * Get the total map area in pixels
+     */
+    getAreaPixels(): number;
 
     /**
      * Get the number of sprites matching this type

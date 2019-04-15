@@ -44,9 +44,6 @@ var Validation = {
         // Do we require a helicopter?
         if(Session.HelicopterMinimum >= 0)
             Session.Helicopter = Helicopters.Human.Random(SpriteTypes.Helicopter_Grenade_Human + Session.HelicopterMinimum);
-
-        // Ensure objectives are set in the phase
-        Settings.setPhaseObjectives();
     },
 
     /**
