@@ -46,8 +46,8 @@ var Terrain = {
 			Land: 123,
 			Tree: 82
 		},
-		LightGrassTiles: [0, 20, 40, 18, 19],
-		DarkGrassTiles: [123, 124, 68, 240, 365]
+		Mainland: [0, 20, 40, 18, 19],
+		Borderland: [123, 124, 68, 240, 365]
 	},
 
 	Desert: {
@@ -55,7 +55,9 @@ var Terrain = {
 			Water: 180,
 			Land: 0,
 			Tree: 220
-		}
+		},
+		Mainland: [0, 20, 40, 18, 19],
+		Borderland: [123, 124, 68, 240, 365]
 	},
 	
 	Ice: {
@@ -63,7 +65,9 @@ var Terrain = {
 			Water: 100,
 			Land: 0,
 			Tree: 170
-		}
+		},
+		Mainland: [0, 20, 40, 18, 19],
+		Borderland: [123, 124, 68, 240, 365]
 	},
 
 	Moors: {
@@ -72,7 +76,9 @@ var Terrain = {
 			Water: 193,
 			Land: 0,
 			Tree: 2
-		}
+		},
+		Mainland: [0, 20, 40, 18, 19],
+		Borderland: [123, 124, 68, 240, 365]
 	},
 	
 	Interior: {
@@ -80,7 +86,9 @@ var Terrain = {
 			Water: 242,
 			Land: 4,
 			Tree: 275
-		}
+		},
+		Mainland: [0, 20, 40, 18, 19],
+		Borderland: [123, 124, 68, 240, 365]
 	},
 	
 	AmigaFormat: {
@@ -88,7 +96,9 @@ var Terrain = {
 			Water: 100,
 			Land: 0,
 			Tree: 240
-		}
+		},
+		Mainland: [0, 20, 40, 18, 19],
+		Borderland: [123, 124, 68, 240, 365]
 	},
 	
 	/**
