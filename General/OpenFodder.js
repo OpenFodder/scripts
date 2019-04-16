@@ -5,22 +5,8 @@ var OpenFodder = {
      *
      * @param {number} pPhaseNumber Current phase number
      */
-    prepareMapSettings: function( pPhaseNumber ) {
+    prepareSettings: function( pPhaseNumber ) {
         Settings.Random();
-
-    },
-
-    /**
-     * 
-     * @param {Array<number>} pObjectives
-     */
-    preparePhaseObjectives: function( pObjectives ) {
-
-		Engine.getPhase().ObjectivesClear();
-
-		for( var x = 0; x < pObjectives.length; ++x) {
-			Engine.getPhase().ObjectiveAdd(pObjectives[x]);
-		}
     },
 
     /**
@@ -31,19 +17,27 @@ var OpenFodder = {
 
         Map.Create( Settings.Width, Settings.Height, Settings.TerrainType, Settings.TerrainTypeSub);
         Terrain.RandomSmooth();
-
-        this.preparePhaseObjectives( Settings.Objectives );
     },
 
     /**
+     * Prepare a phase
+     *  Set Aggression
+     *  Create the map
+     *  Call the content creation function
+     *  Validate the map/objectives are completable
      *
+     * @param {number} pPhaseNumber
      * @param {function} pCreateContent
      */
     createPhase: function(pPhaseNumber, pCreateContent) {
-
         var Phase = this.getNextPhase();
         Phase.map = mapname + "p" + pPhaseNumber;
         Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
+
+        Phase.ObjectivesClear();
+		for( var x = 0; x < Settings.Objectives.length; ++x) {
+			Phase.ObjectiveAdd(Settings.Objectives[x]);
+        }
 
         this.createMap();
         pCreateContent(pPhaseNumber);
@@ -53,22 +47,22 @@ var OpenFodder = {
     /**
      * Create a number of phases in the current mission
      *
-     * @param {number} pCount
-     * @param {function} pCreateContent
-     * @param {function} pPrepareMapSettings
+     * @param {number}   pCount              Number of this phase in the current mission
+     * @param {function} pCreateContent      Called during creation of the map
+     * @param {function} pPrepareSettings    Called during initialisation of the phase
      *
      */
-    createPhases: function(pCount, pCreateContent, pPrepareMapSettings) {
+    createPhases: function(pCount, pCreateContent, pPrepareSettings) {
         var Campaign = Engine.getCampaign();
         OpenFodder.printSmall("Creating Phases", 0, 55);
         mapname = "m" + Campaign.getMissions().length;
 
-        if(pPrepareMapSettings === undefined)
-            pPrepareMapSettings = this.prepareMapSettings;
+        if(pPrepareSettings === undefined)
+            pPrepareSettings = this.prepareSettings;
 
         for(var count = 0; count < pCount; ++count) {
 
-            pPrepareMapSettings(count);
+            pPrepareSettings(count);
             this.createPhase(count, pCreateContent);
         }
     },
@@ -79,16 +73,17 @@ var OpenFodder = {
      * @param {number} pMissions
      * @param {Array<number>} pPhases Number of phases per mission to create
      * @param {function} pCreateContent Callback to create the content of the map
-     * @param {function} pPrepareMapSettings Callback to configure the settings of the next map
+     * @param {function} pPrepareSettings Callback to configure the settings of the map
      *
      */
-    createMissions: function(pMissions, pPhases, pCreateContent, pPrepareMapSettings) {
+    createMissions: function(pMissions, pPhases, pCreateContent, pPrepareSettings) {
         OpenFodder.printSmall("Creating " + pMissions + " Missions", 0, 25);
+
         for(var count = 0; count < pMissions; ++count) {
             var Mission = OpenFodder.getNextMission();
 
             Settings.TerrainType = Map.getRandomInt(0, 4);
-            createPhases(pPhases[count], pCreateContent, pPrepareMapSettings);
+            createPhases(pPhases[count], pCreateContent, pPrepareSettings);
         }
     },
 
@@ -132,7 +127,6 @@ var OpenFodder = {
      * @param {boolean} pUnderline Print with an underline
      */
     printLarge: function(pText, pX, pY, pUnderline) {
-
         if(pUnderline === undefined)
             pUnderline = false;
         Engine.guiPrintString(pText, pX, pY, true, pUnderline);

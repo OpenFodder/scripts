@@ -146,8 +146,8 @@ var Settings = {
      * Randomize all settings
      */
     Random: function() {
-        this.Width = Map.getRandomInt(40, 50);
-        this.Height = Map.getRandomInt(40, 50);
+        this.Width = Map.getRandomInt(40, 150);
+        this.Height = Map.getRandomInt(40, 150);
 
         this.Aggression.Min = Map.getRandomInt(2, 4);
         this.Aggression.Max = Map.getRandomInt(this.Aggression.Min, 8);
@@ -174,13 +174,13 @@ var Settings = {
      */
     RandomBuildings: function() {
 
-        this.BuildingsEnemyCount.barracks.soldier = Math.floor(this.getCalculatedArea() / 1200);
+        this.BuildingsEnemyCount.barracks.soldier = Math.floor(this.getCalculatedArea() / 1600);
         this.BuildingsEnemyCount.barracks.soldier_reinforced = 0;
         this.BuildingsEnemyCount.bunker.soldier = 0;
         this.BuildingsEnemyCount.hut.soldier = 0;
 
-        this.BuildingsCivilianCount.hut.civilian = Math.floor(this.getCalculatedArea() / 400);
-        this.BuildingsCivilianCount.hut.civilian_spear = Math.floor(this.getCalculatedArea() / 2400);
+        this.BuildingsCivilianCount.hut.civilian = Math.floor(this.getCalculatedArea() / 1600);
+        this.BuildingsCivilianCount.hut.civilian_spear = Math.floor(this.getCalculatedArea() / 3200);
         this.BuildingsCivilianCount.hut.civilian_rescue = 0;
     },
 
@@ -193,6 +193,8 @@ var Settings = {
         // TODO: This could be alot better
         if(Map.getRandomInt(0, 1) == 1)
             this.addObjective(Objectives.KillAllEnemy);
+        else
+            this.addObjective(Objectives.DestroyEnemyBuildings);
 
         if(Map.getRandomInt(0, 1) == 1)
             this.addObjective(Objectives.DestroyEnemyBuildings);
@@ -200,7 +202,6 @@ var Settings = {
             // Either Rescue or get civilian home
         if(Map.getRandomInt(0, 1) == 1) {
             this.addObjective(Objectives.RescueHostages);
-
         } else {
             if(Map.getRandomInt(0, 1) == 1)
                 this.addObjective(Objectives.GetCivilianHome);
