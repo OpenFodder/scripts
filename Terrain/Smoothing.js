@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta7';
+const version = '0.70.beta8';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -176,7 +176,7 @@ var bm_cf1_jungle_lightgrass_darkgrass = {
     {"bm":"10010100", "tiles": [ {"tile":"49"},  {"tile":"69"} ] },
     {"bm":"00101000", "tiles": [ {"tile":"209"} ] },
     {"bm":"10010000", "tiles": [ {"tile":"210"} ] },
-    {"bm":"01100000", "tiles": [ {"tile":"20"} ] },
+    {"bm":"01100000", "tiles": [ {"tile":"209"} ] },
     {"bm":"11100000", "tiles": [ {"tile":"47"},  {"tile":"48"} ] },
     {"bm":"11000000", "tiles": [ {"tile":"210"} ] },
        
