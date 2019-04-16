@@ -55,7 +55,6 @@ function createRandomMap() {
 }
 
 OpenFodder.start();
-print("" + Mission.name);
 createRandomMap();
 //createSmallMap();
 

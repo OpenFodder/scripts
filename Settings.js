@@ -29,9 +29,42 @@ var Settings = {
     },
 
     /**
+     * Minimum distance between same type structures if not defined
+     */
+    MinimumDistanceDefault: 100,
+
+    /**
+     * Minimum distances for structures
+     */
+    MinimumDistances: {
+
+        barracks: {
+
+            /**
+             * @var {number} soldier Minimum distance between each enemy barracks
+             */
+            soldier: 100
+        },
+
+        hut: {
+
+            /**
+             * @var {number} civilian_rescue Minimum distance between each civilian and home
+             */
+            civilian_rescue: 150
+        }
+
+    },
+
+    /**
      * @var {Array<number>} Objectives
      */
     Objectives: [],
+
+    /**
+     *
+     */
+    TerrainAlgorithms: ["islands", "simplex", "diamondsquare"],
 
     /**
      * @var {string}
@@ -73,17 +106,15 @@ var Settings = {
      * Randomize all settings
      */
     Random: function() {
-        this.Width = Map.getRandomInt(40, 150);
-        this.Height = Map.getRandomInt(40, 150);
+        this.Width = Map.getRandomInt(40, 50);
+        this.Height = Map.getRandomInt(40, 50);
 
         this.Aggression.Min = Map.getRandomInt(2, 4);
         this.Aggression.Max = Map.getRandomInt(this.Aggression.Min, 8);
 
-        // TODO: Random this
-        this.TerrainAlgorithm = "islands";
+        this.TerrainAlgorithm = this.TerrainAlgorithms[Map.getRandomInt(0, 2)];
         this.TerrainType = Map.getRandomInt(Terrain.Types.Jungle, Terrain.Types.Interior);
 
-        this.TerrainAlgorithm = "islands";
         this.TerrainType = Terrain.Types.Jungle;
 
         this.RandomObjectives();
@@ -98,11 +129,21 @@ var Settings = {
     RandomObjectives: function() {
         this.Objectives = [];
 
-        // TODO
-        this.addObjective(Objectives.KillAllEnemy);
-	    this.addObjective(Objectives.DestroyEnemyBuildings);
-        this.addObjective(Objectives.RescueHostages);
-        this.addObjective(Objectives.GetCivilianHome);
+        // TODO: This could be alot better
+        if(Map.getRandomInt(0, 1) == 1)
+            this.addObjective(Objectives.KillAllEnemy);
+
+        if(Map.getRandomInt(0, 1) == 1)
+            this.addObjective(Objectives.DestroyEnemyBuildings);
+
+            // Either Rescue or get civilian home
+        if(Map.getRandomInt(0, 1) == 1) {
+            this.addObjective(Objectives.RescueHostages);
+
+        } else {
+            if(Map.getRandomInt(0, 1) == 1)
+                this.addObjective(Objectives.GetCivilianHome);
+        }
     },
 
     /**
@@ -170,6 +211,17 @@ var Settings = {
     },
 
     /**
+     * Create random terrain diamond square settings
+     */
+    RandomDiamondSquare: function() {
+
+        this.TerrainSettings = {
+            lev_limits: [0.20, 0.23, 0.55, 0.65, 1.00]
+
+        }
+    },
+
+    /**
      * Create noise settings based on set algorithm
      */
     RandomNoise: function() {
@@ -182,6 +234,8 @@ var Settings = {
                 return this.RandomTerrainSimplex();
 
             case "diamondsquare":
+                return this.RandomDiamondSquare();
+
             default:
                 break;
         }
@@ -332,5 +386,23 @@ var Settings = {
 
     GetMinimumRockets: function() {
         return 1 + (Session.TotalStructures() / 4);
+    },
+
+    /**
+     * Get the minimum distance between two same type structures
+     *
+     * @param {string} pObjectName
+     * @param {string} pTargetName
+     */
+    GetMinimumDistance: function(pObjectName, pTargetName) {
+        var Obj = this.MinimumDistances[pObjectName.toLowerCase()];
+        if( Obj === undefined )
+            return this.MinimumDistanceDefault;
+
+        var Target = Obj[pTargetName.toLowerCase()];
+        if( Target === undefined)
+            return this.MinimumDistanceDefault;
+
+        return Target;
     }
 };

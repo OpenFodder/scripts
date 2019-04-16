@@ -151,17 +151,17 @@ var Structures = {
      * @param {string} pStructType
      * @param {string} pSpriteType
      * @param {number} pCount
-     * @param {number} pMinDistance
+     * @param {number} pMinDistance If undefined, value will be obtained from Settings.MinimumDistances
      */
     PlaceRandom: function(pStructType, pSpriteType, pCount, pMinDistance) {
         if(pMinDistance === undefined)
-            pMinDistance = 250;
+            var pMinDistance = Settings.GetMinimumDistance(pStructType, pSpriteType);
 
         for(var x = 0; x < pCount; ++x) {
 
             // Get the positions of the existing similar type structures
             existingPositions = this.GetStructPositions(pStructType);
-            position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, pMinDistance);
+            position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, pMinDistance );
 
             if(position.x != -1 && position.y != -1) {
                 Struct = this.GetCurrent();
@@ -193,6 +193,7 @@ var Structures = {
 
         for (var building in pBuildings) {
             for(var sprite in pBuildings[building]) {
+
                 Structures.PlaceRandom(building, sprite, pBuildings[building][sprite]);
             };
         };

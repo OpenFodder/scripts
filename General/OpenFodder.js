@@ -153,11 +153,13 @@ var OpenFodder = {
      *
      */
     start: function() {
-        OpenFodder.printLarge("PLEASE WAIT", 0, 15);
+        this.printLarge("PLEASE WAIT", 0, 15);
 
+        // Global Map object
         Map = Engine.getMap();
 
-        Mission = OpenFodder.getNextMission();
+        // Global Mission
+        Mission = this.getNextMission();
 
         // Reset the map session
         Settings.Reset();

@@ -19,7 +19,7 @@ Objectives.GetCivilianHome.CreateCivilian = function() {
 
 /**
  * Create the home for a civilian to return to
- * 
+ *
  * @return cPosition
  */
 Objectives.GetCivilianHome.CreateHome = function() {
@@ -32,7 +32,7 @@ Objectives.GetCivilianHome.CreateHome = function() {
 		position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
 		for( count = 0; count < Session.CivilianPositions.count; ++count) {
 
-			if( Map.getDistanceBetweenPositions( Session.CivilianPositions[count], position) < 100 ) {
+			if( Map.getDistanceBetweenPositions( Session.CivilianPositions[count], position) < Settings.GetMinimumDistance("civilian_rescue", "to_home") ) {
 				found = false;
 				break;
 			}

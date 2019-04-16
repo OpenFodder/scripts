@@ -148,7 +148,7 @@ var Terrain = {
 
 		this.Random();
 	},
-	
+
 	/**
 	 * Create random, with basic tiles
 	 */
@@ -158,7 +158,7 @@ var Terrain = {
 
 		for( x = 0; x < Settings.Width; ++x ) {
 			for( y = 0; y < Settings.Height; ++y) {
-	
+
 				noise =  noises[x][y];
 				TileID = 0;
 
