@@ -35,7 +35,7 @@ var Structures = {
      */
 	GetCurrent: function() {
 		switch(Map.getTileType()) {
-			
+
 			case Terrain.Types.Jungle:
 				return Structures.Jungle;
 			case Terrain.Types.Desert:
@@ -78,7 +78,7 @@ var Structures = {
     /**
      * Place a structure
      *
-     * @param {cPosition} pPosition 
+     * @param {cPosition} pPosition
      * @param {sStructure} pStructure 
      * @param {string} pSpriteSet
      */

@@ -1,16 +1,7 @@
 var OpenFodder = {
 
     /**
-     * Reset/Randomize settings
-     *
-     * @param {number} pPhaseNumber Current phase number
-     */
-    prepareSettings: function( pPhaseNumber ) {
-        Settings.Random();
-    },
-
-    /**
-     * Reset the session, and create a map and prepare terrain
+     * Reset the session, and create a map and prepare the terrain
      */
     createMap: function() {
         Session.Reset();
@@ -27,9 +18,9 @@ var OpenFodder = {
      *  Validate the map/objectives are completable
      *
      * @param {number} pPhaseNumber
-     * @param {function} pCreateContent
+     * @param {Object|Function} pScenario
      */
-    createPhase: function(pPhaseNumber, pCreateContent) {
+    createPhase: function(pPhaseNumber, pScenario) {
         var Phase = this.getNextPhase();
         Phase.map = mapname + "p" + pPhaseNumber;
         Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
@@ -40,30 +31,47 @@ var OpenFodder = {
         }
 
         this.createMap();
-        pCreateContent(pPhaseNumber);
+
+        // If a callable function was passed, call it
+        if( pScenario && {}.toString.call(pScenario) === '[object Function]') {
+            pScenario(pPhaseNumber);
+        } else {
+
+            // Otherwise its a scenario object
+            pScenario.Start(pPhaseNumber);
+        }
+
         Validation.ValidateMap();
     },
 
     /**
      * Create a number of phases in the current mission
      *
-     * @param {number}   pCount              Number of this phase in the current mission
-     * @param {function} pCreateContent      Called during creation of the map
-     * @param {function} pPrepareSettings    Called during initialisation of the phase
+     * @param {number}   pCount            Number of phases in the current mission
+     * @param {Object|Function} pScenario  Called during creation of the map
+     * @param {function} pPrepareSettings  Called during initialisation of the phase
      *
      */
-    createPhases: function(pCount, pCreateContent, pPrepareSettings) {
+    createPhases: function(pTotalPhases, pScenario, pPrepareSettings) {
         var Campaign = Engine.getCampaign();
         OpenFodder.printSmall("Creating Phases", 0, 55);
         mapname = "m" + Campaign.getMissions().length;
 
-        if(pPrepareSettings === undefined)
-            pPrepareSettings = this.prepareSettings;
+        for(var count = 0; count < pTotalPhases; ++count) {
 
-        for(var count = 0; count < pCount; ++count) {
+            // If we received scenario object, call its settings function
+            if( pScenario && {}.toString.call(pScenario) === '[object Object]' && pPrepareSettings === undefined) {
+                pScenario.Settings(count);
+            } else {
 
-            pPrepareSettings(count);
-            this.createPhase(count, pCreateContent);
+                // Otherwise, check pPrepareSettings
+                if(pPrepareSettings === undefined)
+                    Scenario.Settings(count);
+                else
+                    pPrepareSettings(count);
+            }
+
+            this.createPhase(count, pScenario);
         }
     },
 
@@ -144,9 +152,11 @@ var OpenFodder = {
     },
 
     /**
+     * Start me up
      *
+     * @param {number} pSeed Undefined for random
      */
-    start: function() {
+    start: function(pSeed) {
         this.printLarge("PLEASE WAIT", 0, 15);
 
         // Global Map object
@@ -155,7 +165,10 @@ var OpenFodder = {
         // Global Mission
         Mission = this.getNextMission();
 
-        // Reset the map session
-        Settings.Reset();
+        // Prepare settings
+        if(pSeed === undefined)
+            Settings.Reset();
+        else
+            Settings.FromSeed(pSeed);
     }
 };

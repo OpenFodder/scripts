@@ -22,7 +22,7 @@ var PhaseName = {
 	 */
 	Generate: function() {
 
-		switch(Map.getTileType()) {
+		switch(Settings.TerrainType) {
 
 			case Terrain.Types.Jungle:
 				return this.Jungle.Random();

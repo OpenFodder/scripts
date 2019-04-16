@@ -163,11 +163,16 @@ var Settings = {
 
         this.TerrainType = Terrain.Types.Jungle;
 
+        // Randomise items based on map properties
+        this.RandomUpdate();
+    },
+
+    /**
+     * Randomise items based on map parameters (should be called after changing map width/height)
+     */
+    RandomUpdate: function() {
         this.RandomObjectives();
-
-        // Randomise the terrain algorithm settings
         this.RandomNoise();
-
         this.RandomBuildings();
     },
 
@@ -182,6 +187,8 @@ var Settings = {
      * Setup the number of buildings placed based on the area
      */
     RandomBuildings: function() {
+
+        print("Total map area: " + this.getCalculatedArea());
 
         this.BuildingsEnemyCount.barracks.soldier = Math.floor(this.getCalculatedArea() / 1600);
         this.BuildingsEnemyCount.barracks.soldier_reinforced = 0;
