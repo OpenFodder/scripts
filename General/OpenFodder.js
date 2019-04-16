@@ -6,19 +6,19 @@ var OpenFodder = {
      * @param {number} pPhaseNumber Current phase number
      */
     prepareMapSettings: function( pPhaseNumber ) {
-
         Settings.Random();
+
     },
 
     /**
      * 
      * @param {Array<number>} pObjectives
      */
-    prepareMapObjectives: function( pObjectives ) {
+    preparePhaseObjectives: function( pObjectives ) {
 
 		Engine.getPhase().ObjectivesClear();
 
-		for( var x = 0; x < pObjectives.length; ++x) {40
+		for( var x = 0; x < pObjectives.length; ++x) {
 			Engine.getPhase().ObjectiveAdd(pObjectives[x]);
 		}
     },
@@ -27,26 +27,26 @@ var OpenFodder = {
      * Reset the session, and create a map and prepare terrain
      */
     createMap: function() {
-
         Session.Reset();
+
         Map.Create( Settings.Width, Settings.Height, Settings.TerrainType, Settings.TerrainTypeSub);
         Terrain.RandomSmooth();
 
-        this.prepareMapObjectives( Settings.Objectives );
+        this.preparePhaseObjectives( Settings.Objectives );
     },
 
     /**
-     * 
+     *
      * @param {function} pCreateContent
      */
     createPhase: function(pPhaseNumber, pCreateContent) {
 
-        var Phase = OpenFodder.getNextPhase();
+        var Phase = this.getNextPhase();
         Phase.map = mapname + "p" + pPhaseNumber;
         Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
 
         this.createMap();
-        pCreateContent();
+        pCreateContent(pPhaseNumber);
         Validation.ValidateMap();
     },
 
@@ -60,7 +60,7 @@ var OpenFodder = {
      */
     createPhases: function(pCount, pCreateContent, pPrepareMapSettings) {
         var Campaign = Engine.getCampaign();
-
+        OpenFodder.printSmall("Creating Phases", 0, 55);
         mapname = "m" + Campaign.getMissions().length;
 
         if(pPrepareMapSettings === undefined)
@@ -69,7 +69,7 @@ var OpenFodder = {
         for(var count = 0; count < pCount; ++count) {
 
             pPrepareMapSettings(count);
-            this.createPhase(count,pCreateContent);
+            this.createPhase(count, pCreateContent);
         }
     },
 
@@ -83,7 +83,7 @@ var OpenFodder = {
      *
      */
     createMissions: function(pMissions, pPhases, pCreateContent, pPrepareMapSettings) {
-
+        OpenFodder.printSmall("Creating " + pMissions + " Missions", 0, 25);
         for(var count = 0; count < pMissions; ++count) {
             var Mission = OpenFodder.getNextMission();
 
@@ -147,6 +147,19 @@ var OpenFodder = {
      */
     printSmall: function(pText, pX, pY) {
         Engine.guiPrintString(pText, pX, pY, false, false);
+    },
+
+    /**
+     *
+     */
+    start: function() {
+        OpenFodder.printLarge("PLEASE WAIT", 0, 15);
+
+        Map = Engine.getMap();
+
+        Mission = OpenFodder.getNextMission();
+
+        // Reset the map session
+        Settings.Reset();
     }
-    
 };

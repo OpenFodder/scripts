@@ -63,10 +63,9 @@ var Settings = {
      * Reset settings using current seed
      */
     Reset: function() {
-        Map = Engine.getMap();
-        Session.Reset();
 
         this.Seed = Engine.getMap().seed;
+
         print("Starting Seed: " + this.Seed);
     },
 
@@ -99,6 +98,7 @@ var Settings = {
     RandomObjectives: function() {
         this.Objectives = [];
 
+        // TODO
         this.addObjective(Objectives.KillAllEnemy);
 	    this.addObjective(Objectives.DestroyEnemyBuildings);
         this.addObjective(Objectives.RescueHostages);

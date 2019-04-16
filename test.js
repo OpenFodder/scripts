@@ -1,10 +1,10 @@
 
 /**
- * Randomize the map contents
+ * Standard randomize map
  */
-function createMapContent() {
+function createMapRandomContent(pPhaseNumber) {
 
-	Human.RandomXY(Settings.GetPlayerCount());
+	Human.RandomXY(8);
 	Background.Random( Settings.GetBackgroundObjectCount() );
 
 	// Randomize kill all enemy?
@@ -34,27 +34,30 @@ function createMapContent() {
 }
 
 function createSmallMap() {
-	Settings.Width = 40;
-	Settings.Height = 30;
-	Settings.Terrain =Terrain.Types.Ice;
 
-	Settings.Objectives = [];
-	Settings.setObjectives( [Objectives.KillAllEnemy] );
-
-	OpenFodder.createPhases(1, function() {
+	OpenFodder.createPhases(1, function(pPhaseNumber) {
 		Human.RandomXY(Settings.GetPlayerCount());
 		Objectives.KillAllEnemy.Random(Settings.GetEnemyCount());
+
+	}, function(pPhaseNumber) {
+		Settings.Random();
+		Settings.Width = 40;
+		Settings.Height = 30;
+		Settings.Terrain =Terrain.Types.Ice;
+
+		Settings.setObjectives( [Objectives.KillAllEnemy] );
 	});
 }
 
-// Reset the map session
-Settings.Reset();
+function createRandomMap() {
 
-OpenFodder.printLarge("PLEASE WAIT", 0, 15);
-var Mission = OpenFodder.getNextMission();
-OpenFodder.printSmall("Creating Phases", 0, 45);
+	OpenFodder.createPhases(1, createMapRandomContent);
+}
 
-OpenFodder.createPhases(1, createMapContent);
+OpenFodder.start();
+print("" + Mission.name);
+createRandomMap();
+//createSmallMap();
 
 //OpenFodder.createMissions(2, [1, 2], createMapContent);
 //createSmallMap();
