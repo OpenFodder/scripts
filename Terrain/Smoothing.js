@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta6';
+const version = '0.70.beta7';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -32,7 +32,7 @@ const isShowMapChar = false;
 
 // bitmask data for smoothChar
 var bm_smooth_char = [
-  // centter 0 is always char1 (usually water)
+  // center 0 is always char1 (usually water)
   
   // 000
   // 101
@@ -200,6 +200,53 @@ var bm_cf1_jungle_lightgrass_darkgrass = {
   ]
 };
 
+// bitmask data for lightgrass-darkgrass (jungle tileset)
+// swamp:107,167, darkgrass:123,124
+var bm_cf1_jungle_swamp_darkgrass = {
+  "bitmask": [
+    {"bm":"00000011", "tiles": [ {"tile":"227"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"227"} ] }, 
+    {"bm":"00000110", "tiles": [ {"tile":"227"} ] },
+
+    {"bm":"00001001", "tiles": [ {"tile":"207"} ] },
+    {"bm":"00010100", "tiles": [ {"tile":"206"} ] },
+
+    {"bm":"00101001", "tiles": [ {"tile":"168"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"186"} ] },
+
+    {"bm":"00101000", "tiles": [ {"tile":"148"} ] },
+    {"bm":"10010000", "tiles": [ {"tile":"226"} ] },
+
+    {"bm":"01100000", "tiles": [ {"tile":"147"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"147"} ] },
+    {"bm":"11000000", "tiles": [ {"tile":"147"} ] },
+    //      
+
+    {"bm":"11110000", "tiles": [ {"tile":"226"} ] },
+    {"bm":"11100000", "tiles": [ {"tile":"147"} ] }, 
+    {"bm":"11101000", "tiles": [ {"tile":"148"} ] },
+    
+    {"bm":"11010100", "tiles": [ {"tile":"146"} ] },
+    {"bm":"01101001", "tiles": [ {"tile":"148"} ] },
+    
+    {"bm":"10010100", "tiles": [ {"tile":"166"} ] },
+    {"bm":"00101001", "tiles": [ {"tile":"168"} ] },
+    
+    {"bm":"10010110", "tiles": [ {"tile":"206"} ] },
+    {"bm":"00101011", "tiles": [ {"tile":"188"} ] },
+    
+    {"bm":"00010111", "tiles": [ {"tile":"206"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"227"} ] },
+    {"bm":"00001111", "tiles": [ {"tile":"207"} ] },
+    //
+    
+    {"bm":"00001011", "tiles": [ {"tile":"207"} ] },
+    {"bm":"00010110", "tiles": [ {"tile":"206"} ] },
+    {"bm":"01101000", "tiles": [ {"tile":"148"} ] },
+    {"bm":"11010000", "tiles": [ {"tile":"226"} ] }
+  ]
+};
+
 // bitmask data for deepwater-shallowwater (ice tileset)
 var bm_cf1_ice_deepwater_shallowwater = {
   "bitmask": [
@@ -215,20 +262,20 @@ var bm_cf1_ice_deepwater_shallowwater = {
     {"bm":"01100000", "tiles": [ {"tile":"138"} ] },
     {"bm":"11100000", "tiles": [ {"tile":"105"}, {"tile":"106"} ] },
     {"bm":"11000000", "tiles": [ {"tile":"137"} ] },
-         
+          
     {"bm":"11110000", "tiles": [ {"tile":"136"} ] },
     {"bm":"11100000", "tiles": [ {"tile":"105"}, {"tile":"106"} ] }, 
     {"bm":"11101000", "tiles": [ {"tile":"139"} ] },
     {"bm":"11010100", "tiles": [ {"tile":"156"} ] },
-    {"bm":"11010100", "tiles": [ {"tile":"157"} ] },
-    {"bm":"11010100", "tiles": [ {"tile":"107"}, {"tile":"108"} ] },
-    {"bm":"01101001", "tiles": [ {"tile":"109"}, {"tile":"110"} ] },
-    {"bm":"10010100", "tiles": [ {"tile":"178"} ] },
-    {"bm":"10010100", "tiles": [ {"tile":"179"} ] },
-    {"bm":"10010110", "tiles": [ {"tile":"134"} ] },
-    {"bm":"00101011", "tiles": [ {"tile":"103"}, {"tile":"104"} ] },
-    {"bm":"00010111", "tiles": [ {"tile":"133"} ] },
-         
+    {"bm":"01101001", "tiles": [ {"tile":"157"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"107"}, {"tile":"108"} ] },
+    {"bm":"00101001", "tiles": [ {"tile":"109"}, {"tile":"110"} ] },
+    {"bm":"10010110", "tiles": [ {"tile":"178"} ] },
+    {"bm":"00101011", "tiles": [ {"tile":"179"} ] },
+    {"bm":"00010111", "tiles": [ {"tile":"134"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"103"}, {"tile":"104"} ] },
+    {"bm":"00001111", "tiles": [ {"tile":"133"} ] },
+          
     {"bm":"00001011", "tiles": [ {"tile":"119"} ] },
     {"bm":"00010110", "tiles": [ {"tile":"118"} ] },
     {"bm":"01101000", "tiles": [ {"tile":"117"} ] },
@@ -251,20 +298,20 @@ var bm_cf1_ice_wetice_shallowwater = {
     {"bm":"01100000", "tiles": [ {"tile":"94"} ] },
     {"bm":"11100000", "tiles": [ {"tile":"96"} ] },
     {"bm":"11000000", "tiles": [ {"tile":"99"} ] },
-         
+          
     {"bm":"11110000", "tiles": [ {"tile":"98"} ] },
     {"bm":"11100000", "tiles": [ {"tile":"96"} ] }, 
     {"bm":"11101000", "tiles": [ {"tile":"95"} ] },
     {"bm":"11010100", "tiles": [ {"tile":"128"} ] },
-    {"bm":"11010100", "tiles": [ {"tile":"130"} ] },
-    {"bm":"11010100", "tiles": [ {"tile":"113"} ] },
-    {"bm":"01101001", "tiles": [ {"tile":"112"} ] },
-    {"bm":"10010100", "tiles": [ {"tile":"149"} ] },
-    {"bm":"10010100", "tiles": [ {"tile":"151"} ] },
-    {"bm":"10010110", "tiles": [ {"tile":"86"} ] },
-    {"bm":"00101011", "tiles": [ {"tile":"85"} ] },
-    {"bm":"00010111", "tiles": [ {"tile":"83"} ] },
-         
+    {"bm":"01101001", "tiles": [ {"tile":"130"} ] },
+    {"bm":"10010100", "tiles": [ {"tile":"113"} ] },
+    {"bm":"00101001", "tiles": [ {"tile":"112"} ] },
+    {"bm":"10010110", "tiles": [ {"tile":"149"} ] },
+    {"bm":"00101011", "tiles": [ {"tile":"151"} ] },
+    {"bm":"00010111", "tiles": [ {"tile":"86"} ] },
+    {"bm":"00000111", "tiles": [ {"tile":"85"} ] },
+    {"bm":"00001111", "tiles": [ {"tile":"83"} ] },
+          
     {"bm":"00001011", "tiles": [ {"tile":"80"}, {"tile":"81"} ] },
     {"bm":"00010110", "tiles": [ {"tile":"88"}, {"tile":"89"} ] },
     {"bm":"01101000", "tiles": [ {"tile":"92"}, {"tile":"93"} ] },
@@ -775,6 +822,8 @@ function CSmoothTerrain() {
   var _recursion_depth;
   var _chk_tile;
   var _smooth_map_char_cnt;
+  var _map_char;
+  var _big_flood;
 
   // Show Map Char for Debugging
   function showMapChar(tit) {
@@ -1258,6 +1307,7 @@ function CSmoothTerrain() {
       var _lightgrass = [0, 20, 40];
       var _darkgrass2 = [123, 124];
       var _tree =       [1, 2];
+      var _swamp =      [107, 167];
       var _bms;
 
       //printDebug('>> smoothWaterAndLand: started');
@@ -1277,6 +1327,9 @@ function CSmoothTerrain() {
           } else if (map_char[i][j] == level[4].char) {
             map_tile[i][j] = _tree[getRandomInt(0, _tree.length - 1)];
           }
+          else {
+            map_tile[i][j] = _swamp[getRandomInt(0, _swamp.length - 1)];
+          }
 
         }
       }
@@ -1284,12 +1337,31 @@ function CSmoothTerrain() {
       //printDebug('---');
       //showMapTile();
 
-      for (m = 0; m <= 1; m++) {
+      //for (m = 0; m <= 1; m++) {
+      for (m = 0; m <= 2; m++) {
+        /*
         if (m == 0) {
           _bms = bm_cf1_jungle_water_darkgrass;
         } else if (m == 1) {
           _bms = bm_cf1_jungle_lightgrass_darkgrass;
         }
+        */
+        /*
+        if (m == 0) {
+          _bms = bm_cf1_jungle_swamp_darkgrass;
+        } else if (m == 1) {
+          _bms = bm_cf1_jungle_lightgrass_darkgrass;
+        }
+        */
+        
+        if (m == 0) {
+          _bms = bm_cf1_jungle_water_darkgrass;
+        } else if (m == 1) {
+          _bms = bm_cf1_jungle_lightgrass_darkgrass;
+        } else if (m == 2) {
+          _bms = bm_cf1_jungle_swamp_darkgrass;
+        }
+        
         s_step = m;
         smoothWaterAndLandEach(_bms);
 	      printDebug('>> Smoothing water and land... Step ' + m);
@@ -1974,6 +2046,142 @@ function CSmoothTerrain() {
     */
   }
 
+  function floodLoop(x, y, dst_c, src_c) {
+    var fillL, fillR, i;  
+    var in_line = 1;  
+    //unsigned char c = src_c, fillC = dst_c;  
+  
+    /* find left side, filling along the way */  
+    fillL = fillR = x;  
+    while( in_line ) {  
+      _map_char[fillL][y] = dst_c;
+      
+      if ( (fillL == 0) && (y == 0) ) {
+        _big_flood = true;  
+      }
+      
+      fillL--;  
+      //in_line = (fillL < 0) ? 0 : (_map_char[fillL][y] == src_c);  
+
+      if (fillL < 0) {
+        in_line = 0;
+        //_big_flood = true;
+      }
+      else {
+        in_line = (_map_char[fillL][y] == src_c);
+      }
+    }  
+    fillL++;  
+
+    /* find right side, filling along the way */  
+    in_line = 1;  
+    while( in_line ) {  
+      _map_char[fillR][y] = dst_c;  
+      if ( (fillR == 0) && (y == 0) ) {
+        _big_flood = true;  
+      }
+
+      fillR++;  
+      //in_line = (fillR > map_col_num - 1 ) ? 0 : (_map_char[fillR][y] == src_c);  
+
+      if (fillR > map_col_num - 1 ) {
+        //_big_flood = true;
+        in_line = 0;        
+      }
+      else {
+        in_line = (_map_char[fillR][y] == src_c);
+      }
+    }  
+    fillR--;  
+
+    /* search top and bottom */  
+    for(i = fillL; i <= fillR; i++) {  
+      if ( (y > 0) && (_map_char[i][y - 1] == src_c) )  
+         floodLoop(i, y - 1, dst_c, src_c);  
+      if ( (y < map_row_num - 1) && (_map_char[i][y + 1] == src_c ) ) 
+         floodLoop(i, y + 1, dst_c, src_c);  
+    }   
+  }
+
+  function floodFill(x, y, c) {
+    floodLoop(x, y, c, _map_char[x][y]);  
+    _map_char[x][y] = c;  /* some buggy optimizers needed this line */   
+  }
+
+  function addSwamp() {
+    //floodFill(2, 2, '~');
+    //floodFill(25, 11, '~');
+    //floodFill(38, 19, '~');
+    //floodFill(40, 14, '~');
+    //showMapChar('>> Fill Flooded map char');
+
+    if ( (game_type == 'cf1') && (tile_type == 'jungle') ) {
+
+      /*
+      _map_char = map_char;
+      for (var j = 0; j <= map_row_num - 1; j++) {
+        for (var i = 0; i <= map_col_num - 1; i++) {
+          if ( _map_char[i][j] == '.' ) {
+            floodFill(i, j, '~');
+          }
+        }
+      }
+      map_char = _map_char;
+      */
+
+      ///*
+      //print('aaa');
+      for (var i = 0; i <= 31; i++) {
+        var x = getRandomInt(0, map_col_num - 1);
+        var y = getRandomInt(0, map_row_num - 1);
+
+        _big_flood = false;
+        //_map_char = map_char;
+
+        for (var _j = 0; _j <= map_row_num - 1; _j++) {
+          for (var _i = 0; _i <= map_col_num - 1; _i++) {
+            _map_char[_i][_j] = map_char[_i][_j];
+          }
+        }
+  
+        if (_map_char[x][y] == '.') {
+          floodFill(x, y, '~');
+          
+          if (_map_char[0][0] != '~') {
+            //map_char = _map_char;
+
+            for (var _j = 0; _j <= map_row_num - 1; _j++) {
+              for (var _i = 0; _i <= map_col_num - 1; _i++) {
+                map_char[_i][_j] = _map_char[_i][_j];
+              }
+            }    
+
+            //print(String(x) + ', ' + String(y));
+            break;  
+          }
+        }
+
+      }
+      //*/
+
+
+      showMapChar('>> Fill Flooded map char');
+
+      smooth_num = 4;      
+      smooth[0].char1 = '.'; smooth[0].char2 = '#';
+      smooth[1].char1 = '+'; smooth[1].char2 = '#';
+      smooth[2].char1 = '~'; smooth[2].char2 = '#';
+      smooth[3].char1 = 'T'; smooth[3].char2 = '#';
+      
+      /*
+      smooth[0].char1 = '~'; smooth[0].char2 = '#';
+      smooth[1].char1 = '+'; smooth[1].char2 = '#';
+      smooth[2].char1 = 'T'; smooth[2].char2 = '#';
+      */
+   }
+
+  }
+
   this.convertMapChar = function(_map_char) {
     var w, h;
   
@@ -2016,6 +2224,8 @@ function CSmoothTerrain() {
     tile_type = _tile_type;
 
     map_char = makeArray(_w, _h, '');
+    _map_char = makeArray(_w, _h, '');
+
     if (_mode == 'level') {
       map_level = makeArray(_w, _h, 0);
       for (i = 0; i <= _w - 1; i++) {
@@ -2038,11 +2248,11 @@ function CSmoothTerrain() {
       smooth_num = 3;
 
       level = new Array(level_num);
-      smooth = new Array(smooth_num);
+      smooth = new Array(smooth_num + 1);
       for (i = 0; i <= level_num - 1; i++) {
         level[i] = new TLevel();
       }
-      for (i = 0; i <= smooth_num - 1; i++) {
+      for (i = 0; i <= smooth_num - 1 + 1; i++) {
         smooth[i] = new TSmooth();
       }
 
@@ -2087,15 +2297,18 @@ function CSmoothTerrain() {
       smoothMapChar();
       printDebug('>> Smoothing map char... Done');
       showMapChar('>> Smoothed map char');
-
-	    printDebug('>> Smoothing water and land... Started');
-      smoothWaterAndLand();
-	    printDebug('>> Smoothing water and land... Done');
- 
-	    printDebug('>> Smoothing land and tree... Started');
-      smoothLandAndTree();
-      printDebug('>> Smoothing land and tree... Done');
     }
+
+    addSwamp();
+
+    printDebug('>> Smoothing water and land... Started');
+    smoothWaterAndLand();
+    printDebug('>> Smoothing water and land... Done');
+
+    printDebug('>> Smoothing land and tree... Started');
+    smoothLandAndTree();
+    printDebug('>> Smoothing land and tree... Done');
+
 
     if (programMode == 'release') {
       OpenFodder.printSmall('DONE', 0, 160, true);
@@ -2654,6 +2867,7 @@ var _map_char = [
 ];
 */
 
+/*
 var _map_char = [
 '................................................................',
 '................................................................',
@@ -2720,7 +2934,43 @@ var _map_char = [
 '................................................................',
 '................................................................',
 ];
+*/
 
+var _map_char = [
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................################################................',
+  '................################################................',
+  '................####...........#################................',
+  '................####...........#################................',
+  '................####...........#################................',
+  '................####...........#################................',
+  '................####...........#################................',
+  '................################################................',
+  '................################################................',
+  '................################################................',
+  '................################...........#####................',
+  '................################...........#####................',
+  '................################...........#####................',
+  '................################...........#####................',
+  '................################...........#####................',
+  '................################################................',
+  '................################################................',
+  '................################################................',
+  '................################################................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  ];
+  
 var st = new CSmoothTerrain();
 var map_char = st.convertMapChar(_map_char);
 var w = _map_char[0].length;
