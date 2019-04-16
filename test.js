@@ -5,8 +5,6 @@ Scenario.Testing = {
 
 		Scenario.Random.Start(pMissionNumber, pPhaseNumber);
 
-		Structures.PlaceBarracks( new cPosition(16,16), "soldier");
-
     },
 
     Settings: function(pMissionNumber, pPhaseNumber) {
