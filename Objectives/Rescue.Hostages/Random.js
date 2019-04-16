@@ -17,12 +17,11 @@ Objectives.RescueHostages.CreateTent = function() {
 
 		print("Placing rescue tent");
 		// TODO: Loop all known groups
-		// Find a position for the tent which is more than 10 away from the first hostage group
 		do {
 			Position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 1, false);
 			++Attempts;
-		} while( Map.getDistanceBetweenPositions(Session.HostageGroupPositions[0], Position) < 10 && Attempts < 10);
-		
+		} while( Map.getDistanceBetweenPositions(Session.HostageGroupPositions[0], Position) < Settings.GetMinimumDistance("hostage", "tent") && Attempts < 10);
+
 		if(Attempts == 10) 
 			print("Failed finding location for rescue tent, placing anyway");
 

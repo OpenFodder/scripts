@@ -28,13 +28,34 @@ var Settings = {
         Max: 8
     },
 
+    BuildingsCivilianCount: {
+        hut: {
+            civilian: 1,
+            civilian_spear: 1,
+            civilian_rescue: 0
+        }
+    },
+
+    BuildingsEnemyCount: {
+        barracks: {
+            soldier: 1,
+            soldier_reinforced: 0
+        },
+        bunker: {
+            soldier: 0,
+        },
+        hut: {
+            soldier: 0,
+        }
+    },
+
     /**
      * Minimum distance between same type structures if not defined
      */
     MinimumDistanceDefault: 100,
 
     /**
-     * Minimum distances for structures
+     * Minimum distances for objects
      */
     MinimumDistances: {
 
@@ -47,11 +68,30 @@ var Settings = {
         },
 
         hut: {
+            /**
+             * @var {number} civilian Minimum distance between each home
+             */
+            civilian: 100,
 
             /**
-             * @var {number} civilian_rescue Minimum distance between each civilian and home
+             * @var {number} civilian_rescue Minimum distance between each home
              */
-            civilian_rescue: 150
+            civilian_rescue: 150,
+        },
+
+        civilian: {
+            /**
+             * @var {number} to_rescue Minimum distance between a civilian and a civilian_rescue hut
+             */
+            rescue: 150
+        },
+
+        hostage: {
+
+            /**
+             * @var {number} tent: Minimum distance between a hostage and the rescue tent
+             */
+            tent: 150
         }
 
     },
@@ -121,6 +161,27 @@ var Settings = {
 
         // Randomise the terrain algorithm settings
         this.RandomNoise();
+
+        this.RandomBuildings();
+    },
+
+    getCalculatedArea: function() {
+        return Settings.Width * Settings.Height;
+    },
+
+    /**
+     * Setup the number of buildings placed based on the area
+     */
+    RandomBuildings: function() {
+
+        this.BuildingsEnemyCount.barracks.soldier = Math.floor(this.getCalculatedArea() / 1200);
+        this.BuildingsEnemyCount.barracks.soldier_reinforced = 0;
+        this.BuildingsEnemyCount.bunker.soldier = 0;
+        this.BuildingsEnemyCount.hut.soldier = 0;
+
+        this.BuildingsCivilianCount.hut.civilian = Math.floor(this.getCalculatedArea() / 400);
+        this.BuildingsCivilianCount.hut.civilian_spear = Math.floor(this.getCalculatedArea() / 2400);
+        this.BuildingsCivilianCount.hut.civilian_rescue = 0;
     },
 
     /**
@@ -324,23 +385,23 @@ var Settings = {
      */
     GetHostageCount: function() {
         // TODO: Algorithm to decide number of hostage group
-        return 4;
+        return Math.floor(Math.min(Map.getArea() / 900, 1));
     },
 
     /**
      * Number of hostages per placement
      */
     GetHostageGroupSize: function() {
-        // TODO: Algorithm to decide number of hostages per group
-        return 1;
+
+        return Map.getRandomInt(1,3);
     },
 
     /**
      * Number of enemies which should be placed
      */
     GetEnemyCount: function() {
-        // TODO: Algorithm to decide number of enemys
-        return 10;
+
+        return Math.floor(Math.min(Map.getArea() / 900, 1));;
 
     },
 
@@ -348,33 +409,16 @@ var Settings = {
      * Number of enemy buildings to be placed
      */
     GetEnemyBuildingCount: function() {
-        // TODO: Algorithm to decide number of buildings
-        return {
-                "barracks": {
-                    "soldier": 2,
-                    "soldier_reinforced": 0
-                },
-                "bunker":   {
-                    "soldier": 0
-                },
-                "hut":      {
-                    "soldier": 0
-                },
-            };
+
+        return this.BuildingsEnemyCount;
     },
 
     /**
      * Get the civilian buildings to be placed
      */
     GetCivilianBuildingCount: function() {
-        // TODO: Algorithm to decide number of buildings
-        return {
-            "hut":  {
-                "civilian": 3,
-                "civilian_spear": 1,
-                "civilian_rescue": 0
-            },
-        };
+
+        return this.BuildingsCivilianCount;
     },
 
     /**

@@ -186,7 +186,7 @@ var Structures = {
     },
 
     /**
-     * 
+     *
      * @param {object} pBuildings
      */
     PlaceBuildings: function(pBuildings) {
