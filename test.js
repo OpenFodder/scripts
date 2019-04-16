@@ -4,6 +4,7 @@ OpenFodder.start();
 //createSmallMap();
 
 OpenFodder.createPhases(1, Scenario.Random);
+//OpenFodder.createPhases(1, Scenario.Random.Start, Scenario.RandomSmall.Settings);
 
 
 //OpenFodder.createMissions(2, [1, 2], createMapContent);

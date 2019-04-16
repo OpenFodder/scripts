@@ -17,10 +17,11 @@ var OpenFodder = {
      *  Call the content creation function
      *  Validate the map/objectives are completable
      *
+     * @param {number} pMissionNumber
      * @param {number} pPhaseNumber
      * @param {Object|Function} pScenario
      */
-    createPhase: function(pPhaseNumber, pScenario) {
+    createPhase: function(pMissionNumber, pPhaseNumber, pScenario) {
         var Phase = this.getNextPhase();
         Phase.map = mapname + "p" + pPhaseNumber;
         Phase.SetAggression(Settings.Aggression.Min, Settings.Aggression.Max);
@@ -34,11 +35,11 @@ var OpenFodder = {
 
         // If a callable function was passed, call it
         if( pScenario && {}.toString.call(pScenario) === '[object Function]') {
-            pScenario(pPhaseNumber);
+            pScenario(pMissionNumber, pPhaseNumber);
         } else {
 
             // Otherwise its a scenario object
-            pScenario.Start(pPhaseNumber);
+            pScenario.Start(pMissionNumber, pPhaseNumber);
         }
 
         Validation.ValidateMap();
@@ -47,7 +48,7 @@ var OpenFodder = {
     /**
      * Create a number of phases in the current mission
      *
-     * @param {number}   pCount            Number of phases in the current mission
+     * @param {number} PhaseNumber         Number of phases in the current mission
      * @param {Object|Function} pScenario  Called during creation of the map
      * @param {function} pPrepareSettings  Called during initialisation of the phase
      *
@@ -55,23 +56,24 @@ var OpenFodder = {
     createPhases: function(pTotalPhases, pScenario, pPrepareSettings) {
         var Campaign = Engine.getCampaign();
         OpenFodder.printSmall("Creating Phases", 0, 55);
-        mapname = "m" + Campaign.getMissions().length;
+        var MissionNumber = Campaign.getMissions().length;
+        mapname = "m" + MissionNumber;
 
-        for(var count = 0; count < pTotalPhases; ++count) {
+        for(var PhaseNumber = 0; PhaseNumber < pTotalPhases; ++PhaseNumber) {
 
             // If we received scenario object, call its settings function
             if( pScenario && {}.toString.call(pScenario) === '[object Object]' && pPrepareSettings === undefined) {
-                pScenario.Settings(count);
+                pScenario.Settings(MissionNumber, PhaseNumber);
             } else {
 
                 // Otherwise, check pPrepareSettings
                 if(pPrepareSettings === undefined)
-                    Scenario.Settings(count);
+                    Scenario.Settings(MissionNumber, PhaseNumber);
                 else
-                    pPrepareSettings(count);
+                    pPrepareSettings(MissionNumber, PhaseNumber);
             }
 
-            this.createPhase(count, pScenario);
+            this.createPhase(MissionNumber, PhaseNumber, pScenario);
         }
     },
 

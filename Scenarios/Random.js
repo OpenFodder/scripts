@@ -33,13 +33,26 @@ Scenario.Random = {
     },
 
     Settings: function(pMissionNumber, pPhaseNumber) {
-       // Settings.FromSeed(-28133);
         Settings.Random();
-        /*Settings.Width = 40;
-        Settings.Height = 40;
-        Settings.TerrainType = Terrain.Types.Jungle;
-
-        Settings.RandomUpdate();*/
-        //Settings.setObjectives( [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings] );
     }
 };
+
+Scenario.RandomSmall = {
+
+    Start: function(pMissionNumber, pPhaseNumber) {
+
+        Scenario.Random.Start(pMissionNumber, pPhaseNumber);
+    },
+
+    Settings: function(pMissionNumber, pPhaseNumber) {
+       //Settings.FromSeed(-28133);
+       Settings.Random();
+       Settings.Width = 40;
+       Settings.Height = 40;
+       Settings.TerrainType = Terrain.Types.Jungle;
+
+       Settings.RandomUpdate();
+       Settings.setObjectives( [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings] );
+    }
+}
+
