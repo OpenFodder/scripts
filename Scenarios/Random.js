@@ -27,7 +27,7 @@ Scenario.Random = {
         }
 
         Structures.PlaceBuildings(Settings.GetCivilianBuildingCount());
-    
+
         Weapons.RandomGrenades(Settings.GetMinimumGrenades());
         Weapons.RandomRockets(Settings.GetMinimumRockets() / 2);
     },

@@ -1,9 +1,34 @@
 
+Scenario.Testing = {
+
+    Start: function(pMissionNumber, pPhaseNumber) {
+
+		Scenario.Random.Start(pMissionNumber, pPhaseNumber);
+
+		Structures.PlaceBarracks( new cPosition(16,16), "soldier");
+
+    },
+
+    Settings: function(pMissionNumber, pPhaseNumber) {
+       //Settings.FromSeed(1);
+       Settings.Random();
+       Settings.Width = 40;
+       Settings.Height = 40;
+       Settings.TerrainType = Terrain.Types.Jungle;
+
+       Settings.RandomUpdate();
+       Settings.setObjectives( [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings] );
+    }
+}
+
+
+
+
 OpenFodder.start();
 //OpenFodder.createPhases(1, Scenario.Random);
 //createSmallMap();
 
-OpenFodder.createPhases(1, Scenario.Random);
+OpenFodder.createPhases(1, Scenario.Testing);
 //OpenFodder.createPhases(1, Scenario.Random.Start, Scenario.RandomSmall.Settings);
 
 
