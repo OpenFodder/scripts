@@ -28,6 +28,14 @@ var Settings = {
         Max: 8
     },
 
+    /**
+     * Minimum distance between same type structures if not defined
+     */
+    BuildingsDistanceMinimum: 100,
+
+    /**
+     * Number and type of civilian buildings to be created
+     */
     BuildingsCivilianCount: {
         hut: {
             civilian: 1,
@@ -36,6 +44,9 @@ var Settings = {
         }
     },
 
+    /**
+     * Nunmber and type of enemy buildings to be created
+     */
     BuildingsEnemyCount: {
         barracks: {
             soldier: 1,
@@ -50,14 +61,9 @@ var Settings = {
     },
 
     /**
-     * Minimum distance between same type structures if not defined
-     */
-    MinimumDistanceDefault: 100,
-
-    /**
      * Minimum distances for objects
      */
-    MinimumDistances: {
+    ObjectMinimumDistance: {
 
         barracks: {
 
@@ -165,6 +171,9 @@ var Settings = {
         this.RandomBuildings();
     },
 
+    /**
+     * Total number of tiles the map will have
+     */
     getCalculatedArea: function() {
         return Settings.Width * Settings.Height;
     },
@@ -440,13 +449,13 @@ var Settings = {
      * @param {string} pTargetName
      */
     GetMinimumDistance: function(pObjectName, pTargetName) {
-        var Obj = this.MinimumDistances[pObjectName.toLowerCase()];
+        var Obj = this.ObjectMinimumDistance[pObjectName.toLowerCase()];
         if( Obj === undefined )
-            return this.MinimumDistanceDefault;
+            return this.BuildingsDistanceMinimum;
 
         var Target = Obj[pTargetName.toLowerCase()];
         if( Target === undefined)
-            return this.MinimumDistanceDefault;
+            return this.BuildingsDistanceMinimum;
 
         return Target;
     }
