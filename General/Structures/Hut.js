@@ -1,7 +1,7 @@
 Structures.Jungle.Hut = {
 
     StructFindTile: [
-        Terrain.Jungle.Mainland,
+        Terrain.Jungle.Mainland.concat(Terrain.Jungle.Borderland),
     ],
 
     Struct: [

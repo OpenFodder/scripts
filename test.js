@@ -7,8 +7,9 @@ Scenario.Testing = {
     },
 
     Settings: function(pMissionNumber, pPhaseNumber) {
-       Settings.FromSeed(1);
-       Settings.Random();
+       //Settings.FromSeed(3);
+	   Settings.Random();
+	   return;
        Settings.Width = 40;
        Settings.Height = 40;
        Settings.TerrainType = Terrain.Types.Jungle;

@@ -1,6 +1,6 @@
 Structures.Jungle.Barracks = {
     StructFindTile: [
-        Terrain.Jungle.Mainland,
+        Terrain.Jungle.Mainland.concat(Terrain.Jungle.Borderland),
     ],
 
     Struct: [

@@ -178,16 +178,18 @@ var Structures = {
 
         for(var x = 0; x < pCount; ++x) {
 
-            //StructInfo.StructFindTile
-
             // Get the positions of the existing similar type structures
             existingPositions = this.GetStructPositions(pStructType);
 
-            if(StructInfo.StructFindTile.length) {
-                x = Map.getRandomInt(0, StructInfo.StructFindTile.length - 1);
-                position = Positioning.PositionOnTilesAwayFrom(StructInfo.StructFindTile[x], 3, existingPositions, pMinDistance );
+            var position = new cPosition(-1, -1);
 
-            } else {
+            if(StructInfo.StructFindTile.length) {
+                var type = Map.getRandomInt(0, StructInfo.StructFindTile.length - 1);
+                position = Positioning.PositionOnTilesAwayFrom(StructInfo.StructFindTile[type], 3, existingPositions, pMinDistance );
+            }
+
+            if(position.x == -1 || position.y == -1) {
+                print("Fallback position find to flatground");
                 position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 4, existingPositions, pMinDistance );
             }
 
