@@ -52,7 +52,23 @@ var Structures = {
 			default:
 				return Structures.Jungle;
 		}
-	},
+    },
+
+    GetStructInfo: function(pStructType) {
+        Struct = this.GetCurrent();
+
+        switch(pStructType.toLowerCase()) {
+            case "barracks":
+                return Struct.Barracks;
+            case "hut":
+                return Struct.Hut;
+            case "bunker":
+                return Struct.Bunker;
+            default:
+                print("Invalid structure: " + pStructType);
+                break;
+        }
+    },
 
     /**
      * 
@@ -79,17 +95,18 @@ var Structures = {
      * Place a structure
      *
      * @param {cPosition} pPosition
-     * @param {sStructure} pStructure 
+     * @param {sStructure} pStructure
+     * @param {string} pStructSet
      * @param {string} pSpriteSet
      */
-    Place: function(pPosition, pStructure, pSpriteSet) {
+    Place: function(pPosition, pStructure, pStructSet, pSpriteSet) {
         TileX = Math.floor(pPosition.x / 16);
         TileY = Math.floor(pPosition.y / 16);
 
         if(pStructure === undefined || pStructure.Struct === undefined || pStructure.Types === undefined)
             return;
 
-        Struct = pStructure.Struct;
+        Struct = pStructure.Struct[pStructSet];
         Sprites = pStructure.Types[pSpriteSet.toLowerCase()];
 
         if(Sprites === undefined && pSpriteSet !== "") {
@@ -116,7 +133,7 @@ var Structures = {
      */
     PlaceHut: function(pPosition, pHutType) {
         Struct = this.GetCurrent();
-        this.Place(pPosition, Struct.Hut, pHutType);
+        this.Place(pPosition, Struct.Hut, 0, pHutType);
         Session.HutPositions.push(pPosition);
     },
 
@@ -128,7 +145,7 @@ var Structures = {
      */
     PlaceBarracks: function(pPosition, pSpriteSet) {
         Struct = this.GetCurrent();
-        this.Place(pPosition, Struct.Barracks, pSpriteSet);
+        this.Place(pPosition, Struct.Barracks, 0, pSpriteSet);
         Session.BarracksPositions.push(pPosition);
     },
 
@@ -140,7 +157,7 @@ var Structures = {
      */
     PlaceBunker: function(pPosition, pSpriteSet) {
         Struct = this.GetCurrent();
-        this.Place(pPosition, Struct.Bunker, pSpriteSet);
+        this.Place(pPosition, Struct.Bunker, 0, pSpriteSet);
         Session.BunkerPositions.push(pPosition);
     },
 
@@ -157,30 +174,27 @@ var Structures = {
         if(pMinDistance === undefined)
             var pMinDistance = Settings.GetMinimumDistance(pStructType, pSpriteType);
 
+        var StructInfo = this.GetStructInfo(pStructType);
+
         for(var x = 0; x < pCount; ++x) {
+
+            //StructInfo.StructFindTile
 
             // Get the positions of the existing similar type structures
             existingPositions = this.GetStructPositions(pStructType);
-            position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 3, existingPositions, pMinDistance );
+
+            if(StructInfo.StructFindTile.length) {
+                x = Map.getRandomInt(0, StructInfo.StructFindTile.length - 1);
+                position = Positioning.PositionOnTilesAwayFrom(StructInfo.StructFindTile[x], 3, existingPositions, pMinDistance );
+
+            } else {
+                position = Positioning.PositionAwayFrom(Terrain.Features.FlatGround(), 4, existingPositions, pMinDistance );
+            }
 
             if(position.x != -1 && position.y != -1) {
-                Struct = this.GetCurrent();
                 existingPositions.push(position);
 
-                switch(pStructType.toLowerCase()) {
-                    case "barracks":
-                        this.Place(position, Struct.Barracks, pSpriteType);
-                        break;
-                    case "hut":
-                        this.Place(position, Struct.Hut, pSpriteType);
-                        break;
-                    case "bunker":
-                        this.Place(position, Struct.Bunker, pSpriteType);
-                        break;
-                    default:
-                        print("Invalid structure: " + pStructType);
-                        break;
-                }
+                this.Place(position, StructInfo, 0, pSpriteType);
             }
         }
     },

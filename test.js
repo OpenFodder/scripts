@@ -4,11 +4,10 @@ Scenario.Testing = {
     Start: function(pMissionNumber, pPhaseNumber) {
 
 		Scenario.Random.Start(pMissionNumber, pPhaseNumber);
-
     },
 
     Settings: function(pMissionNumber, pPhaseNumber) {
-       //Settings.FromSeed(1);
+       Settings.FromSeed(1);
        Settings.Random();
        Settings.Width = 40;
        Settings.Height = 40;
@@ -18,8 +17,6 @@ Scenario.Testing = {
        Settings.setObjectives( [Objectives.KillAllEnemy, Objectives.DestroyEnemyBuildings] );
     }
 }
-
-
 
 
 OpenFodder.start();

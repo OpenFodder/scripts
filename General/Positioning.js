@@ -40,9 +40,9 @@ var Positioning = {
     /**
      * Find a position on the map which has 'pTerrainFeatures' in 'Radius' atleast 'pDistance' away from all positions in 'pPositions'
      *
-     * @param {Array<number>} pTerrainFeatures 
-     * @param {number} pRadius 
-     * @param {cPosition} pPositions 
+     * @param {Array<number>} pTerrainFeatures
+     * @param {number} pRadius
+     * @param {cPosition} pPositions
      * @param {number} pDistance
      * @param {number} pMaxAttempts 
      *
@@ -62,6 +62,50 @@ var Positioning = {
         // Find a position
         do {
             Position = Map.getRandomXYByFeatures(pTerrainFeatures, pRadius, false);
+            found = true;
+
+            // Ensure its away from the current placements
+            for(var count = 0; count < pPositions.length; ++count) {
+                Distance = Map.getDistanceBetweenPositions(Position, pPositions[count]);
+                if(Distance < pDistance)
+                    found = false;    
+            }
+            ++Attempts;
+        } while(found == false && Attempts < pMaxAttempts);
+
+        if(Attempts >= pMaxAttempts) {
+            Position = new cPosition(-1, -1);
+            print("Failed to find a position");
+        }
+
+        return Position;
+    },
+
+    /**
+     * Find a position on the map which has 'pTileIDs' in 'Radius' atleast 'pDistance' away from all positions in 'pPositions'
+     *
+     * @param {Array<number>} pTileIDs
+     * @param {number} pRadius
+     * @param {cPosition} pPositions
+     * @param {number} pDistance
+     * @param {number} pMaxAttempts 
+     *
+     * @return cPosition
+     */
+    PositionOnTilesAwayFrom: function(pTileIDs, pRadius, pPositions, pDistance, pMaxAttempts) {
+        found = false;
+        Attempts = 0;
+        Distance = [];
+
+        // Default parameters
+        if(pMaxAttempts === undefined)
+            pMaxAttempts = 20;
+        if(pDistance === undefined)
+            pDistance = 10;
+
+        // Find a position
+        do {
+            Position = Map.getRandomXYByTileID(pTileIDs, pRadius);
             found = true;
 
             // Ensure its away from the current placements
