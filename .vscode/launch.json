@@ -19,6 +19,18 @@
             "program": "${workspaceFolder}\\..\\..\\Projects\\VS2017\\Release\\OpenFodder.exe",
             "cwd": "${workspaceFolder}\\..\\..\\Run",
             "args": ["--window","--window-scale" ,"1", "--skipintro", "--cheats", "--random", "--columns", "151", "--rows","90", "--script", "Scenario/Intro.js"],
+        },
+        {
+            "name"        : "Duk Attach",
+            "type"        : "duk",
+            "request"     : "attach",
+            "stopOnEntry" : false,
+
+            "address"     : "localhost",
+            "port"        : 9091,
+            "debugLog" : true,
+
+            "localRoot"   : "${workspaceRoot}",
         }
     ]
 }
