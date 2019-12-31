@@ -22,7 +22,7 @@
  *
  */
 
-const version = '0.70.beta8';
+const version = '0.70.beta9';
 
 //const programMode = 'debug';
 const programMode = 'release';
@@ -1315,7 +1315,7 @@ function CSmoothTerrain() {
       // init
       for (j = 0; j <= map_row_num - 1; j++) {
         for (i = 0; i <= map_col_num - 1; i++) {
-          //map_tile[i][j] = 0;
+          map_tile[i][j] = 123;
           if (map_char[i][j] == level[0].char) {
             map_tile[i][j] = _water[getRandomInt(0, _water.length - 1)];
           } else if (map_char[i][j] == level[1].char) {
@@ -1326,8 +1326,7 @@ function CSmoothTerrain() {
             map_tile[i][j] = _darkgrass2[getRandomInt(0, _darkgrass2.length - 1)];
           } else if (map_char[i][j] == level[4].char) {
             map_tile[i][j] = _tree[getRandomInt(0, _tree.length - 1)];
-          }
-          else {
+          } else if (map_char[i][j] == '~') {
             map_tile[i][j] = _swamp[getRandomInt(0, _swamp.length - 1)];
           }
 
