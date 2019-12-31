@@ -215,12 +215,12 @@ var Settings = {
         if(Map.getRandomInt(0, 1) == 1)
             this.addObjective(Objectives.DestroyEnemyBuildings);
 
-            // Either Rescue or get civilian home
-        if(Map.getRandomInt(0, 1) == 1) {
-            this.addObjective(Objectives.RescueHostages);
-        } else {
-            if(Map.getRandomInt(0, 1) == 1)
+        // Either Rescue or get civilian home
+        if(Map.getRandomInt(0, 15) == 1) {
+            if(Map.getRandomInt(0, 1) == 0)
                 this.addObjective(Objectives.GetCivilianHome);
+			else
+				this.addObjective(Objectives.RescueHostages);
         }
     },
 
