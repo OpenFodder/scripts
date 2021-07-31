@@ -167,6 +167,15 @@ var Settings = {
         this.RandomUpdate();
     },
 
+	RandomEditor: function() {
+		this.Width = Map.getWidth();
+		this.Height = Map.getHeight();
+		
+		this.TerrainAlgorithm = this.TerrainAlgorithms[Map.getRandomInt(0, 2)];
+        this.TerrainType = Map.getTileType();
+		this.RandomNoise();
+	},
+	
     /**
      * Randomise items based on map parameters (should be called after changing map width/height)
      */
