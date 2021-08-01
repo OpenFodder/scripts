@@ -173,7 +173,6 @@ var Settings = {
 		
 		this.TerrainAlgorithm = this.TerrainAlgorithms[Map.getRandomInt(0, 2)];
         this.TerrainType = Map.getTileType();
-		this.RandomNoise();
 	},
 	
     /**

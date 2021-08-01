@@ -3,7 +3,6 @@ Scenario.MapEditor = {
 
     Start: function(pMissionNumber, pPhaseNumber) {
 
-		Scenario.Random.Start(pMissionNumber, pPhaseNumber);
     },
 
     Settings: function(pMissionNumber, pPhaseNumber) {
@@ -13,4 +12,7 @@ Scenario.MapEditor = {
 }
 
 OpenFodder.start();
-OpenFodder.createPhases(1, Scenario.MapEditor);
+
+Settings.RandomEditor();
+OpenFodder.createMap();
+Settings.RandomNoise();
