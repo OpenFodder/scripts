@@ -1,3 +1,20 @@
+var SETTINGS_DEFAULT_MINIMUM_DISTANCE = 100;
+var SETTINGS_OBJECT_MINIMUM_DISTANCE = {
+    barracks: {
+        soldier: 100
+    },
+    hut: {
+        civilian: 100,
+        civilian_rescue: 150
+    },
+    civilian: {
+        rescue: 150
+    },
+    hostage: {
+        tent: 150
+    }
+};
+
 var Settings = {
 
     /**
@@ -29,103 +46,55 @@ var Settings = {
     },
 
     /**
-     * Minimum distance between same type structures if not defined
-     */
-    BuildingsDistanceMinimum: 100,
-
-    /**
-     * Number and type of civilian buildings to be created
-     */
-    BuildingsCivilianCount: {
-        hut: {
-            civilian: 1,
-            civilian_spear: 1,
-            civilian_rescue: 0
-        }
-    },
-
-    /**
-     * Nunmber and type of enemy buildings to be created
-     */
-    BuildingsEnemyCount: {
-        barracks: {
-            soldier: 1,
-            soldier_reinforced: 0
-        },
-        bunker: {
-            soldier: 0,
-        },
-        hut: {
-            soldier: 0,
-        }
-    },
-
-    /**
-     * Minimum distances for objects
-     */
-    ObjectMinimumDistance: {
-
-        barracks: {
-
-            /**
-             * @var {number} soldier Minimum distance between each enemy barracks
-             */
-            soldier: 100
-        },
-
-        hut: {
-            /**
-             * @var {number} civilian Minimum distance between each home
-             */
-            civilian: 100,
-
-            /**
-             * @var {number} civilian_rescue Minimum distance between each home
-             */
-            civilian_rescue: 150,
-        },
-
-        civilian: {
-            /**
-             * @var {number} to_rescue Minimum distance between a civilian and a civilian_rescue hut
-             */
-            rescue: 150
-        },
-
-        hostage: {
-
-            /**
-             * @var {number} tent: Minimum distance between a hostage and the rescue tent
-             */
-            tent: 150
-        }
-
-    },
-
-    /**
      * @var {Array<number>} Objectives
      */
     Objectives: [],
 
     /**
-     *
-     */
-    TerrainAlgorithms: ["islands", "simplex", "diamondsquare"],
-
-    /**
-     * @var {string}
-     */
-    TerrainAlgorithm: "islands",
-
-    /**
-     * @var {object}
-     */
-    TerrainSettings: {},
-
-    /**
      * @var {number} seed The initial seed
      */
     Seed: 0,
+
+    /**
+     * Multiplayer match settings copied from the synced C++ lobby state.
+     */
+    Multiplayer: {
+        Enabled: false,
+        Mode: 0,
+        MapSeed: 0,
+        PlayerCount: 1,
+        TeamCount: 1,
+        TeamSize: 1,
+        SquadTroopsPerTeam: 4,
+        KillLimit: 0,
+        TimeLimitSeconds: 0,
+        FriendlyFire: false,
+        MapSize: NetworkMapSizes.Medium,
+        Terrain: NetworkMapTerrains.Jungle,
+        VehicleSet: NetworkVehicleSets.None,
+        PickupDensity: NetworkPickupDensities.Normal,
+        CoverDensity: NetworkCoverDensities.Normal,
+        TerrainSub: 0,
+        ObjectiveType: "none",
+        PickupSets: 2
+    },
+
+    /**
+     * Campaign random-map settings copied from the C++ options screen.
+     */
+    RandomMap: {
+        Enabled: false,
+        Seed: 0,
+        MapSize: NetworkMapSizes.Medium,
+        MapSizeExplicit: false,
+        Terrain: NetworkMapTerrains.Jungle,
+        VehicleSet: NetworkVehicleSets.None,
+        PickupDensity: NetworkPickupDensities.Normal,
+        CoverDensity: NetworkCoverDensities.Normal,
+        TerrainSub: 0,
+        Profile: NetworkMapProfiles.Jungle,
+        ProfileName: ""
+    },
 
     /**
      * Randomise a settings with a specific seed
@@ -149,87 +118,259 @@ var Settings = {
     },
 
     /**
-     * Randomize all settings
+     * Copy network match settings into the script layer.
+     */
+    ConfigureMultiplayerFromEngine: function() {
+        this.Multiplayer.Enabled = Engine.networkEnabled();
+        this.Multiplayer.Mode = Engine.networkGameMode();
+        this.Multiplayer.MapSeed = Engine.networkMapSeed();
+        this.Multiplayer.PlayerCount = Engine.networkPlayerCount();
+        this.Multiplayer.TeamCount = Engine.networkTeamCount();
+        this.Multiplayer.TeamSize = Engine.networkTeamSize();
+        this.Multiplayer.KillLimit = Engine.networkKillLimit();
+        this.Multiplayer.TimeLimitSeconds = Engine.networkTimeLimitSeconds();
+        this.Multiplayer.FriendlyFire = Engine.networkFriendlyFire();
+        this.Multiplayer.MapSize = Engine.networkMapSize();
+        this.Multiplayer.Terrain = Engine.networkMapTerrain();
+        this.Multiplayer.TerrainSub = Engine.networkMapTerrainSub ? Engine.networkMapTerrainSub() : 0;
+        this.Multiplayer.VehicleSet = Engine.networkVehicleSet();
+        this.Multiplayer.PickupDensity = Engine.networkPickupDensity();
+        this.Multiplayer.CoverDensity = Engine.networkCoverDensity();
+        this.Multiplayer.SquadTroopsPerTeam = 4;
+
+        if(this.Multiplayer.Mode == NetworkModes.RescuePrisoner)
+            this.Multiplayer.ObjectiveType = "rescue_prisoner";
+        else
+            this.Multiplayer.ObjectiveType = "none";
+
+        if(this.Multiplayer.MapSeed)
+            Engine.getMap().seed = this.Multiplayer.MapSeed;
+
+        this.Seed = Engine.getMap().seed;
+    },
+
+    /**
+     * Copy campaign random-map settings into the script layer.
+     */
+    ConfigureRandomMapFromEngine: function() {
+        this.RandomMap.Enabled = Engine.randomMapOptionsEnabled();
+        this.RandomMap.Seed = Engine.randomMapSeed();
+        this.RandomMap.MapSize = Engine.randomMapSize();
+        this.RandomMap.MapSizeExplicit = Engine.randomMapSizeExplicit ? Engine.randomMapSizeExplicit() : false;
+        this.RandomMap.Terrain = Engine.randomMapTerrain();
+        this.RandomMap.TerrainSub = Engine.randomMapTerrainSub ? Engine.randomMapTerrainSub() : 0;
+        this.RandomMap.VehicleSet = Engine.randomMapVehicleSet();
+        this.RandomMap.PickupDensity = Engine.randomMapPickupDensity();
+        this.RandomMap.CoverDensity = Engine.randomMapCoverDensity();
+        this.RandomMap.Profile = Engine.randomMapProfile();
+        this.RandomMap.ProfileName = Engine.randomMapProfileName ? Engine.randomMapProfileName() : "";
+
+        if(this.RandomMap.Enabled && this.RandomMap.Seed)
+            Engine.getMap().seed = this.RandomMap.Seed;
+
+        this.Seed = Engine.getMap().seed;
+    },
+
+    /**
+     * Apply one of the network/random-map size presets to Settings.Width/Height.
+     */
+    ApplyMapSize: function(pMapSize) {
+        switch(pMapSize) {
+            case NetworkMapSizes.Small:
+                this.Width = 56;
+                this.Height = 44;
+                break;
+
+            case NetworkMapSizes.Large:
+                this.Width = 96;
+                this.Height = 72;
+                break;
+
+            case NetworkMapSizes.ExtraLarge:
+                this.Width = 128;
+                this.Height = 96;
+                break;
+
+            default:
+                this.Width = 72;
+                this.Height = 56;
+                break;
+        }
+    },
+
+    /**
+     * Convert engine/menu terrain selection into script terrain type.
+     */
+    TerrainTypeForNetworkTerrain: function(pTerrain) {
+        switch(pTerrain) {
+            case NetworkMapTerrains.Random:
+                return Map.getRandomInt(Terrain.Types.Jungle, Terrain.Types.Moors);
+
+            case NetworkMapTerrains.Desert:
+                return Terrain.Types.Desert;
+
+            case NetworkMapTerrains.Ice:
+                return Terrain.Types.Ice;
+
+            case NetworkMapTerrains.Moors:
+                return Terrain.Types.Moors;
+
+            default:
+                return Terrain.Types.Jungle;
+        }
+    },
+
+    /**
+     * Apply terrain and terrain-sub selection. TerrainSub is meaningful only
+     * for jungle/beach maps.
+     */
+    ApplyTerrainSelection: function(pTerrain, pTerrainSub) {
+        this.TerrainType = this.TerrainTypeForNetworkTerrain(pTerrain);
+        this.TerrainTypeSub = this.TerrainType == Terrain.Types.Jungle ? (pTerrainSub || 0) : 0;
+    },
+
+    /**
+     * Apply campaign random-map menu settings after the profile has chosen
+     * its base values.
+     */
+    ApplyRandomMapOptions: function() {
+        if(!this.RandomMap.Enabled)
+            return;
+
+        this.ApplyMapSize(this.RandomMap.MapSize);
+        this.ApplyTerrainSelection(this.RandomMap.Terrain, this.RandomMap.TerrainSub);
+    },
+
+    /**
+     * Apply deterministic defaults for generated multiplayer maps.
+     */
+    ApplyMultiplayerDefaults: function() {
+        this.ApplyMapSize(this.Multiplayer.MapSize);
+        this.ApplyTerrainSelection(this.Multiplayer.Terrain, this.Multiplayer.TerrainSub);
+        this.SetAggressionRange(0, 0);
+        this.setObjectives([]);
+
+        switch(this.Multiplayer.PickupDensity) {
+            case NetworkPickupDensities.Low:
+                this.Multiplayer.PickupSets = Math.max(1, Math.floor(this.Multiplayer.TeamCount / 2));
+                break;
+
+            case NetworkPickupDensities.High:
+                this.Multiplayer.PickupSets = Math.max(4, this.Multiplayer.TeamCount * 2);
+                break;
+
+            default:
+                this.Multiplayer.PickupSets = Math.max(2, this.Multiplayer.TeamCount);
+                break;
+        }
+    },
+
+    SetAggressionRange: function(pMin, pMax) {
+        var min = Math.max(0, Math.min(8, Math.floor(pMin || 0)));
+        var max = Math.max(0, Math.min(8, Math.floor(pMax || 0)));
+
+        if(max < min)
+            max = min;
+
+        this.Aggression.Min = min;
+        this.Aggression.Max = max;
+    },
+
+    ApplyCampaignDefaults: function() {
+        this.ApplyMapSize(NetworkMapSizes.Medium);
+        this.ApplyTerrainSelection(NetworkMapTerrains.Jungle, 0);
+        this.SetAggressionRange(3, 7);
+        this.setObjectives([]);
+    },
+
+    MapGenAggressionRange: function(pContext) {
+        var profile = pContext && pContext.Profile ? pContext.Profile : {};
+        var plan = pContext && pContext.GrammarPlan ? pContext.GrammarPlan : {};
+        var intent = plan.intent || {};
+        var routeShape = intent.routeShape || {};
+        var campaignBand = intent.campaignBand || {};
+        var bandName = String(campaignBand.name || "");
+        var objectiveLabel = String(intent.objectiveLabel || profile.GrammarObjectiveLabel || "");
+        var pressureGoals = Math.max(0, Math.floor(routeShape.pressureGoalCountTarget || 0));
+        var supportGoals = Math.max(0, Math.floor(routeShape.supportGoalCountTarget || 0));
+        var min = 3;
+        var max = 7;
+
+        if(bandName === "early") {
+            min = 2;
+            max = 5;
+        }
+        else if(bandName === "late") {
+            min = 4;
+            max = 8;
+        }
+
+        if(objectiveLabel === "enemy_heavy") {
+            min += 1;
+            max += 1;
+        }
+        else if(objectiveLabel === "rescue_hostages" || objectiveLabel === "civilian_delivery") {
+            min -= 1;
+        }
+        else if(objectiveLabel === "destroy_buildings") {
+            max += 1;
+        }
+
+        if(pressureGoals >= 8)
+            min += 1;
+        if(pressureGoals >= 12 || supportGoals >= 4)
+            max += 1;
+
+        if(typeof profile.AggressionMin === "number")
+            min = profile.AggressionMin;
+        if(typeof profile.AggressionMax === "number")
+            max = profile.AggressionMax;
+
+        min = Math.max(0, Math.min(8, Math.floor(min)));
+        max = Math.max(min, Math.min(8, Math.floor(max)));
+
+        return {
+            Min: min,
+            Max: max
+        };
+    },
+
+    ApplyMapGenAggression: function(pContext) {
+        if(this.Multiplayer.Enabled) {
+            this.SetAggressionRange(0, 0);
+            return;
+        }
+
+        var range = this.MapGenAggressionRange(pContext);
+        this.SetAggressionRange(range.Min, range.Max);
+    },
+
+    /**
+     * Randomize generic scenario settings using supported fixed map sizes.
      */
     Random: function() {
-        this.Width = Map.getRandomInt(40, 150);
-        this.Height = Map.getRandomInt(40, 150);
+        var sizes = [
+            NetworkMapSizes.Small,
+            NetworkMapSizes.Medium,
+            NetworkMapSizes.Large
+        ];
 
-        this.Aggression.Min = Map.getRandomInt(2, 4);
-        this.Aggression.Max = Map.getRandomInt(this.Aggression.Min, 8);
-
-        this.TerrainAlgorithm = this.TerrainAlgorithms[Map.getRandomInt(0, 2)];
-        this.TerrainType = Map.getRandomInt(Terrain.Types.Jungle, Terrain.Types.Interior);
-
-        this.TerrainType = Terrain.Types.Jungle;
-
-        // Randomise items based on map properties
-        this.RandomUpdate();
+        this.ApplyCampaignDefaults();
+        this.ApplyMapSize(sizes[Map.getRandomInt(0, sizes.length - 1)]);
     },
 
 	RandomEditor: function() {
 		this.Width = Map.getWidth();
 		this.Height = Map.getHeight();
 		
-		this.TerrainAlgorithm = this.TerrainAlgorithms[Map.getRandomInt(0, 2)];
         this.TerrainType = Map.getTileType();
 	},
-	
-    /**
-     * Randomise items based on map parameters (should be called after changing map width/height)
-     */
-    RandomUpdate: function() {
-        this.RandomObjectives();
-        this.RandomNoise();
-        this.RandomBuildings();
-    },
 
     /**
      * Total number of tiles the map will have
      */
     getCalculatedArea: function() {
         return Settings.Width * Settings.Height;
-    },
-
-    /**
-     * Setup the number of buildings placed based on the area
-     */
-    RandomBuildings: function() {
-
-        print("Total map area: " + this.getCalculatedArea());
-
-        this.BuildingsEnemyCount.barracks.soldier = Math.floor(this.getCalculatedArea() / 1600);
-        this.BuildingsEnemyCount.barracks.soldier_reinforced = 0;
-        this.BuildingsEnemyCount.bunker.soldier = 0;
-        this.BuildingsEnemyCount.hut.soldier = 0;
-
-        this.BuildingsCivilianCount.hut.civilian = Math.floor(this.getCalculatedArea() / 1600);
-        this.BuildingsCivilianCount.hut.civilian_spear = Math.floor(this.getCalculatedArea() / 3200);
-        this.BuildingsCivilianCount.hut.civilian_rescue = 0;
-    },
-
-    /**
-     * Set random objectives
-     */
-    RandomObjectives: function() {
-        this.Objectives = [];
-
-        // TODO: This could be alot better
-        if(Map.getRandomInt(0, 1) == 1)
-            this.addObjective(Objectives.KillAllEnemy);
-        else
-            this.addObjective(Objectives.DestroyEnemyBuildings);
-
-        if(Map.getRandomInt(0, 1) == 1)
-            this.addObjective(Objectives.DestroyEnemyBuildings);
-
-        // Either Rescue or get civilian home
-        if(Map.getRandomInt(0, 15) == 1) {
-            if(Map.getRandomInt(0, 1) == 0)
-                this.addObjective(Objectives.GetCivilianHome);
-			else
-				this.addObjective(Objectives.RescueHostages);
-        }
     },
 
     /**
@@ -263,133 +404,23 @@ var Settings = {
         return this.Objectives.indexOf(pObjective.ID) != -1;
     },
 
-    /**
-     * Create random terrain island settings
-     */
-    RandomTerrainIsland: function() {
+    GetActiveCoverDensity: function() {
+        if(this.Multiplayer.Enabled)
+            return this.Multiplayer.CoverDensity;
 
-        this.TerrainSettings = {
-            lev_limits: [0.20, 0.23, 0.55, 0.65, 1.00],
-            //lev_limits: [0.17, 0.25, 0.35, 0.45, 1.00],   //Old values
+        if(this.RandomMap.Enabled)
+            return this.RandomMap.CoverDensity;
 
-            Octaves: 4,
-            Roughness: Map.getRandomFloat(0.01, 0.3),
-            Scale: Map.getRandomFloat(0.02, 0.04),
-            Seed: Map.getRandomInt(0, 255),
-            EdgeFade: Map.getRandomFloat(0.00, 0.2),
-            RadialEnabled: Map.getRandomInt(0,1) == 0 ? false : true
-        };
-    },
-
-    /**
-     * Create random terrain simplex noise settings
-     */
-    RandomTerrainSimplex: function() {
-
-        this.TerrainSettings = {
-            lev_limits: [0.20, 0.23, 0.55, 0.65, 1.00],
-
-            Octaves: 4,
-            Scale: Map.getRandomFloat(0.02, 0.04),
-            Lacunarity:  Map.getRandomFloat(0.01, 0.5),
-            Persistance: Map.getRandomFloat(0.01, 1.)
-        };
-    },
-
-    /**
-     * Create random terrain diamond square settings
-     */
-    RandomDiamondSquare: function() {
-
-        this.TerrainSettings = {
-            lev_limits: [0.20, 0.23, 0.55, 0.65, 1.00]
-
-        }
-    },
-
-    /**
-     * Create noise settings based on set algorithm
-     */
-    RandomNoise: function() {
-
-        switch(this.TerrainAlgorithm) {
-            case "islands":
-                return this.RandomTerrainIsland()
-
-            case "simplex":
-                return this.RandomTerrainSimplex();
-
-            case "diamondsquare":
-                return this.RandomDiamondSquare();
-
-            default:
-                break;
-        }
-
-    },
-
-    /**
-     * Get noise for the terrain algorithm
-     */
-    GetNoise: function() {
-
-        switch(this.TerrainAlgorithm) {
-            case "islands":
-                return this.GetIslandNoise();
-
-            case "simplex":
-                return this.GetSimplexNoise();
-
-            case "diamondsquare":
-                return this.GetDiamondSquare();
-
-            default:
-                break;
-        }
-
-    },
-
-    /**
-     * Generate Simplex Island
-     */
-    GetIslandNoise: function() {
-
-        print('>> SimplexIslands parameters:');
-        print('>>   pOctaves = ' + this.TerrainSettings.Octaves);
-        print('>>   pRoughness = ' + this.TerrainSettings.Roughness.toFixed(2));
-        print('>>   pScale = ' + this.TerrainSettings.Scale.toFixed(2));
-        print('>>   pSeed = ' + this.TerrainSettings.Seed);
-        print('>>   pRadialEnabled = ' + this.TerrainSettings.RadialEnabled);
-        print('>>   pEdgeFade = ' + this.TerrainSettings.EdgeFade.toFixed(2));
-
-        return Map.SimplexIslands(this.TerrainSettings.Octaves,
-                                    this.TerrainSettings.Roughness,
-                                    this.TerrainSettings.Scale,
-                                    this.TerrainSettings.Seed,
-                                    this.TerrainSettings.RadialEnabled,
-                                    this.TerrainSettings.EdgeFade);
-
-    },
-
-    /**
-     *Generate Simplex Noise
-     */
-    GetSimplexNoise: function() {
-
-        return Map.SimplexNoise(this.TerrainSettings.Octaves, this.TerrainSettings.Scale, this.TerrainSettings.Lacunarity, this.TerrainSettings.Persistance);
-    },
-
-    /**
-     * Generate Diamond Square heightmap
-     */
-    GetDiamondSquare: function() {
-        return Map.DiamondSquare();
+        return null;
     },
 
     /**
      * Number of players
      */
     GetPlayerCount: function() {
+        if(this.Multiplayer.Enabled)
+            return this.Multiplayer.PlayerCount;
+
         return Map.getRandomInt(1,8);
     },
 
@@ -397,6 +428,67 @@ var Settings = {
      * Return the background item count
      */
     GetBackgroundObjectCount: function() {
+        if(this.Multiplayer.Enabled || this.RandomMap.Enabled) {
+            var areaScale = Math.max(0.6, this.getCalculatedArea() / (96 * 72));
+            var densityScale = 1.0;
+            var coverDensity = this.GetActiveCoverDensity();
+
+            switch(coverDensity) {
+                case NetworkCoverDensities.Sparse:
+                    densityScale = 0.45;
+                    break;
+
+                case NetworkCoverDensities.Dense:
+                    densityScale = 1.75;
+                    break;
+
+                case NetworkCoverDensities.Heavy:
+                    densityScale = 2.6;
+                    break;
+
+                default:
+                    densityScale = 1.0;
+                    break;
+            }
+
+            var terrainScale = {
+                Palms: 1.0,
+                Bushes1: 1.0,
+                Blooms: 1.0
+            };
+
+            switch(this.TerrainType) {
+                case Terrain.Types.Desert:
+                    terrainScale.Palms = 0.35;
+                    terrainScale.Bushes1 = 0.65;
+                    terrainScale.Blooms = 0.25;
+                    break;
+
+                case Terrain.Types.Ice:
+                    terrainScale.Palms = 0.2;
+                    terrainScale.Bushes1 = 0.45;
+                    terrainScale.Blooms = 0.15;
+                    break;
+
+                case Terrain.Types.Moors:
+                    terrainScale.Palms = 0.55;
+                    terrainScale.Bushes1 = 1.25;
+                    terrainScale.Blooms = 0.45;
+                    break;
+
+                default:
+                    terrainScale.Palms = 1.25;
+                    terrainScale.Bushes1 = 1.1;
+                    terrainScale.Blooms = 1.0;
+                    break;
+            }
+
+            return {
+                Palms: Math.round(20 * areaScale * densityScale * terrainScale.Palms),
+                Bushes1: Math.round(16 * areaScale * densityScale * terrainScale.Bushes1),
+                Blooms: Math.round(8 * areaScale * densityScale * terrainScale.Blooms)
+            };
+        }
 
         return {
             Palms: 10,
@@ -406,71 +498,19 @@ var Settings = {
     },
 
     /**
-     * Calculate the number of hostages to create
-     */
-    GetHostageCount: function() {
-        // TODO: Algorithm to decide number of hostage group
-        return Math.floor(Math.min(Map.getArea() / 900, 1));
-    },
-
-    /**
-     * Number of hostages per placement
-     */
-    GetHostageGroupSize: function() {
-
-        return Map.getRandomInt(1,3);
-    },
-
-    /**
-     * Number of enemies which should be placed
-     */
-    GetEnemyCount: function() {
-
-        return Math.floor(Math.min(Map.getArea() / 900, 1));;
-
-    },
-
-    /**
-     * Number of enemy buildings to be placed
-     */
-    GetEnemyBuildingCount: function() {
-
-        return this.BuildingsEnemyCount;
-    },
-
-    /**
-     * Get the civilian buildings to be placed
-     */
-    GetCivilianBuildingCount: function() {
-
-        return this.BuildingsCivilianCount;
-    },
-
-    /**
-     * Minimum number of grenades required for this mission
-     */
-    GetMinimumGrenades: function() {
-        return 1 + (Session.TotalStructures() / 4);
-    },
-
-    GetMinimumRockets: function() {
-        return 1 + (Session.TotalStructures() / 4);
-    },
-
-    /**
      * Get the minimum distance between two same type structures
      *
      * @param {string} pObjectName
      * @param {string} pTargetName
      */
     GetMinimumDistance: function(pObjectName, pTargetName) {
-        var Obj = this.ObjectMinimumDistance[pObjectName.toLowerCase()];
+        var Obj = SETTINGS_OBJECT_MINIMUM_DISTANCE[pObjectName.toLowerCase()];
         if( Obj === undefined )
-            return this.BuildingsDistanceMinimum;
+            return SETTINGS_DEFAULT_MINIMUM_DISTANCE;
 
         var Target = Obj[pTargetName.toLowerCase()];
         if( Target === undefined)
-            return this.BuildingsDistanceMinimum;
+            return SETTINGS_DEFAULT_MINIMUM_DISTANCE;
 
         return Target;
     }

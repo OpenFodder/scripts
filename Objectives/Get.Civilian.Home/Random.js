@@ -12,7 +12,7 @@ Objectives.GetCivilianHome.CreateCivilian = function() {
 	var CivilianPosition = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 2, true);
 	Session.CivilianPositions.push(CivilianPosition);
 
-	Map.SpriteAdd( SpriteTypes.Civilian_Spear, position.x, position.y );
+	Map.SpriteAdd( SpriteTypes.Civilian_Spear, CivilianPosition.x, CivilianPosition.y );
 
 	return CivilianPosition;
 }
@@ -24,24 +24,24 @@ Objectives.GetCivilianHome.CreateCivilian = function() {
  */
 Objectives.GetCivilianHome.CreateHome = function() {
 
-	found = false;
+	var found = false;
+	var position = new cPosition(-1, -1);
 
 	do {
 		found = true;
 
 		position = Map.getRandomXYByFeatures(Terrain.Features.FlatGround(), 3, false);
-		for( count = 0; count < Session.CivilianPositions.count; ++count) {
+		for( var count = 0; count < Session.CivilianPositions.length; ++count) {
 
 			if( Map.getDistanceBetweenPositions( Session.CivilianPositions[count], position) < Settings.GetMinimumDistance("civilian", "rescue") ) {
 				found = false;
 				break;
 			}
 
-			var path = Map.calculatePathBetweenPositions( SpriteTypes.Civilian, position, Session.HumanPosition );
-			if(!path.length) {
-				found = false;
-				break;
-			}
+		}
+
+		if(!Reachability.VerifyReachable(SpriteTypes.Civilian, position, Session.HumanPosition)) {
+			found = false;
 		}
 
 	} while( found == false );

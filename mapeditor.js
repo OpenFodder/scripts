@@ -15,4 +15,3 @@ OpenFodder.start();
 
 Settings.RandomEditor();
 OpenFodder.createMap();
-Settings.RandomNoise();
