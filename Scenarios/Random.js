@@ -13,6 +13,8 @@ Scenario.Random = {
 
         try {
             var context = (typeof Session !== "undefined") ? Session.MapGenContext : null;
+            if(!MapGen.Integration.DiagnosticsEnabled(context))
+                return;
             var validation = context && context.Validation ? context.Validation : null;
             var seed = Settings && Settings.RandomMap && Settings.RandomMap.Enabled ?
                 Settings.RandomMap.Seed : ((typeof Map !== "undefined" && Map.seed !== undefined) ? Map.seed : 0);

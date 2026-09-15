@@ -279,7 +279,7 @@ MapGen.Integration = MapGen.Integration || {};
     };
 
     pIntegration.WriteContextMetadata = function(pContext, pRequestedSeed) {
-        if(typeof FileIO === "undefined" || !pContext)
+        if(typeof FileIO === "undefined" || !pContext || !this.DiagnosticsEnabled(pContext))
             return;
 
         try {

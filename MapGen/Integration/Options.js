@@ -239,6 +239,27 @@ MapGen.Integration = MapGen.Integration || {};
         }
     };
 
+    // Runtime diagnostics are opt-in. The regeneration pipeline manages this
+    // flag for its validation reports; normal gameplay leaves it absent.
+    pIntegration.DiagnosticsEnabled = function(pContext) {
+        if(pContext && (pContext.DebugDumps || (pContext.Profile && pContext.Profile.DebugDumps)))
+            return true;
+        if(typeof Settings !== "undefined" && Settings.MapGenDebugDumps)
+            return true;
+        if(typeof FileIO === "undefined")
+            return false;
+
+        try {
+            var flag = new FileIO("mapgen_diagnostics.flag", true);
+            var enabled = flag.isOpen();
+            if(enabled)
+                flag.close();
+            return enabled;
+        } catch(e) {
+            return false;
+        }
+    };
+
     pIntegration.FastTileIterationEnabled = function() {
         if(typeof FileIO === "undefined")
             return false;

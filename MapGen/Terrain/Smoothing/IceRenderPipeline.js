@@ -296,7 +296,8 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
     };
 
     pIce.DumpCharMap = function(pContext, pChars) {
-        this.DumpCharMapNamed(pContext, pChars, "icecharmap_" + pContext.Seed + ".txt", true);
+        this.DumpCharMapNamed(pContext, pChars, "icecharmap_" + pContext.Seed + ".txt",
+            MapGen.Integration.DiagnosticsEnabled(pContext));
     };
 
     pIce.DumpTileLayerNamed = function(pContext, pTiles, pPath, pForce) {
