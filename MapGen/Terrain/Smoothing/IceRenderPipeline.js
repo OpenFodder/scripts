@@ -407,6 +407,10 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
                     continue;
 
                 if(MapGen.Layers.Get(pContext.Layers.crossing, x, y, 0)) {
+                    // Keep the fitted ice apron at crossing banks. Plain ford
+                    // snow would erase its transition to the adjacent water.
+                    if(this.NeedsCardinalTerrainTransition(pChars, x, y))
+                        continue;
                     if(palette && palette.ford)
                         MapGen.Layers.Set(pTiles, x, y, MapGen.Render.PickTile(palette.ford, pContext, x, y, 41));
                     ++protectedCount;

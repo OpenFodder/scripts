@@ -281,7 +281,8 @@ MapGen.Layout.Rivers = {
         var rivers = pContext.Rivers || [];
         for(var riverIndex = 0; riverIndex < rivers.length; ++riverIndex) {
             var river = rivers[riverIndex];
-            if(river.kind !== "river")
+            if(river.kind !== "river" &&
+                !(pContext.RegionalPlan && river.kind === "river_branch"))
                 continue;
             var radius = Math.max(1, Math.floor(Number(river.width || 1)));
             var points = river.points || [];
@@ -403,17 +404,36 @@ MapGen.Layout.Rivers = {
             var start = horizontal ? this.EdgePoint(pContext, "left") : this.EdgePoint(pContext, "top");
             var end = horizontal ? this.EdgePoint(pContext, "right") : this.EdgePoint(pContext, "bottom");
             var width = this.RiverWidth(pContext);
+            var branchPlanned = false;
+            if(pContext.RegionalPlan) {
+                var chance = Number(pContext.Profile.RiverBranchChance || 0);
+                branchPlanned = chance > 0 && (pContext.Profile.CompositionVariant === "river_fork_cliffs" ||
+                    MapGen.Random.HashTile(pContext.Seed, riverIndex, 61, 19403) / 4294967296 < chance);
+                if(branchPlanned) {
+                    // Leave room for a narrow tributary and later bank smoothing.
+                    var length = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+                    var branchRoom = Math.min(pContext.Width, pContext.Height) * 1.5 + 32;
+                    var room = (this.WaterBudgetCells(pContext) - this.CurrentWaterCells(pContext)) * 0.80 - branchRoom;
+                    width = Math.max(1, Math.min(width, Math.floor(room / Math.max(1, length * 2.3) - 0.5)));
+                }
+            }
             var river = {
                 start: start,
                 end: end,
                 width: width,
                 points: [],
-                kind: "river"
+                kind: "river",
+                branchPlanned: branchPlanned
             };
 
             this.DrawRiver(pContext, river);
-            this.PlaceCrossings(pContext, river);
-            this.BuildBranches(pContext, river);
+            if(pContext.RegionalPlan) {
+                this.BuildBranches(pContext, river);
+                this.PlaceCrossings(pContext, river);
+            } else {
+                this.PlaceCrossings(pContext, river);
+                this.BuildBranches(pContext, river);
+            }
             pContext.Rivers.push(river);
 
             if(!firstRiver)
@@ -1345,12 +1365,39 @@ MapGen.Layout.Rivers = {
                 surface: "ford"
             };
 
+            // Branches are already planned: move crossings along the parent
+            // instead of fitting a bridge down a tributary junction.
+            if(pContext.RegionalPlan && !this.CrossingAvoidsTributaries(pContext, crossing)) {
+                var preferred = pRiver.points.indexOf(point), replacement = null;
+                for(var shift = 1; shift < pRiver.points.length && !replacement; ++shift) {
+                    for(var side = -1; side <= 1; side += 2) {
+                        var at = preferred + shift * side;
+                        if(at < 0 || at >= pRiver.points.length) continue;
+                        crossing.x = pRiver.points[at].x; crossing.y = pRiver.points[at].y;
+                        if(!this.CrossingTooClose(pContext, crossing, minDistance) &&
+                            this.CrossingAvoidsTributaries(pContext, crossing)) {
+                            replacement = pRiver.points[at]; break;
+                        }
+                    }
+                }
+                if(!replacement) continue;
+            }
             if(this.CrossingTooClose(pContext, crossing, minDistance))
                 continue;
 
             pContext.Crossings.push(crossing);
             this.StampCrossingReservation(pContext, crossing);
         }
+    },
+
+    CrossingAvoidsTributaries: function(c, crossing) {
+        var probe = {Crossings:[crossing]};
+        for(var i = 0; i < c.Rivers.length; ++i) {
+            var branch = c.Rivers[i];
+            if(branch.kind === "river_branch" &&
+                !this.TributaryAvoidsCrossings(probe, branch.points, branch.width)) return false;
+        }
+        return true;
     },
 
     StampCrossingReservation: function(pContext, pCrossing) {
@@ -1726,7 +1773,7 @@ MapGen.Layout.Rivers = {
         if(branchChance <= 0 || maxDepth <= 0)
             return;
 
-        if(!pContext.Random.Chance(branchChance))
+        if(pContext.RegionalPlan ? !pParent.branchPlanned : !pContext.Random.Chance(branchChance))
             return;
 
         this.BuildBranchRecursive(pContext, pParent, 1, maxDepth, true);
@@ -1751,12 +1798,39 @@ MapGen.Layout.Rivers = {
         var joint = points[jointIdx];
 
         var maxLen = Math.max(8, Math.floor(points.length * (0.45 / pDepth)));
-        var path = this.WalkDownhill(pContext, joint, maxLen);
+        var branchWidth = Math.max(1, (pParent.width || 2) - pDepth);
+        // Recorded parent width includes modulation. Subtracting one and then
+        // adding modulation again previously made tributaries as wide as it.
+        if(pContext.RegionalPlan)
+            branchWidth = Math.max(1, Math.min(2, Math.floor((pParent.width || 2) / 2) - pDepth + 1));
+        // A walk starting inside the parent immediately hits its next water
+        // cell and stops. Regional tributaries start on a dry bank and flow
+        // back to the joint, so the branch can actually leave the main river.
+        var path = null;
+        if(pContext.RegionalPlan) {
+            // A junction beside a reserved crossing can stretch its bridge
+            // down the tributary. Search a few distributed joints instead.
+            var span = hi - lo + 1, trials = Math.min(8, span);
+            for(var trial = 0; trial < trials && !path; ++trial) {
+                var candidate = lo + ((jointIdx - lo + Math.floor(trial * span / trials)) % span);
+                path = this.RegionalTributaryPath(pContext, pParent, candidate, maxLen, branchWidth);
+                if(path) { jointIdx = candidate; joint = points[candidate]; }
+            }
+            // A local height minimum can reject every short flow path. Try a
+            // bounded curve only after those candidates fail; keep it clear
+            // of reserved land and existing crossings.
+            for(var fallback = 0; fallback < trials && !path; ++fallback) {
+                var fallbackIndex = lo + ((jointIdx - lo + Math.floor(fallback * span / trials)) % span);
+                path = this.RegionalTributaryPath(pContext, pParent, fallbackIndex, maxLen, branchWidth, true);
+                if(path) { jointIdx = fallbackIndex; joint = points[fallbackIndex]; }
+            }
+        } else {
+            path = this.WalkDownhill(pContext, joint, maxLen);
+        }
         if(!path || path.length < 4)
             return;
 
         var endPoint = path[path.length - 1];
-        var branchWidth = Math.max(1, (pParent.width || 2) - pDepth);
         var branch = {
             start: { x: joint.x, y: joint.y, role: "river_branch" },
             end:   { x: endPoint.x, y: endPoint.y, role: "river_branch_end" },
@@ -1768,7 +1842,9 @@ MapGen.Layout.Rivers = {
 
         this.StampBranchSpine(pContext, branch, path);
 
-        if(pReserveCrossing && pDepth === 1) {
+        // Regional routes already have parent crossings. A crossing at the
+        // junction runs along the branch; connectivity can route around its tip.
+        if(pReserveCrossing && pDepth === 1 && !pContext.RegionalPlan) {
             var prev = points[Math.max(0, jointIdx - 1)];
             var next = points[Math.min(points.length - 1, jointIdx + 1)];
             var axis = Math.abs(next.x - prev.x) > Math.abs(next.y - prev.y) ? "vertical" : "horizontal";
@@ -1792,6 +1868,76 @@ MapGen.Layout.Rivers = {
 
         if(pDepth < pMaxDepth && random.Chance((pContext.Profile.RiverBranchChance || 0) * 0.6))
             this.BuildBranchRecursive(pContext, branch, pDepth + 1, pMaxDepth, false);
+    },
+
+    TributaryAvoidsCrossings: function(c, path, width) {
+        // Match StampCrossingReservation's rectangle, including the branch's
+        // widest disc and a bank apron. Checking the source alone misses bends.
+        var radius = width + (width >= 2 ? 1 : 0) + 2;
+        for(var ci = 0; ci < c.Crossings.length; ++ci) {
+            var crossing = c.Crossings[ci];
+            var length = Math.max(2, Math.floor(crossing.length || ((crossing.radius || 1) * 2)));
+            var half = Math.max(1, Math.floor(crossing.halfWidth || 1));
+            for(var pi = 0; pi < path.length; ++pi) {
+                var dx = Math.abs(path[pi].x - crossing.x), dy = Math.abs(path[pi].y - crossing.y);
+                var along = crossing.axis === "horizontal" ? dx : dy;
+                var across = crossing.axis === "horizontal" ? dy : dx;
+                if(along <= length + radius && across <= half + radius) return false;
+            }
+        }
+        return true;
+    },
+
+    TributaryCurve: function(c, source, joint) {
+        var dx = joint.x - source.x, dy = joint.y - source.y;
+        var distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+        var bend = (MapGen.Random.HashTile(c.Seed, source.x, source.y, 19429) / 4294967296 * 2 - 1) *
+            Math.min(3, distance * 0.2);
+        var steps = Math.ceil(distance), path = [source];
+        for(var step = 1; step <= steps; ++step) {
+            var t = step / steps, offset = 4 * t * (1 - t) * bend;
+            var point = {
+                x: Math.max(1, Math.min(c.Width - 2, Math.round(source.x + dx * t - dy / distance * offset))),
+                y: Math.max(1, Math.min(c.Height - 2, Math.round(source.y + dy * t + dx / distance * offset)))
+            };
+            path = path.concat(MapGen.Grammar.Route.LinePoints(path[path.length - 1], point, true));
+        }
+        return path;
+    },
+
+    RegionalTributaryPath: function(c, parent, jointIndex, length, width, fallback) {
+        if(this.WaterBudgetExceeded(c)) return null;
+        var points = parent.points, joint = points[jointIndex];
+        var a = points[Math.max(0, jointIndex - 3)], b = points[Math.min(points.length - 1, jointIndex + 3)];
+        var dx = b.x - a.x, dy = b.y - a.y, span = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+        var sign = fallback ? (MapGen.Random.HashTile(c.Seed, joint.x, joint.y, 19427) % 2 ? 1 : -1) :
+            (c.Random.Chance(0.5) ? 1 : -1);
+        length = Math.min(length, Math.round(Math.min(c.Width, c.Height) * 0.28));
+        for(var side = 0; side < 2; ++side) {
+            var direction = side ? -sign : sign;
+            var source = {x: Math.max(3, Math.min(c.Width - 4, Math.round(joint.x - dy / span * length * direction))),
+                y: Math.max(3, Math.min(c.Height - 4, Math.round(joint.y + dx / span * length * direction)))};
+            if(!this.CanStampLakeCell(c, source.x, source.y, 5) ||
+                MapGen.Layers.Get(c.Layers.water, source.x, source.y, 0)) continue;
+            var path = fallback ? this.TributaryCurve(c, source, joint) : this.TraceFlow(c, source, joint);
+            if(!path || path.length < 7) continue;
+            // TraceFlow may finish with a short jump to the sink. Fill that
+            // last segment so narrow tributaries cannot leave a dry gap.
+            var sink = path.pop();
+            path = path.concat(MapGen.Grammar.Route.LinePoints(path[path.length - 1], sink, true));
+            if(path.length > length * 2 + 1) continue;
+            if(!this.TributaryAvoidsCrossings(c, path, width)) continue;
+            var dry = 0, fits = true;
+            for(var i = 0; i < path.length; ++i) {
+                if(MapGen.Layers.Get(c.Layers.water, path[i].x, path[i].y, 0)) continue;
+                ++dry;
+                if(fallback && !this.CanStampLakeCell(c, path[i].x, path[i].y, width + 2)) {
+                    fits = false; break;
+                }
+            }
+            if(fits && dry >= 6) return path.reverse();
+        }
+        return null;
     },
 
     // Stamp a pre-computed spine path with width modulation. Lighter than

@@ -220,6 +220,7 @@ MapGen.Layout.RouteArchetypes = {
     },
 
     AnchorChain: function(pContext) {
+        if(pContext.RegionalPlan) return MapGen.Layout.RegionIntents.Chain(pContext);
         var a = pContext.Anchors || {};
         var chain = [];
 
@@ -1340,6 +1341,7 @@ MapGen.Layout.RouteArchetypes = {
             if(pocket)
                 this.StampPocket(pContext, mask, pocket, pocketRadius, "route_phase_" + pi);
         }
+        MapGen.Layout.RegionIntents.ReserveRoutes(pContext, mask, def);
 
         MapGen.Context.AddLog(
             pContext,
@@ -1494,7 +1496,11 @@ MapGen.Layout.RouteArchetypes = {
         // a gate wall while tightening its surrounding route shoulder.
         var placements = pContext.Placements || {};
         for(var group in placements) {
-            if(!placements.hasOwnProperty(group) ||
+            // Keep the established first pass. If a neck repair still fails,
+            // cosmetic ground details may yield their actor-sized clearing;
+            // solid objects retain occupied/owner protection above.
+            if((group === "decor" && pReplaceRouteShoulder && pContext.RepairPasses > 0) ||
+                !placements.hasOwnProperty(group) ||
                 !(placements[group] instanceof Array))
                 continue;
             for(var index = 0; index < placements[group].length; ++index) {

@@ -20,6 +20,8 @@ MapGen.Layout.Continent = {
         // don't overwrite it.
         if(pContext.Continent)
             return;
+        if(MapGen.Layout.Landforms.Build(pContext))
+            return;
 
         if(profile.ContinentStyles === undefined && profile.LandFraction === undefined)
             return;

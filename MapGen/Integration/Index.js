@@ -68,7 +68,13 @@ MapGen.Integration = MapGen.Integration || {};
         if(!context || !context.Materialized || !context.Validation.ok) {
             var reasons = context && context.Validation ? context.Validation.reasons : ["no_context"];
             if(!multiplayer) Scenario.Random.RecordFailure(reasons.join(", "));
-            throw new Error("MapGen exhausted attempts: " + reasons.join(", "));
+            var requestedSeed = context && context.RequestedSeed !== undefined ? context.RequestedSeed : options.Seed;
+            var profileName = context && context.Profile ? context.Profile.Name :
+                (options.Profile && options.Profile.Name ? options.Profile.Name : options.ProfileName || "");
+            var dimensions = context && context.Width !== undefined && context.Height !== undefined ?
+                context.Width + "x" + context.Height : "unknown";
+            throw new Error("MapGen exhausted attempts (requested seed " + requestedSeed +
+                ", profile " + profileName + ", dimensions " + dimensions + "): " + reasons.join(", "));
         }
         return context;
     };

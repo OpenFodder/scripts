@@ -38,15 +38,27 @@ MapGen.Layout = MapGen.Layout || {};
     function routeField(c, g, entries, maze) {
         var W = c.Width, H = c.Height, N = W * H, pred = new Int32Array(N), distance = new Int32Array(N);
         var queue = new Int32Array(N), tail = 0, head = 0, get = MapGen.Layers.Get;
+        // Candidate rectangles are immutable for this search. Rasterize their
+        // inclusive integer footprint once instead of rescanning every entry
+        // for every BFS cell. Ceil/floor retain inside() semantics for any
+        // non-integer rectangle bounds.
+        var candidateBlocked = new Uint8Array(N);
+        for(var entryIndex = 0; entryIndex < entries.length; ++entryIndex) {
+            var candidateRect = entries[entryIndex].candidate.rect;
+            var minX = Math.max(0, Math.ceil(candidateRect.minX));
+            var maxX = Math.min(W - 1, Math.floor(candidateRect.maxX));
+            var minY = Math.max(0, Math.ceil(candidateRect.minY));
+            var maxY = Math.min(H - 1, Math.floor(candidateRect.maxY));
+            for(var cy = minY; cy <= maxY; ++cy)
+                for(var cx = minX; cx <= maxX; ++cx)
+                    candidateBlocked[cy * W + cx] = 1;
+        }
         function blocked(x, y) {
             if(g.cliff[y][x])
                 return true;
             if(g.water[y][x] && !get(c.Layers.crossing, x, y, 0) && !get(c.Layers.causeway, x, y, 0))
                 return true;
-            for(var b = 0; b < entries.length; ++b)
-                if(inside(entries[b].candidate.rect, x, y))
-                    return true;
-            return false;
+            return candidateBlocked[y * W + x] !== 0;
         }
         for(var i = 0; i < N; ++i) {
             pred[i] = -2;
@@ -142,6 +154,24 @@ MapGen.Layout = MapGen.Layout || {};
             if(old.clearing.regionId)
                 regions[old.clearing.regionId] = true;
         }
+        var settlement = c.RegionalPlan && c.RegionalPlan.settlement;
+        var regionalGrouping = entries.length >= 2 &&
+            (settlement === "compound" || settlement === "camps");
+        var regionalFloorsMet = false;
+        if(regionalGrouping) {
+            var area = c.Width * c.Height;
+            var sectorFloor = area >= 10000 ? 5 : (area >= 6000 ? 4 :
+                (area >= 3200 ? 3 : 2));
+            var regionFloor = area >= 10000 ? 4 :
+                (area >= 6000 ? 4 : (area >= 3200 ? 3 : 2));
+            var rowFloor = area >= 10000 ? 3 : 0;
+            // These are the complete live-validation floors. Do not clamp
+            // them to entries.length: a two-site prefix must not suppress
+            // ranking bonuses when the eventual plan needs three or more.
+            regionalFloorsMet = Object.keys(occupiedSectors).length >= sectorFloor &&
+                Object.keys(regions).length >= regionFloor &&
+                Object.keys(occupiedRows).length >= rowFloor;
+        }
         var water = I.StructureWaterClearance(c, spec), cliff = I.StructureCliffClearance(c, spec);
         var clear = I.StructureClearance(spec), spacing = I.StructureSpacing(spec, c),
             margin = Math.max(3, I.StructureMapMargin(c));
@@ -225,10 +255,23 @@ MapGen.Layout = MapGen.Layout || {};
             var region = MapGen.Encounters.NearestEncounterRegion
                              ? MapGen.Encounters.NearestEncounterRegion(c, pt, false)
                              : null;
+            // Recovery for a missing encounter region must try new regions
+            // before nearby alternatives exhaust its bounded shortlist.
+            if(search && search.unusedRegion && (!region || regions[region.id])) continue;
             var col = Math.min(2, Math.floor(pt.x * 3 / c.Width)),
                 row = Math.min(2, Math.floor(pt.y * 3 / c.Height));
-            var score = (occupiedSectors[col + "," + row] ? 0 : 600) + (occupiedRows[row] ? 0 : 500) +
-                        (region && !regions[region.id] ? 500 : 0) - Math.sqrt(nearDistance) * 3;
+            var geographicBonus = (occupiedSectors[col + "," + row] ? 0 : 600) +
+                        (occupiedRows[row] ? 0 : 500) +
+                        (region && !regions[region.id] ? 500 : 0);
+            // The live validator requires sector/region coverage (and, on
+            // very large maps, three row bands). Once those floors are
+            // already met by the first placements, compound/camp regional
+            // modes may spend later slots near their preferred region. This
+            // changes ranking only; all footprint, route, spacing and live
+            // validation checks remain unchanged.
+            if(regionalFloorsMet)
+                geographicBonus = 0;
+            var score = geographicBonus - Math.sqrt(nearDistance) * 3;
             // Secure the required map span with the second landmark before
             // spending the remaining slots on geographic/encounter coverage.
             if(entries.length === 1) {
@@ -241,7 +284,7 @@ MapGen.Layout = MapGen.Layout || {};
             }
             if(entries.length === 0 && nearest && nearest.role === "compound_objective")
                 score += 900;
-            score += (MapGen.Random.HashTile(c.Seed, pt.x, pt.y, 7319) % 1000) / 1000;
+            score += MapGen.Variation.BuildingBias(c, pt.x, pt.y, entries.length);
             shortlist.push({
                 tileX : tx,
                 tileY : ty,

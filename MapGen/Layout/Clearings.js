@@ -160,7 +160,7 @@ MapGen.Layout.Clearings = {
         var templates = MapGen.Layout.Templates;
         var template = templates ? templates.Resolve(pContext) : null;
 
-        if(template && typeof template.ClearingComposition === "function") {
+        if(!pContext.RegionalPlan && template && typeof template.ClearingComposition === "function") {
             template.ClearingComposition(pContext, this);
             return;
         }

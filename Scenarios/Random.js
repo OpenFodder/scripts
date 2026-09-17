@@ -13,23 +13,47 @@ Scenario.Random = {
 
         try {
             var context = (typeof Session !== "undefined") ? Session.MapGenContext : null;
-            if(!MapGen.Integration.DiagnosticsEnabled(context))
-                return;
+            var diagnostics = MapGen.Integration.DiagnosticsEnabled(context);
+            var requestedSeed = context && context.RequestedSeed !== undefined ? context.RequestedSeed :
+                (typeof Settings !== "undefined" && Settings.RandomMap && Settings.RandomMap.Enabled &&
+                    Settings.RandomMap.Seed !== undefined ? Settings.RandomMap.Seed :
+                    (typeof Settings !== "undefined" && Settings.Seed !== undefined ? Settings.Seed :
+                        ((typeof Map !== "undefined" && Map.seed !== undefined) ? Map.seed : 0)));
+            var selectedSeed = context && context.Seed !== undefined ? context.Seed :
+                ((typeof Map !== "undefined" && Map.seed !== undefined) ? Map.seed : requestedSeed);
             var validation = context && context.Validation ? context.Validation : null;
-            var seed = Settings && Settings.RandomMap && Settings.RandomMap.Enabled ?
-                Settings.RandomMap.Seed : ((typeof Map !== "undefined" && Map.seed !== undefined) ? Map.seed : 0);
+            var retrySource = context && context.Retry ? context.Retry : null;
+            var reasons = validation && validation.reasons ? validation.reasons.slice(0) : [pMessage];
+            var compactAttempts = [];
+            if(retrySource && retrySource.attempts) {
+                for(var attemptIndex = 0; attemptIndex < retrySource.attempts.length; ++attemptIndex) {
+                    var attempt = retrySource.attempts[attemptIndex] || {};
+                    compactAttempts.push({ seed: attempt.seed, attempt: attempt.attempt,
+                        stage: attempt.stage, reasons: attempt.reasons || [] });
+                }
+            }
             var retry = context && context.Retry ? {
                 totalAttempts: context.Retry.totalAttempts,
                 selectedAttempt: context.Retry.selectedAttempt,
                 selectedSeed: context.Retry.selectedSeed,
-                selectedScore: context.Retry.selectedScore,
-                attempts: context.Retry.attempts
+                selectedScore: context.Retry.selectedScore
             } : null;
+            if(retry) retry.attempts = diagnostics ? context.Retry.attempts : compactAttempts;
             var payload = {
                 message: pMessage,
-                seed: seed,
+                // Failure envelopes are deliberately written during normal
+                // gameplay so an exhausted map can always be replayed.
+                seed: requestedSeed,
+                requestedSeed: requestedSeed,
+                selectedSeed: selectedSeed,
                 profile: context && context.Profile ? context.Profile.Name : "",
-                validation: validation ? {
+                width: context && context.Width !== undefined ? context.Width : 0,
+                height: context && context.Height !== undefined ? context.Height : 0,
+                reasons: reasons,
+                retry: retry
+            };
+            if(diagnostics) {
+                payload.validation = validation ? {
                     ok: validation.ok,
                     fatal: validation.fatal,
                     reasons: validation.reasons,
@@ -40,11 +64,10 @@ Scenario.Random = {
                         coverage: validation.metrics.Coverage,
                         placements: validation.metrics.Placements
                     } : null
-                } : null,
-                liveValidation: context && context.LiveValidation ? context.LiveValidation : null,
-                retry: retry
-            };
-            var file = new FileIO("mapgen_failure_" + seed + ".json", false);
+                } : null;
+                payload.liveValidation = context && context.LiveValidation ? context.LiveValidation : null;
+            }
+            var file = new FileIO("mapgen_failure_" + requestedSeed + ".json", false);
             if(file.isOpen()) {
                 file.writeLine(JSON.stringify(payload));
                 file.close();

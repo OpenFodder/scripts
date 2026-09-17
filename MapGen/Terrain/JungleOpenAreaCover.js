@@ -8,6 +8,10 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
             return false;
         if(pContext.Profile.OpenAreaBreakup === false)
             return false;
+        // Large empty areas are part of regional forest geometry. Local
+        // route, encounter and validation cover passes still protect play.
+        if(pContext.RegionalPlan && pContext.Profile.PreserveForestOpenSpace)
+            return false;
 
         return true;
     };
@@ -952,7 +956,8 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
             placements: []
         };
 
-        if((profile.OpenFieldScreens === false && profile.V3OpenFieldScreens !== true) ||
+        if((pContext.RegionalPlan && profile.PreserveForestOpenSpace) ||
+            (profile.OpenFieldScreens === false && profile.V3OpenFieldScreens !== true) ||
             pDensity <= 0)
             return shaped;
 

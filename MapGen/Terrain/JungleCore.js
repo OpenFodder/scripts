@@ -31,12 +31,16 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
     };
 
     pJungle.TreeScore = function(pContext, pX, pY) {
-        var largeScale = Math.max(8, Math.floor(Math.min(pContext.Width, pContext.Height) * 0.20));
-        var mediumScale = Math.max(5, Math.floor(Math.min(pContext.Width, pContext.Height) * 0.09));
+        var profile = pContext.Profile || {};
+        var largeScale = Math.max(8, Math.floor(Math.min(pContext.Width, pContext.Height) *
+            (profile.ForestLargeScaleFraction || 0.20)));
+        var mediumScale = Math.max(5, Math.floor(Math.min(pContext.Width, pContext.Height) *
+            (profile.ForestMediumScaleFraction || 0.09)));
         var fine = this.HashUnit(pContext, pX, pY, 303);
         var score = (this.ValueNoise(pContext, pX, pY, largeScale, 301) * 0.66) +
             (this.ValueNoise(pContext, pX, pY, mediumScale, 302) * 0.29) +
             (fine * 0.05);
+        score = MapGen.Variation.ForestScore(pContext, pX, pY, score);
 
         if(MapGen.Layers.Get(pContext.Layers.terrainEdge, pX, pY, 0))
             score -= 0.30;

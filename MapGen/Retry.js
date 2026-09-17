@@ -255,6 +255,10 @@ MapGen.Retry = {
             warnings: validation ? validation.warnings.slice(0) : [],
             repairActions: validation && validation.repairActions ? validation.repairActions.slice(0) : [],
             localRepairs: pResult && pResult.LocalRepairs ? pResult.LocalRepairs.slice(0) : [],
+            authorFailure: pResult && pResult.AuthorResult && !pResult.AuthorResult.ok ? {
+                reason: pResult.AuthorResult.reason,
+                diagnostics: (pResult.AuthorResult.diagnostics || []).slice(0)
+            } : null,
             screenPacing: pacing ? {
                 deadFraction: pacing.deadFraction,
                 quietFraction: pacing.quietFraction,

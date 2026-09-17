@@ -123,6 +123,7 @@ MapGen.Layout = MapGen.Layout || {};
                 // replacing one site, keeping the other buildings and access
                 // routes fixed, before discarding the whole layout.
                 var originals = plan.entries.slice(0), repaired = false, candidates = 0, missingRows = null;
+                var missingRegion = MapGen.Repair.HasKey(report.reasons, "live_structure_regions_too_low");
                 if(MapGen.Repair.HasKey(report.reasons, "live_structure_rows_too_low")) {
                     missingRows = {0: true, 1: true, 2: true};
                     for(var rowIndex = 0; rowIndex < originals.length; ++rowIndex) {
@@ -140,8 +141,9 @@ MapGen.Layout = MapGen.Layout || {};
                     rebuild(replacement);
                     var next = MapGen.Layout.BuildingSites.Find(c, g, plan.entries, specs[replacement], plan.policy, {
                         candidateLimit: 128,
-                        dense: !!missingRows,
+                        dense: !!missingRows || missingRegion,
                         requiredRows: missingRows,
+                        unusedRegion: missingRegion,
                         accept: function(site) {
                             ++candidates;
                             plan.entries.push({spec: specs[replacement], candidate: site});

@@ -256,6 +256,21 @@ MapGen.Layout.Anchors = {
     },
 
     BuildGrammarBeachCampaign: function(pContext) {
+        // Regional layouts already own endpoints, branches and settlement
+        // regions. Replacing those with the old six-row beach matrix made
+        // unrelated plans share endpoints and pinched every coast around the
+        // same near-edge spawn. Coast fitting protects these planned points.
+        if(pContext.RegionalPlan) {
+            if(!pContext.Anchors || !pContext.Anchors.start)
+                MapGen.Layout.RegionIntents.PlaceAnchors(pContext);
+            pContext.GrammarBeachRouteContext = {
+                edgeSide: this.BeachEdgeSide(pContext),
+                family: MapGen.Grammar.GrammarBeachFamily(pContext),
+                source: "regional_beach_routes"
+            };
+            return pContext.Anchors;
+        }
+        // Named nonregional styles retain their authored route matrices.
         var random = pContext.Random;
         var minSide = Math.min(pContext.Width, pContext.Height);
         var marginX = Math.max(6, Math.floor(pContext.Width * 0.12));

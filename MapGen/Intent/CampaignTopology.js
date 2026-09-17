@@ -176,6 +176,26 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
         return "late";
     }
 
+    // Keep recovery anchors inside the phase that was measured for the slot.
+    // A nearby trunk vertex can be materially different around a water/cliff
+    // pocket, while changing phase would make the authored-phase accounting
+    // claim a beat in the wrong part of the mission.
+    function topologyPhaseRouteIndex(pLength, pBaseIndex, pPhase, pAttempt) {
+        var startFraction = pPhase === "early" ? 0 :
+            (pPhase === "mid" ? 0.34 : 0.68);
+        var endFraction = pPhase === "early" ? 0.34 :
+            (pPhase === "mid" ? 0.68 : 1);
+        var minIndex = Math.max(4,
+            Math.ceil((pLength - 1) * startFraction));
+        var maxIndex = Math.min(pLength - 5,
+                Math.ceil((pLength - 1) * endFraction) -
+                (pPhase === "late" ? 0 : 1));
+        if(maxIndex < minIndex) { return pBaseIndex; }
+        var offsets = [0, -4, 4, -8, 8, -12, 12, -16, 16];
+        var index = pBaseIndex + offsets[pAttempt % offsets.length];
+        return Math.max(minIndex, Math.min(maxIndex, index));
+    }
+
     // Side routes are mission beats, not decoration. Spread their attachment
     // points across progression phases so a medium/large map cannot put every
     // optional destination in the middle third of the same journey.
@@ -307,6 +327,9 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
                     }
                 }
             }
+            // A reachable site in the requested sector wins over a shorter
+            // detour in another column. Other columns are true fallbacks.
+            if(best) break;
         }
         return best;
     }
@@ -390,7 +413,8 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
                     (attempt % 6) - 2;
                 var along = pRng && pRng.Int ? pRng.Int(-5, 5) : attempt - 5;
                 var candidate = topologyCandidate(pIntentMap, primary,
-                    routeIndex, side, Math.max(7, baseDistance + distJitter),
+                    routeIndex, side,
+                    Math.max(7, baseDistance + distJitter),
                     along, plan.sites);
                 if(!candidate) { continue; }
                 var path = findTopologyPath(pIntentMap, anchor, candidate,
@@ -407,7 +431,8 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
                 }
             }
             if(isXLTopology && (!accepted ||
-                topologySector(pIntentMap, accepted).y !== targetRow)) {
+                topologySector(pIntentMap, accepted).y !== targetRow ||
+                topologySector(pIntentMap, accepted).x !== targetColumn)) {
                 var targeted = topologyTargetedSpur(pIntentMap, primary,
                     routeIndex, targetRow, targetColumn, plan.sites,
                     primaryMask, usedMask);
@@ -545,10 +570,13 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
             var fillSite = null;
             var fillPath = null;
             for(var fillAttempt = 0; fillAttempt < 16 && !fillSite; ++fillAttempt) {
+                var fillRouteIndex = topologyPhaseRouteIndex(
+                    primary.length, fillIndex, fillPhase, fillAttempt);
+                fillAnchor = primary[fillRouteIndex];
                 var fillSide = initialSide *
                     ((fillSlot + fillAttempt) % 2 ? -1 : 1);
                 var fillCandidate = topologyCandidate(pIntentMap, primary,
-                    fillIndex, fillSide,
+                    fillRouteIndex, fillSide,
                     baseDistance + (fillAttempt % 5),
                     ((fillAttempt * 3) % 11) - 5, plan.sites);
                 if(!fillCandidate) { continue; }
@@ -558,7 +586,24 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
                 fillSite = fillCandidate;
                 fillPath = candidatePath;
             }
+            // Broad lakes leave useful land at an oblique angle to the trunk.
+            // If the quick perpendicular probes fail, search dry geographic
+            // sectors from anchors in this same phase. Existing path/spacing
+            // checks still decide whether the detour is meaningful.
+            for(var sectorAttempt = 0; !fillSite && sectorAttempt < 9; ++sectorAttempt) {
+                fillRouteIndex = topologyPhaseRouteIndex(
+                    primary.length, fillIndex, fillPhase, sectorAttempt);
+                fillAnchor = primary[fillRouteIndex];
+                var anchorSector = topologySector(pIntentMap, fillAnchor);
+                for(var rowOffset = 0; !fillSite && rowOffset < 3; ++rowOffset) {
+                    var recovered = topologyTargetedSpur(pIntentMap, primary,
+                        fillRouteIndex, (anchorSector.y + rowOffset) % 3,
+                        anchorSector.x, plan.sites, primaryMask, usedMask);
+                    if(recovered) { fillSite = recovered.candidate; fillPath = recovered.path; }
+                }
+            }
             if(!fillSite) { continue; }
+            fillFraction = fillRouteIndex / Math.max(1, primary.length - 1);
             fillSite.routeFraction = fillFraction;
             fillSite.routePhase = fillPhase;
             fillSite.topologyPurpose = "fallback_detour";

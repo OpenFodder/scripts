@@ -627,6 +627,20 @@ MapGen.Grammar = MapGen.Grammar || {};
         };
     },
 
+    RegionalBeachCoastDimensions: function(c) {
+        var form = [0, 0, 1, 2][this.GrammarBeachVariantHash(c, 3697, false) % 4];
+        var roll = this.GrammarBeachVariantHash(c, 3691, false) % 4;
+        return {form: form,
+            depth: form === 1 ? 0.18 + roll * 0.05 : form === 2 ? 0.32 + roll * 0.05 : 0.14 + roll * 0.07,
+            entry: form === 1 ? 0.02 + roll * 0.02 : form === 2 ? 0.06 + roll * 0.02 : 0,
+            curve: 0.7 + (this.GrammarBeachVariantHash(c, 3701, false) % 1000) / 1000};
+    },
+
+    RegionalBeachDepthFraction: function(dimensions, progress) {
+        return dimensions.entry + (dimensions.depth - dimensions.entry) *
+            Math.pow(Math.max(0, Math.min(1, progress)), dimensions.curve);
+    },
+
     BuildComposableGrammarBeachCoast: function(pContext, pFamily) {
         var vertical = pFamily === "mapm5_top_bank";
         var axisLength = vertical ? pContext.Height : pContext.Width;
@@ -634,8 +648,20 @@ MapGen.Grammar = MapGen.Grammar || {};
         var layoutVariant = this.GrammarBeachLayoutVariant(pContext);
         var lengthVariant = this.GrammarBeachLengthVariant(pContext);
         var courseVariant = this.GrammarBeachCourseVariant(pContext);
+        var regional = pContext.RegionalPlan;
+        var dimensions = regional ? this.RegionalBeachCoastDimensions(pContext) : null;
+        var coastForm = dimensions ? dimensions.form : 0;
         var spanFractions = [0.42, 0.50, 0.58, 0.66, 0.74, 0.84];
         var span = Math.round(axisLength * spanFractions[lengthVariant]);
+        var spanProfile = 0, shelfProfile = 0, widthProfile = 0;
+        if(regional) {
+            // Keep the original edge families and monotone contour, while
+            // varying regional shelf extent independently of route topology.
+            spanProfile = this.GrammarBeachVariantHash(pContext, 3683, false) % 3;
+            shelfProfile = this.GrammarBeachVariantHash(pContext, 3685, false) % 3;
+            widthProfile = this.GrammarBeachVariantHash(pContext, 3687, false) % 3;
+            span += Math.round(axisLength * (spanProfile - 1) * 0.07);
+        }
         span = Math.max(12, Math.min(axisLength, span));
 
         // A sub1 beach can enter through the top/right or bottom/right map
@@ -646,6 +672,10 @@ MapGen.Grammar = MapGen.Grammar || {};
         var start = Math.max(0, axisLength - span);
         if((layoutVariant === 0 || layoutVariant === 3) && span < axisLength)
             start = Math.max(0, start - Math.round(axisLength * 0.10));
+        // A full-edge coast may enter the map already deep. Starting every
+        // contour at one water tile forced all beaches into corner wedges.
+        // Both forms still use only east/south-facing, monotone atlas joins.
+        if(coastForm !== 0) start = 0;
         span = axisLength - start;
 
         var waterPoints = [];
@@ -656,6 +686,10 @@ MapGen.Grammar = MapGen.Grammar || {};
         var widths = [];
         var waterDepth = 1;
         var beachWidth = 3 + (layoutVariant % 3);
+        if(regional && widthProfile === 1) ++beachWidth;
+        if(regional && widthProfile === 2) --beachWidth;
+        var minimumBeachWidth = regional ? 4 : 3;
+        beachWidth = Math.max(minimumBeachWidth, Math.min(7, beachWidth));
         var runStyle = courseVariant % 3;
 
         function nextRunLength(pAxis, pChange) {
@@ -665,7 +699,6 @@ MapGen.Grammar = MapGen.Grammar || {};
                 courseVariant + pChange,
                 3673
             );
-
             // mapm8's south coast advances through broad two- to five-cell
             // shelves. One-cell shelves are legal at isolated corners, but a
             // long run of them makes every water turn expose the same tiny
@@ -673,17 +706,29 @@ MapGen.Grammar = MapGen.Grammar || {};
             // Keep the steeper cadence for the mapm5-style east coast, whose
             // source contour genuinely changes almost every row.
             if(vertical) {
+                var verticalRun;
                 if(runStyle === 0)
-                    return 1 + (roll % 2);
-                if(runStyle === 1)
-                    return 1 + (roll % 3);
-                return 2 + (roll % 2);
+                    verticalRun = 1 + (roll % 2);
+                else if(runStyle === 1)
+                    verticalRun = 1 + (roll % 3);
+                else
+                    verticalRun = 2 + (roll % 2);
+                if(regional && shelfProfile === 0) ++verticalRun;
+                if(regional && shelfProfile === 1 && (pChange % 2) === 0)
+                    verticalRun = Math.max(1, verticalRun - 1);
+                return verticalRun;
             }
+            var horizontalRun;
             if(runStyle === 0)
-                return 2 + (roll % 3);
-            if(runStyle === 1)
-                return 2 + (roll % 4);
-            return 3 + (roll % 3);
+                horizontalRun = 2 + (roll % 3);
+            else if(runStyle === 1)
+                horizontalRun = 2 + (roll % 4);
+            else
+                horizontalRun = 3 + (roll % 3);
+            if(regional && shelfProfile === 0) ++horizontalRun;
+            if(regional && shelfProfile === 1 && (pChange % 2) === 0)
+                horizontalRun = Math.max(1, horizontalRun - 1);
+            return horizontalRun;
         }
 
         var runRemaining = nextRunLength(
@@ -699,17 +744,42 @@ MapGen.Grammar = MapGen.Grammar || {};
         var depthChanges = 0;
         var widthChanges = 0;
         var maximumWaterDepth = Math.max(5, crossLimit - 8);
+        if(regional) {
+            // Choose coast extent independently from route topology. A deep
+            // bay and a long shallow shore must not imply the same route.
+            maximumWaterDepth = Math.max(5, Math.round(crossLimit * dimensions.depth));
+            if(coastForm !== 0) {
+                waterDepth = Math.max(2, Math.round(crossLimit * dimensions.entry));
+                maximumWaterDepth = Math.max(waterDepth, maximumWaterDepth);
+            }
+            regional.coast = {family: pFamily, depth: maximumWaterDepth, span: span,
+                form: ["corner", "shelf", "deep"][coastForm],
+                spanProfile: spanProfile, shelfProfile: shelfProfile,
+                widthProfile: widthProfile};
+        }
 
         for(var offset = 0; offset < span; ++offset) {
             if(offset > 0) {
                 --runRemaining;
-                if(runRemaining <= 0 && waterDepth < maximumWaterDepth) {
+                if(coastForm === 0 && runRemaining <= 0 && waterDepth < maximumWaterDepth) {
                     ++waterDepth;
                     ++depthChanges;
                     runRemaining = nextRunLength(
                         start + offset,
                         depthChanges
                     );
+                    if(regional) {
+                        // Alternate broad shelves with steeper sections using
+                        // only the monotone one-tile joins the sand atlas has.
+                        var section = Math.floor(offset * 3 / span);
+                        if(shelfProfile === 0 && section === 0)
+                            runRemaining += 4;
+                        else if(shelfProfile === 1 && section === 2)
+                            runRemaining += 3;
+                        else if(shelfProfile === 2 &&
+                            (section + courseVariant) % 2 === 0)
+                            runRemaining += 2;
+                    }
                 }
 
                 --widthRemaining;
@@ -725,7 +795,7 @@ MapGen.Grammar = MapGen.Grammar || {};
                         --nextWidth;
                     else if(widthRoll > 2)
                         ++nextWidth;
-                    nextWidth = Math.max(3, Math.min(7, nextWidth));
+                    nextWidth = Math.max(minimumBeachWidth, Math.min(7, nextWidth));
                     if(nextWidth !== beachWidth) {
                         beachWidth = nextWidth;
                         ++widthChanges;
@@ -739,6 +809,10 @@ MapGen.Grammar = MapGen.Grammar || {};
                 }
             }
 
+            if(coastForm !== 0)
+                waterDepth = Math.min(offset ? depths[offset - 1] + 1 : maximumWaterDepth,
+                    Math.max(1, Math.round(crossLimit * this.RegionalBeachDepthFraction(
+                        dimensions, offset / Math.max(1, span - 1)))));
             depths.push(waterDepth);
             widths.push(beachWidth);
         }
@@ -769,6 +843,11 @@ MapGen.Grammar = MapGen.Grammar || {};
             ++currentRun;
         }
         runLengths.push(currentRun);
+        if(regional) {
+            regional.coast.start = start;
+            regional.coast.entryDepth = depths[0];
+            regional.coast.finalDepth = depths[depths.length - 1];
+        }
 
         function stampWater(self, axis, cross) {
             var x = vertical ? cross : axis;
@@ -1247,161 +1326,6 @@ MapGen.Grammar = MapGen.Grammar || {};
             pocket: true,
             segment: null
         };
-    },
-
-    GrammarBeachInteriorWaterRoom: function(pContext) {
-        var layers = pContext ? pContext.Layers || {} : {};
-        var profile = pContext ? pContext.Profile || {} : {};
-        var maxWaterCoverage = Number(profile.MaxWaterCoverage);
-        var currentWater = 0;
-
-        if(!isFinite(maxWaterCoverage))
-            maxWaterCoverage = 0.16;
-
-        for(var x = 0; x < pContext.Width; ++x) {
-            for(var y = 0; y < pContext.Height; ++y) {
-                if(MapGen.Layers.Get(layers.water, x, y, 0))
-                    ++currentWater;
-            }
-        }
-
-        return Math.max(
-            0,
-            Math.floor((pContext.Width * pContext.Height) * Math.max(0, maxWaterCoverage - 0.004)) -
-                currentWater
-        );
-    },
-
-    CanPlaceGrammarBeachInteriorWaterCell: function(pContext, pProtectedPoints, pX, pY) {
-        var layers = pContext.Layers || {};
-
-        if(this.IsLiveTerrainProtectedCell(pContext, pX, pY, pProtectedPoints, 5))
-            return false;
-        if(MapGen.Layers.Get(layers.water, pX, pY, 0) ||
-            MapGen.Layers.Get(layers.coast, pX, pY, 0) ||
-            MapGen.Layers.Get(layers.riverBank, pX, pY, 0) ||
-            MapGen.Layers.Get(layers.forcedBank, pX, pY, 0) ||
-            MapGen.Layers.Get(layers.lakeShore, pX, pY, 0) ||
-            MapGen.Layers.Get(layers.blocked, pX, pY, 0))
-            return false;
-        if(this.HasLiveTerrainLayerNear(layers.water, pX, pY, 4) ||
-            this.HasLiveTerrainLayerNear(layers.coast, pX, pY, 3))
-            return false;
-
-        return true;
-    },
-
-    BuildGrammarBeachInteriorWater: function(pContext, pProtectedPoints) {
-        if(!pContext ||
-            !pContext.Profile ||
-            pContext.Profile.TargetPackProfile !== "grammar_beach")
-            return null;
-        if(pContext.Profile.AllowBeachInteriorWater !== true)
-            return null;
-
-        var room = this.GrammarBeachInteriorWaterRoom(pContext);
-        if(room < 10)
-            return null;
-
-        var waterTarget = Math.min(
-            room,
-            14 + (MapGen.Random.HashTile(pContext.Seed, room, 43, 861) % 16)
-        );
-        var layers = pContext.Layers || {};
-        var marginX = Math.max(7, Math.floor(pContext.Width * 0.12));
-        var marginY = Math.max(6, Math.floor(pContext.Height * 0.12));
-
-        for(var attempt = 0; attempt < 96; ++attempt) {
-            var vertical = (MapGen.Random.HashTile(pContext.Seed, attempt, 3, 863) % 100) < 58;
-            var length = Math.max(5, Math.min(13, Math.floor(waterTarget / 3) + (attempt % 3)));
-            var maxX = Math.max(marginX, pContext.Width - marginX - 1);
-            var maxY = Math.max(marginY, pContext.Height - marginY - 1);
-            var xRange = Math.max(1, maxX - marginX + 1);
-            var yRange = Math.max(1, maxY - marginY + 1);
-            var cx = marginX + (MapGen.Random.HashTile(pContext.Seed, attempt, 5, 865) % xRange);
-            var cy = marginY + (MapGen.Random.HashTile(pContext.Seed, attempt, 7, 867) % yRange);
-            var existingWaterRadius = vertical ? Math.max(7, Math.floor(length * 0.6)) : Math.max(8, length);
-            var existingCoastRadius = 5;
-            var cellLookup = {};
-            var cells = [];
-
-            if(this.PointNearList({ x: cx, y: cy }, pProtectedPoints || [], 9))
-                continue;
-            if(this.HasLiveTerrainLayerNear(layers.water, cx, cy, existingWaterRadius) ||
-                this.HasLiveTerrainLayerNear(layers.coast, cx, cy, existingCoastRadius))
-                continue;
-
-            function addCell(self, x, y) {
-                var key = x + "," + y;
-                if(cellLookup[key])
-                    return;
-                if(!self.CanPlaceGrammarBeachInteriorWaterCell(pContext, pProtectedPoints, x, y))
-                    return;
-                cellLookup[key] = true;
-                cells.push({ x: x, y: y });
-            }
-
-            var phase = (MapGen.Random.HashTile(pContext.Seed, attempt, 11, 869) % 6283) / 1000;
-            var start = -Math.floor(length / 2);
-            var end = start + length - 1;
-
-            for(var t = start; t <= end; ++t) {
-                var edgeDistance = Math.min(t - start, end - t);
-                var centerOffset = Math.round(
-                    (Math.sin((t * 0.75) + phase) * 1.4) +
-                    (Math.sin((t * 0.37) + (phase * 1.7)) * 0.8)
-                );
-                var half = edgeDistance <= 0 ? 0 : 1;
-                var halfRoll = MapGen.Random.HashTile(pContext.Seed, attempt + t + 17, edgeDistance + 19, 871) % 100;
-
-                if(waterTarget > 22 && edgeDistance > 1 && halfRoll > 76)
-                    half = 2;
-                if(halfRoll < 14)
-                    half = Math.max(0, half - 1);
-
-                for(var cross = -half; cross <= half; ++cross) {
-                    var nibble = MapGen.Random.HashTile(pContext.Seed, cx + t + cross, cy + attempt, 873) % 100;
-                    if(Math.abs(cross) === half && half > 0 && nibble < 14)
-                        continue;
-
-                    var x = vertical ? cx + centerOffset + cross : cx + t;
-                    var y = vertical ? cy + t : cy + centerOffset + cross;
-                    addCell(this, x, y);
-                }
-            }
-
-            if(cells.length < Math.min(10, room) || cells.length > room)
-                continue;
-
-            var waterPoints = [];
-            var waterSeen = {};
-            for(var cellIndex = 0; cellIndex < cells.length; ++cellIndex)
-                this.SetLiveWaterCell(pContext, cells[cellIndex].x, cells[cellIndex].y, waterPoints, waterSeen);
-
-            var shorePoints = this.BuildBeachShorePoints(pContext, waterPoints);
-            var river = {
-                role: "grammar_beach_interior_lagoon",
-                center: { x: cx, y: cy },
-                points: shorePoints,
-                segment: null
-            };
-
-            pContext.Rivers.push(river);
-            return {
-                river: river,
-                waterPoints: waterPoints,
-                shorePoints: shorePoints,
-                vertical: vertical,
-                side: 0,
-                inward: { x: 0, y: 0 },
-                localizedSegment: true,
-                blob: true,
-                interior: true,
-                segment: null
-            };
-        }
-
-        return null;
     },
 
     CountLiveLayerNeighbours: function(pLayer, pX, pY, pRadius) {
@@ -3834,7 +3758,6 @@ MapGen.Grammar = MapGen.Grammar || {};
         var beach = this.StampShoreBeachBand(pContext, riverInfo, protectedPoints);
         var pocketInfo = this.BuildAuthoredBeachPondPocket(pContext, protectedPoints);
         var pocketBeach = pocketInfo ? this.StampShoreBeachBand(pContext, pocketInfo, protectedPoints) : null;
-        var interiorInfo = this.BuildGrammarBeachInteriorWater(pContext, protectedPoints);
         var combinedBeach = this.CombineLiveBeachSets(beach, pocketBeach);
         var quicksand = this.StampQuicksandPatches(pContext, riverInfo, combinedBeach, protectedPoints, archetype);
         var cleared = this.ClearProtectedLiveTerrain(pContext, protectedPoints);
@@ -3857,7 +3780,6 @@ MapGen.Grammar = MapGen.Grammar || {};
 
         appendWaterPoints(this, riverInfo.waterPoints);
         appendWaterPoints(this, pocketInfo ? pocketInfo.waterPoints : null);
-        appendWaterPoints(this, interiorInfo ? interiorInfo.waterPoints : null);
 
         pContext.GrammarLiveTerrain = {
             mode: "localized_beach_river",
@@ -3901,8 +3823,9 @@ MapGen.Grammar = MapGen.Grammar || {};
             pocketRole: pocketInfo ? pocketInfo.river.role : null,
             pocketWaterCells: pocketInfo ? pocketInfo.waterPoints.length : 0,
             pocketBeach: pocketBeach,
-            interiorRole: interiorInfo ? interiorInfo.river.role : null,
-            interiorWaterCells: interiorInfo ? interiorInfo.waterPoints.length : 0,
+            interiorRole: null,
+            interiorWaterCells: 0,
+            interiorWaterBodies: [],
             beach: combinedBeach,
             quicksand: quicksand,
             dynamicCells: dynamic.cells,
@@ -3935,7 +3858,6 @@ MapGen.Grammar = MapGen.Grammar || {};
                 " depthChanges=" + riverInfo.edgeDepthChanges +
                 " water=" + riverInfo.waterPoints.length +
                 " pocketWater=" + (pocketInfo ? pocketInfo.waterPoints.length : 0) +
-                " interiorWater=" + (interiorInfo ? interiorInfo.waterPoints.length : 0) +
                 " shore=" + riverInfo.river.points.length +
                 " beach=" + combinedBeach.coast + " quicksand=" + quicksand.count +
                 " dynamic=" + dynamic.cells.length +

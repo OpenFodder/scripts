@@ -135,7 +135,7 @@ MapGen.Terrain = MapGen.Terrain || {};
         // Reject an impossible repair before spending its patch budget. The
         // union is an optimistic upper bound: it even ignores patch conflicts
         // and the tile budget, while counting each possible cover cell once.
-        var possible = [], capacityCells = new Uint8Array(W * H);
+        var possible = [], capacityCells = new Uint8Array(W * H), capacityCount = 0;
         for(var sampleIndex = 0; sampleIndex < samples.length; ++sampleIndex)
             possible.push({cover: samples[sampleIndex].cover});
         for(var candidateIndex = 0; candidateIndex < candidates.length; ++candidateIndex) {
@@ -143,13 +143,22 @@ MapGen.Terrain = MapGen.Terrain || {};
             for(var ci = 0; ci < capacity.length; ++ci) {
                 var cell = capacity[ci], cellIndex = cell.y * W + cell.x;
                 if(capacityCells[cellIndex]) continue;
-                capacityCells[cellIndex] = 1;
+                capacityCells[cellIndex] = 1; ++capacityCount;
                 for(var sj = 0; sj < samples.length; ++sj) {
                     var dx = cell.x - samples[sj].x, dy = cell.y - samples[sj].y;
                     if(dx * dx + dy * dy <= radiusSq) ++possible[sj].cover;
                 }
             }
         }
+        var possibleExposed = 0, possibleRun = 0, possibleLongest = 0;
+        for(var possibleIndex = 0; possibleIndex < possible.length; ++possibleIndex) {
+            if(possible[possibleIndex].cover < minimum) {
+                ++possibleExposed; possibleRun += step;
+                possibleLongest = Math.max(possibleLongest, possibleRun);
+            } else possibleRun = 0;
+        }
+        stats.possible = {candidateCells: capacityCount,
+            exposedSamples: possibleExposed, longestExposedRunTiles: possibleLongest};
         if(!satisfies(c, possible, minimum, step)) {
             stats.stopped = "insufficient_safe_cover";
             return false;

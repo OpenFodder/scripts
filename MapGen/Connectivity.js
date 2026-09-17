@@ -1360,12 +1360,16 @@ MapGen.Connectivity = {
         for(var index = 0; index < sites.length; ++index) {
             var site = sites[index];
             if(!site || !site.point) continue;
-            if(pContext.Profile && pContext.Profile.GeneratorCore === "official_grammar" &&
+            // Regional structure markers still host guards and encounter
+            // space even when the exact building footprint is placed elsewhere.
+            // Reserve their approach before cover grows around the site.
+            if(!pContext.RegionalPlan && pContext.Profile && pContext.Profile.GeneratorCore === "official_grammar" &&
                 site.kind === "structure")
                 continue;
             if(site.requireConnected) continue;
             if(!site.requireSpur) continue;
-            spurs.push(site.point);
+            spurs.push({point: site.point, anchor: pContext.RegionalPlan && site.kind === "structure" ?
+                site.routeAnchor : null});
         }
 
         return spurs;
@@ -1524,8 +1528,10 @@ MapGen.Connectivity = {
         // cheapest in walkCost so the spur naturally docks onto the spine.
         var spurs = this.SpurSites(pContext);
         for(var spurIndex = 0; spurIndex < spurs.length; ++spurIndex) {
-            var spurEnd = spurs[spurIndex];
-            var anchor = this.NearestCorridorPoint(pContext, spurEnd);
+            var spur = spurs[spurIndex], spurEnd = spur.point;
+            // Regional site fitting already selected a reachable trunk
+            // anchor. The geometrically closest path can lie across water.
+            var anchor = spur.anchor || this.NearestCorridorPoint(pContext, spurEnd);
             if(!anchor) anchor = pContext.CriticalPoints[0];
             var spurResult = this.RouteBetween(pContext, walkCost, anchor, spurEnd, "spur", 1);
             walkCost = this.BuildWalkCost(pContext, spurResult && spurResult.WalkCost, spurResult && spurResult.Spec);

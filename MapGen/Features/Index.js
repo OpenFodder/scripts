@@ -330,7 +330,26 @@ MapGen.Features = {
         if(typeof pSite.minDistanceOverride === "number")
             minDistance = Math.max(0, Math.floor(pSite.minDistanceOverride));
 
-        return this.CandidateNearPoint(pContext, pSite.point, radius, minDistance);
+        var point = this.CandidateNearPoint(pContext, pSite.point, radius, minDistance);
+        if(point || !pSite.routePlanned)
+            return point;
+
+        // The fast eight-ray search can miss a valid pocket beside a routed
+        // site. Check the remaining cells within the same six-cell radius,
+        // retaining placement clearance and the eight-cell site contract.
+        for(var ring = 2; ring <= 6; ++ring) {
+            for(var dy = -ring; dy <= ring; ++dy) {
+                for(var dx = -ring; dx <= ring; ++dx) {
+                    if(Math.max(Math.abs(dx), Math.abs(dy)) !== ring ||
+                        !dx || !dy || Math.abs(dx) === Math.abs(dy) || dx * dx + dy * dy > 64)
+                        continue;
+                    var candidate = {x:pSite.point.x + dx, y:pSite.point.y + dy};
+                    if(this.CanPlaceAt(pContext, candidate, radius, minDistance))
+                        return candidate;
+                }
+            }
+        }
+        return null;
     },
 
     PlaceStructureSite: function(pContext, pSite) {

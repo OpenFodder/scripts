@@ -69,7 +69,13 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
             return pA.y - pB.y;
         });
 
-        targetCount = Math.max(0, Math.min(candidates.length, Math.round(candidates.length * coverage)));
+        // Beach compositions specify whole-map cover targets. Applying that
+        // fraction to the remaining dry cells underfills deeper shores and
+        // makes retries favour the same shallow layout. Rank enough forest
+        // up front; all route, water and building exclusions still apply.
+        var coverArea = pContext.RegionalPlan && pContext.Profile.Name === "grammar_beach" ?
+            pContext.Width * pContext.Height : candidates.length;
+        targetCount = Math.max(0, Math.min(candidates.length, Math.round(coverArea * coverage)));
 
         for(var index = 0; index < targetCount; ++index) {
             this.MarkTreeCell(pContext, candidates[index].x, candidates[index].y);

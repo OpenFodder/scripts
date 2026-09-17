@@ -183,6 +183,12 @@ MapGen.Profiles = (function() {
         validateMinimum(validation, pProfile, "Width", 16);
         validateMinimum(validation, pProfile, "Height", 16);
         validateRange(validation, pProfile, "TreeCoverage", 0, 0.9);
+        if(pProfile.ForestShape && ["groves", "belts", "heartwood", "rim"].indexOf(pProfile.ForestShape) < 0)
+            addIssue(validation, "errors", "ForestShape", "unknown forest shape");
+        if(pProfile.JungleLandform && ["basin", "islands"].indexOf(pProfile.JungleLandform) < 0)
+            addIssue(validation, "errors", "JungleLandform", "unknown jungle landform");
+        if(pProfile.RegionalIceTerrain && ["lakes", "inlets", "river_loop", "woodland"].indexOf(pProfile.RegionalIceTerrain) < 0)
+            addIssue(validation, "errors", "RegionalIceTerrain", "unknown regional ice terrain");
         validateRange(validation, pProfile, "PathCoverage", 0.01, 0.45);
         validateMinimum(validation, pProfile, "MainPathWidth", 1);
         validateMinimum(validation, pProfile, "SidePathWidth", 1);
@@ -2601,7 +2607,11 @@ MapGen.Profiles = (function() {
         var resolved;
         var compositionVariant;
 
-        compositionVariant = resolveCompositionVariant(random, raw.CompositionVariants);
+        // Look up general-purpose compositions after inheritance, so a named
+        // maze/neck/crossing retains its own terrain contract.
+        MapGen.Variation.ConfigureProfile(raw, resolvedName, random);
+        compositionVariant = resolveCompositionVariant(random, raw.CompositionVariants ||
+            (MapGen.ProfileCompositions && MapGen.ProfileCompositions[resolvedName]));
         if(compositionVariant)
             raw = merge(raw, compositionVariant.overrides);
         raw = merge(raw, pOverrides || {});

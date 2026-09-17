@@ -936,7 +936,9 @@ MapGen.Repair = {
             this.HasKey(reasons, "route_median_width_too_high") ||
             this.HasKey(reasons, "final_route_neck_fraction_too_low") ||
             this.HasKey(reasons, "final_route_neck_run_too_short") ||
-            this.HasKey(reasons, "final_route_median_width_too_high");
+            this.HasKey(reasons, "final_route_median_width_too_high") ||
+            this.HasKey(reasons, "final_route_visible_neck_fraction_too_low") ||
+            this.HasKey(reasons, "final_route_visible_neck_run_too_short");
     },
 
     ConstrictActualRoute: function(pContext) {
@@ -1039,20 +1041,31 @@ MapGen.Repair = {
                 repaired = true;
         }
 
-        if(this.NeedsRouteConstrictionRepair(report)) {
-            if(this.ConstrictActualRoute(pContext))
-                repaired = true;
-        }
-
         if(this.HasKey(report.reasons, "tree_coverage_too_high")) {
             this.ThinTreesToTarget(pContext);
             repaired = true;
         }
 
+        // Structural repairs need refreshed terrain and a newly measured
+        // route. Apply cover on the next bounded pass, after that refresh;
+        // otherwise smoothing can erase it and consume its one-shot budget.
+        if(repaired)
+            return true;
+
+        if(this.NeedsRouteConstrictionRepair(report)) {
+            if(this.ConstrictActualRoute(pContext)) {
+                // The gate already preserves the measured route and placement
+                // access. A general terrain refresh smooths away its narrow
+                // throat and reapplies the old broad route reservations.
+                pContext.RepairCoverOnly = !repaired;
+                repaired = true;
+            }
+        }
+
         if(this.HasKey(report.reasons, "tree_coverage_too_low")) {
             // Adding cover changes no water or placement-derived state. A
             // global refresh would smooth away the repair before rendering.
-            pContext.RepairCoverOnly = !repaired;
+            pContext.RepairCoverOnly = pContext.RepairCoverOnly || !repaired;
             this.GrowTreesToTarget(pContext);
             repaired = true;
         }

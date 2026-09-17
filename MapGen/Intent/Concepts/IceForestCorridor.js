@@ -58,6 +58,12 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         var isMaze = style === "ice_tree_maze";
         var isBlob = style === "ice_tree_blob";
         var isNeck = style === "ice_neck_route";
+        // Small maze canvases cannot satisfy the existing 0.62 forest floor
+        // after a three-cell corridor, keep-clear halos, and required dead
+        // ends are reserved. Preserve the floor by making only this smallest
+        // maze scale use a one-cell route; normal and larger mazes retain the
+        // established corridor width.
+        var corridorHalfWidth = isMaze && (W * H) < 3000 ? 0 : CORRIDOR_HALF_WIDTH;
 
         if(W < (PERIMETER_MARGIN * 2 + 12) || H < (PERIMETER_MARGIN * 2 + 8)) {
             return pIntent.AuthorResult.Fail(
@@ -192,7 +198,7 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         var corridorCells = V ? V.StampRouteByShape(
             pIntentMap, routeShape,
             startX, startY, endX, endY,
-            CORRIDOR_HALF_WIDTH, routeRng
+            corridorHalfWidth, routeRng
         ) : 0;
 
         // 0.5. P3d.5 water: per-seed lake using the selected style's
@@ -240,8 +246,8 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         //    shred to scattered dots. CA converges from random seed to
         //    organic blob shapes that survive prune (no thin spurs, no
         //    singletons). Dramatic visual improvement vs bernoulli.
-        var corridorMinY = midY - CORRIDOR_HALF_WIDTH;
-        var corridorMaxY = midY + CORRIDOR_HALF_WIDTH;
+        var corridorMinY = midY - corridorHalfWidth;
+        var corridorMaxY = midY + corridorHalfWidth;
 
         function routeYAtColumn(pX, pFallback) {
             var totalY = 0;
@@ -268,7 +274,8 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
             minY: interiorMinY, maxY: interiorMaxY
         }, {
             iterations: 3,
-            seedDensity: caSeedDensity
+            seedDensity: caSeedDensity,
+            seedDensityField: !isMaze ? V.RegionalForestDensity(pContext, caSeedDensity, 0.16) : null
         }, decorRng) : 0;
         var openPocketCells = 0; // CA produces this naturally (cells that
                                  // converge to 0 are open pockets).
@@ -299,7 +306,12 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         // They connect to the primary route but terminate inside the canopy.
         var mazeDeadEnds = 0;
         if(isMaze && V) {
-            var deadEndCount = V.PerSeedInt(decorRng, 4, 7);
+            // Small maze screens have little spare acreage after the route,
+            // spawn/structure halos, and KEEP_CLEAR reservations.  Retain
+            // the four-branch contract while avoiding the extra reservations
+            // created by the larger screen's 5-7 branch lottery.
+            var smallMaze = (W * H) < 3000;
+            var deadEndCount = smallMaze ? 4 : V.PerSeedInt(decorRng, 4, 7);
             for(var de = 0; de < deadEndCount; ++de) {
                 var branchX = Math.floor(startX +
                     ((de + 1) / (deadEndCount + 1)) * (endX - startX));
@@ -316,18 +328,22 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
                     }
                 }
                 var towardTop = (de % 2) === 0;
+                var branchReach = smallMaze ? 5 : 7;
                 var targetY = towardTop ?
                     V.PerSeedInt(decorRng, interiorMinY + 3,
-                        Math.max(interiorMinY + 3, midY - 7)) :
-                    V.PerSeedInt(decorRng, Math.min(interiorMaxY - 3, midY + 7),
+                        Math.max(interiorMinY + 3, midY - branchReach)) :
+                    V.PerSeedInt(decorRng,
+                        Math.min(interiorMaxY - 3, midY + branchReach),
                         interiorMaxY - 3);
+                var lateralReach = smallMaze ? 4 : 8;
                 var targetX = Math.max(interiorMinX + 3,
                     Math.min(interiorMaxX - 3,
-                        branchX + V.PerSeedInt(decorRng, -8, 8)));
+                        branchX + V.PerSeedInt(decorRng, -lateralReach,
+                            lateralReach)));
                 var branchShape = (de % 3 === 0) ? "s_curve" : "zigzag";
                 V.StampRouteByShape(pIntentMap, branchShape,
                     branchX, branchY, targetX, targetY,
-                    de % 3 === 0 ? 1 : 0, decorRng);
+                    (!smallMaze && de % 3 === 0) ? 1 : 0, decorRng);
                 ++mazeDeadEnds;
             }
         }

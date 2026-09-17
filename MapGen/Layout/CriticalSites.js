@@ -863,7 +863,11 @@ MapGen.Layout.CriticalSites = {
                     return pRight.routeQuality - pLeft.routeQuality;
                 if(pLeft.routeIndex !== pRight.routeIndex)
                     return pLeft.routeIndex - pRight.routeIndex;
-                return Math.abs(pLeft.routeOffset || 0) - Math.abs(pRight.routeOffset || 0);
+                // Opposite sides of the same route can have equal quality and
+                // distance. Both native runtimes must choose the same site.
+                return Math.abs(pLeft.routeOffset || 0) - Math.abs(pRight.routeOffset || 0) ||
+                    pLeft.x - pRight.x || pLeft.y - pRight.y ||
+                    (pLeft.routeOffset || 0) - (pRight.routeOffset || 0);
             });
 
             var profile = pContext.Profile || {};
@@ -950,7 +954,7 @@ MapGen.Layout.CriticalSites = {
                 for(var pathIndex = 0; pathIndex < paths.length && !point; ++pathIndex) {
                     var branch = paths[pathIndex];
                     if(branch === route || !branch.points || branch.points.length < 8 ||
-                        (branch.role !== "primary" && branch.role !== "secondary"))
+                        (branch.role !== "primary" && branch.role !== "secondary" && branch.role !== "regional_branch"))
                         continue;
                     point = this.FindRouteSideSitePoint(pContext, branch, site,
                         kindOrder, kindCounts[siteKind], sites);
@@ -970,15 +974,16 @@ MapGen.Layout.CriticalSites = {
             ++moved;
         }
 
-        // Spend one shared rescue budget on the initial layout. Subsequent
-        // retries and any still-missing sites reject before expensive
-        // rendering. Dense search also checks the same eligible branches used
+        // Spend one shared rescue budget per layout. Later attempts get a
+        // smaller budget: one missing footprint should not automatically force
+        // another complete map. Dense search checks the same eligible branches used
         // by the fast pass, so a failed site can be repaired onto a concrete
         // alternate route without changing any validation thresholds. Each
         // route receives a fair slice of the shared budget; unused work is
         // carried forward to the next route/site.
-        if(failed && (pContext.Attempt || 0) === 0 && MapGen.Layout.RouteSiteSearch) {
-            var rescueBudget = {checksLeft: 4096, probesLeft: 32};
+        if(failed && MapGen.Layout.RouteSiteSearch) {
+            var firstAttempt = (pContext.Attempt || 0) === 0;
+            var rescueBudget = {checksLeft: firstAttempt ? 4096 : 1024, probesLeft: firstAttempt ? 32 : 8};
             var planner = this;
             MapGen.Context.Time(pContext, "Layout.RouteSiteSearch", function() {
                 for(var missingIndex = 0; missingIndex < missing.length &&
@@ -989,7 +994,7 @@ MapGen.Layout.CriticalSites = {
                     for(var pathIndex = 0; pathIndex < paths.length; ++pathIndex) {
                         var branch = paths[pathIndex];
                         if(branch === route || !branch.points || branch.points.length < 8 ||
-                            (branch.role !== "primary" && branch.role !== "secondary"))
+                            (branch.role !== "primary" && branch.role !== "secondary" && branch.role !== "regional_branch"))
                             continue;
                         searchRoutes.push(branch);
                     }

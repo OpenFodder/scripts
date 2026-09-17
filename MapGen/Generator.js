@@ -319,6 +319,7 @@ MapGen.PipelineStages = function() {
         { label: "Layout",        fn: function(c) { MapGen.Layout.Build(c); } },
         { label: "TerrainIntent", fn: function(c) { MapGen.Grammar.ApplyLiveTerrain(c); } },
         { label: "Connectivity",  fn: function(c) { MapGen.Connectivity.Build(c); } },
+        { label: "TerrainFill",   fn: function(c) { MapGen.Grammar.FillBeachInteriorWater(c); } },
         { label: "RoutePlanPreflight", fn: function(c, rules) { MapGen.Layout.PreflightRoutePlan(c, rules); } },
         { label: "Terrain",       fn: function(c) {
             if(MapGen.Layout && MapGen.Layout.Rivers &&

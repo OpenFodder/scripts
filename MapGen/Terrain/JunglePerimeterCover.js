@@ -61,6 +61,8 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
     pJungle.ApplyPerimeterCover = function(pContext) {
         if(!this.SupportsPerimeterCover(pContext))
             return { stamped: 0, width: 0 };
+        if(pContext.RegionalPlan && pContext.Profile.PreserveForestOpenSpace)
+            return { stamped: 0, width: 0 };
 
         var chance = this.PerimeterCoverChance(pContext);
         if(chance <= 0)

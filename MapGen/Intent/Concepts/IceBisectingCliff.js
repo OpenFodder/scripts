@@ -388,25 +388,57 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
             Math.min(maximumCover * 0.72, requestedCover * 0.72));
         var coverHigh = Math.max(coverLow,
             Math.min(maximumCover * 0.88, requestedCover * 1.08));
+        // Skidoo gets a modestly fuller authored band because cliff, route,
+        // and anchor reservations reduce the cover that reaches structures.
+        if(profile.ForcedMobilityMode === "skidoo_jump") {
+            coverLow = Math.max(coverLow,
+                Math.min(maximumCover * 0.82, requestedCover * 0.95));
+            coverHigh = Math.max(coverLow,
+                Math.min(maximumCover * 0.96, requestedCover * 1.45));
+        }
         var coverDensity = V ?
             V.PerSeedRange(decorRng, coverLow, coverHigh) :
             (coverLow + coverHigh) * 0.5;
-        for(var fy = interiorMinY; fy <= interiorMaxY; ++fy) {
-            for(var fx = interiorMinX; fx <= interiorMaxX; ++fx) {
-                var idx = (fy * W) + fx;
-                if(pIntentMap.terrain[idx] === T.CLIFF_BODY ||
-                   pIntentMap.terrain[idx] === T.CLIFF_TOP) { continue; }
-                if(pIntentMap.movement[idx] & (M.ROUTE_PRIMARY | M.ROUTE_SECONDARY |
-                                                M.CROSSING | M.BRIDGE)) { continue; }
-                if(pIntentMap.claim[idx] & (C.SPAWN_SAFE | C.OBJECTIVE)) { continue; }
-                // Skip cells along the route band (routeCenterX ± 2)
-                if(fx >= routeCenterX - 2 && fx <= routeCenterX + 2) { continue; }
-                var rand = decorRng && decorRng.Float ?
-                    decorRng.Float(0, 1) : 0.5;
-                if(rand < coverDensity) {
-                    pIntent.Map.SetTerrain(pIntentMap, fx, fy, T.FOREST);
-                    pIntent.Map.AddMovement(pIntentMap, fx, fy, M.BLOCKED);
-                    pIntent.Map.SetOwner(pIntentMap, fx, fy, O.TREE);
+        // The renderer keeps supported tree components and prunes isolated
+        // cells. Use the CA+dilation helper for skidoo so its authored cover
+        // arrives as connected masses; other cliff styles retain scatter.
+        if(profile.ForcedMobilityMode === "skidoo_jump" && V &&
+           V.StampForestCellularAutomata) {
+            var xlSkidoo = (W * H) >= 10000;
+            // XL maps use one pass with a denser initial field to preserve
+            // large, low-frequency components. The runtime cover budget still
+            // enforces the profile's MaxTreeCoverage cap.
+            var skidooSeedDensity = xlSkidoo ?
+                Math.min(0.56, Math.max(coverDensity, maximumCover * 2.0)) :
+                coverDensity;
+            V.StampForestCellularAutomata(pIntentMap, {
+                minX: interiorMinX, maxX: interiorMaxX,
+                minY: interiorMinY, maxY: interiorMaxY
+            }, {
+                iterations: xlSkidoo ? 1 : 3,
+                seedDensity: skidooSeedDensity,
+                skipPredicate: function(fx, fy) {
+                    return fx >= routeCenterX - 2 && fx <= routeCenterX + 2;
+                }
+            }, decorRng);
+        } else {
+            for(var fy = interiorMinY; fy <= interiorMaxY; ++fy) {
+                for(var fx = interiorMinX; fx <= interiorMaxX; ++fx) {
+                    var idx = (fy * W) + fx;
+                    if(pIntentMap.terrain[idx] === T.CLIFF_BODY ||
+                       pIntentMap.terrain[idx] === T.CLIFF_TOP) { continue; }
+                    if(pIntentMap.movement[idx] & (M.ROUTE_PRIMARY | M.ROUTE_SECONDARY |
+                                                    M.CROSSING | M.BRIDGE)) { continue; }
+                    if(pIntentMap.claim[idx] & (C.SPAWN_SAFE | C.OBJECTIVE)) { continue; }
+                    // Skip cells along the route band (routeCenterX ± 2)
+                    if(fx >= routeCenterX - 2 && fx <= routeCenterX + 2) { continue; }
+                    var rand = decorRng && decorRng.Float ?
+                        decorRng.Float(0, 1) : 0.5;
+                    if(rand < coverDensity) {
+                        pIntent.Map.SetTerrain(pIntentMap, fx, fy, T.FOREST);
+                        pIntent.Map.AddMovement(pIntentMap, fx, fy, M.BLOCKED);
+                        pIntent.Map.SetOwner(pIntentMap, fx, fy, O.TREE);
+                    }
                 }
             }
         }
@@ -618,12 +650,19 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
             flatFraction: 0.22, stairFraction: 0.55 }
     ];
 
+    // The generic grammar_ice profile has no authored terrace contract. Give
+    // it one additional mid-length phrase while leaving named mobility and
+    // terrace profiles on their established three-shape distribution.
+    var GENERIC_TERRACE_SHAPE =
+        { name: "staggered_shelf", reachX: 0.44, sideInset: 6,
+            flatFraction: 0.30, stairFraction: 0.48 };
+
     // Build a one-cell-at-a-time cliff slope which the shipped ice atlas can
     // actually join.  Its step strips may repeat, but two separate step runs
     // need at least two body columns between them (step -> body_v3 ->
     // body_v0 -> step).  Linear rounding frequently produced step/body/step,
     // for which no legal strip sequence exists.
-    function terraceSlopeOffsets(pDelta, pEdgeCount) {
+    function terraceSlopeOffsets(pDelta, pEdgeCount, pSequenceSeed) {
         var offsets = [0];
         var direction = pDelta < 0 ? -1 : 1;
         var changes = Math.abs(pDelta) | 0;
@@ -641,6 +680,8 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         var flatEdges = pEdgeCount - changes;
         var clusterCount = Math.min(4, changes,
             1 + Math.floor(flatEdges / 2));
+        if(pSequenceSeed !== undefined)
+            clusterCount = 1 + MapGen.Random.HashTile(pSequenceSeed, 271, 277, 4237) % clusterCount;
         var clusterSizes = [];
         var clusterBase = Math.floor(changes / clusterCount);
         var clusterExtra = changes % clusterCount;
@@ -657,7 +698,9 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         // conspicuously straight landing at either end.
         var spreadIndex = 0;
         while(spareFlats-- > 0) {
-            gapSizes[spreadIndex % gapSizes.length]++;
+            var gap = pSequenceSeed === undefined ? spreadIndex % gapSizes.length :
+                MapGen.Random.HashTile(pSequenceSeed, spreadIndex, 281, 4241) % gapSizes.length;
+            gapSizes[gap]++;
             ++spreadIndex;
         }
         // The perpendicular edge owns exactly the atlas face plus its three
@@ -750,8 +793,9 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         var shapeHash = MapGen.Random.HashTile(
             cornerSeed, 263, 269, 4231);
         var cornerPick = cornerHash % 4;
-        var terraceShape = TERRACE_SHAPES[
-            shapeHash % TERRACE_SHAPES.length];
+        var shapePool = String(profile.Name || "") === "grammar_ice" ?
+            TERRACE_SHAPES.concat([GENERIC_TERRACE_SHAPE]) : TERRACE_SHAPES;
+        var terraceShape = shapePool[shapeHash % shapePool.length];
         // 0 = NW, 1 = NE, 2 = SW, 3 = SE
         var cornerNorth = (cornerPick === 0 || cornerPick === 1);
         var cornerWest  = (cornerPick === 0 || cornerPick === 2);
@@ -792,6 +836,12 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
         var driftColumns = Math.max(
             1, reachX - flatColumns - edgeExitColumns);
         var requiredDrift = Math.abs(fadeTopY - sideTopY);
+        // Narrow generic maps still need a complete face and a five-column
+        // stair landing. Extend the terrace before rejecting a legal slope.
+        if(profile.Name === "grammar_ice" && driftColumns < requiredDrift) {
+            reachX = Math.min(W - 1, Math.max(reachX, requiredDrift + 5 + edgeExitColumns));
+            driftColumns = Math.max(1, reachX - flatColumns - edgeExitColumns);
+        }
         // The 56-wide Small preset initially has fewer drift edges than
         // vertical height changes. Borrow columns from its still-safe stair
         // landing so every rendered cliff column moves by at most one row.
@@ -801,9 +851,12 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
             driftColumns = requiredDrift;
         }
         var slopeOffsets = terraceSlopeOffsets(
-            fadeTopY - sideTopY, driftColumns);
+            fadeTopY - sideTopY, driftColumns,
+            profile.RegionalComposition ? cornerSeed : undefined);
         if(!slopeOffsets)
-            return false;
+            return pIntent.AuthorResult.Fail(pIntent.AuthorReason.InsufficientOpenArea,
+                [pIntent.AuthorResult.Diagnostic("ice_bisecting_cliff_terrace.slope",
+                    "Cliff requires " + requiredDrift + " height steps across " + driftColumns + " columns")]);
         var cliffColumns = [];
         for(var step = 0; step <= reachX; ++step) {
             var cliffX = cornerWest ? step : (W - 1 - step);
@@ -1121,6 +1174,7 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
                 {
                     iterations: 3,
                     seedDensity: terraceForestDensity,
+                    seedDensityField: Vt.RegionalForestDensity(pContext, terraceForestDensity, 0.12),
                     skipPredicate: terraceForestSkip
                 },
                 terraceDecorRng

@@ -794,17 +794,25 @@ MapGen.Grammar = {
         var style = styles[variant % styles.length];
         var beachFamily = this.GrammarBeachFamily ?
             this.GrammarBeachFamily(pContext) : "";
+        var regionalBeach = profile.RegionalComposition && profile.Name === "grammar_beach";
+        if(regionalBeach && profile.RegionalBeachForestCoverage !== undefined) {
+            // Mission recipes mostly describe sparse outposts. Forest amount
+            // is an independent regional choice, just like its spatial shape.
+            style.tree = profile.RegionalBeachForestCoverage;
+            style.minTree = style.tree * 0.5;
+            style.maxTree = Math.min(0.75, style.tree + 0.12);
+        }
 
-        // Terrain family and composition used to be independent rolls. That
-        // can pair mapm8's compact cove with an almost empty open-landing
-        // composition, losing the forests and quicksand that make the source
-        // map tactically interesting. Preserve composition variety, but apply
-        // source-family floors so none of the three terrain families becomes
-        // a large lawn with one decorative shoreline.
+        // Authored families retain their source cover floors. Regional routes
+        // and encounter cover own tactical pacing: raising every sparse/open
+        // composition to the same family density erased those distinctions.
+        // Other family features, including quicksand, still apply to both.
         if(beachFamily === "mapm8_corner_cove") {
-            style.tree = Math.max(style.tree, 0.28);
-            style.minTree = Math.max(style.minTree, 0.18);
-            style.maxTree = Math.max(style.maxTree, 0.40);
+            if(!regionalBeach) {
+                style.tree = Math.max(style.tree, 0.28);
+                style.minTree = Math.max(style.minTree, 0.18);
+                style.maxTree = Math.max(style.maxTree, 0.40);
+            }
             style.quicksand = Math.max(
                 style.quicksand,
                 2 + (MapGen.Random.HashTile(pContext.Seed, variant, 181, 3607) % 2)
@@ -818,9 +826,11 @@ MapGen.Grammar = {
             style.spurRate = Math.max(style.spurRate, 1.0);
         }
         else if(beachFamily === "mapm5_top_bank") {
-            style.tree = Math.max(style.tree, 0.22);
-            style.minTree = Math.max(style.minTree, 0.14);
-            style.maxTree = Math.max(style.maxTree, 0.34);
+            if(!regionalBeach) {
+                style.tree = Math.max(style.tree, 0.22);
+                style.minTree = Math.max(style.minTree, 0.14);
+                style.maxTree = Math.max(style.maxTree, 0.34);
+            }
             style.forestSeed = Math.max(style.forestSeed, 0.0058);
             style.patchMin = Math.max(style.patchMin, 18);
             style.patchMax = Math.max(style.patchMax, 96);
@@ -1151,6 +1161,15 @@ MapGen.Grammar = {
             profile.StructureMaxClearings = lockedTarget;
             profile.GrammarStructureTargetMax = lockedTarget;
             return;
+        }
+
+        // Select the mission's building count before Objectives plans doors
+        // and compounds. Stay within the existing size budget and preserve
+        // explicit caller caps; live placement uses this same resolved cap.
+        if(profile.StructureCountVariation && profile.GrammarStructureTargetMax === undefined) {
+            var countRoll = MapGen.Random.HashTile(pContext.Seed, pContext.Width, pContext.Height, 19117) / 4294967296;
+            profile.GrammarStructureTargetMax = budget.structureFloor +
+                Math.floor(countRoll * (budget.structureCeiling - budget.structureFloor + 1));
         }
 
         profile.StructureClusters = Math.min(
@@ -2546,6 +2565,15 @@ MapGen.Grammar = {
                 Number(profile.MaxWaterCoverage || 0)
             );
         }
+
+        // Regional landscapes have their own water budget. The older style
+        // caps reduced broad lakes and inlets to the same small snowfield pond.
+        // Apply this before explicit runtime overrides so caller limits win.
+        if(profile.RegionalComposition && profile.Name === "grammar_ice" &&
+            style !== "ice_tree_maze" && style !== "ice_neck_route" &&
+            style !== "ice_cliff_checkpoint" && style !== "ice_cliff_terrace")
+            profile.MaxWaterCoverage = Math.max(Number(profile.MaxWaterCoverage || 0),
+                Number(profile.RegionalIceWaterCoverage || 0) / 0.78 + 0.02);
 
         runtimeOverrides = profile.IceLayoutRuntimeOverrides || null;
         if(runtimeOverrides) {

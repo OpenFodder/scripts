@@ -32,6 +32,57 @@ dry apron and buffer against the original water/coast mask before reserving land
 - Multiplayer shares route and spawn protection; its existing match planner owns
   team objects. Campaign building requirements do not leak into multiplayer.
 
+Regional ice reserves settlement space and any cliff before shaping water.
+`Intent/RegionalTerrain.js` fits transit with the native pathfinder, preferring
+dry routes and allowing only short water crossings. Cliff regions use the
+existing stair and cliff tiles, with dry shore aprons; narrow maps retain their
+water/forest layouts. Generic tiny ice maps choose a fitting style before runtime
+tuning, while explicitly forced styles keep their authored selection.
+
+Regional circuits separate arrival and objective across the loop. Regional
+structure markers reserve approaches before cover because they still host
+encounters even when exact building footprints move. Beach settlement scoring
+lives in `Layout/RegionIntents.js` and distinguishes compounds, paired camps,
+and dispersed sites while keeping the supported east/south shoreline families.
+Regional forest fields distinguish individual groves, one to three winding
+belts, a single heartwood mass, and a broad clearing enclosed by rim forest.
+The latter three use map-scale geometry independent of the route partition.
+`PreserveForestOpenSpace` keeps their open areas through generic perimeter and
+open-field filler passes; route, encounter, and validation cover still apply.
+Regional ice materializes its already allocated forest mask instead of thinning
+it through a second patch allocation.
+
+Ordinary regional layouts mix irregular, overlapping districts with complete
+partitions; mazes and cliff reservations retain disjoint partitions. Full-edge
+beaches use districts to reserve the local coastal footprint before sites.
+`Layout/WaterGeography.js` supplies shared continuous fields for scattered lakes,
+long basins, lake chains and crescents. Jungle varies water quantity by landform
+and the strength of channels between islands. Ice budgets water by landscape,
+from dry woodland to broad lakes/inlets, before explicit runtime overrides.
+Shore-heavy ice leaves extra forest headroom for contour and route pruning.
+Secondary-route recovery can search dry sectors within the missing progression
+phase when perpendicular probes are blocked by water. Building distribution
+recovery filters for unused encounter regions before ranking alternatives.
+
+Generic beaches choose partial corner shores or full-edge shelves/deeper coasts.
+All remain east/south-facing monotone contours, capped around reserved anchors.
+Full-edge shores grow across their entire length using seeded depth curves.
+Settlement planning reserves that local depth before placing regional points,
+so a deep coast is not flattened by an anchor placed in its intended footprint.
+Regional beach endpoints and support remain on the regional graph; the beach
+hook no longer replaces them with the legacy six-layout endpoint matrix.
+The generic water ceiling is 36%, with caller overrides preserved. Beach forest
+allocation uses the composition's whole-map cover target, avoiding low-cover
+retries when water takes more space. Regional sand bands stay at least four
+cells wide to retain visible sand after fitting grass and water transitions.
+Regional beaches choose forest amount independently of the mission recipe;
+the source-family forest floors remain for authored profiles. Tactical cover
+and live placement validation still apply to every regional composition.
+Routed structure markers retain the fast placement search, then check off-axis
+cells within the same bounded neighbourhood if that search misses a legal pocket.
+Ice crossing overlays preserve fitted shoreline transitions instead of replacing
+them with plain ford snow.
+
 Composed beaches cap their coastline depth around planned anchors before water
 is painted, preserving the atlas's monotone shoreline and one-cell steps. Late
 point clearance alone cannot recover access to a spawn surrounded by water.
@@ -49,6 +100,7 @@ of its original 12-cell budget.
 | Module under `Run/Scripts/MapGen` | Responsibility |
 | --- | --- |
 | `Layout/GameplayPlan.js` | Ordering policy and building/approach reservations |
+| `Layout/WaterGeography.js` | Seeded continuous basin geometry shared by jungle and ice |
 | `Layout/BuildingSites.js` | Footprint checks, distribution scoring, shared route search |
 | `Layout/RouteSiteSearch.js` | Bounded dense fallback when the fast route-side site search fails |
 | `Layout/PlacementRepair.js` | Bounded forest connectors for disconnected placement pockets |
@@ -147,6 +199,8 @@ occupied cells, authored cover budgets and ordinary cover exclusions still apply
 Incomplete repairs undo their layer changes before another render is attempted.
 Cover-only repairs render and fully revalidate without rebuilding water or running
 global terrain smoothing. Other repair types retain their derived-terrain refresh.
+When both are needed, structural changes refresh and revalidate first; cover
+uses the resulting route on the next pass within the same repair budget.
 Final collision, connectivity, objective and drift validation remain mandatory;
 this does not guarantee that every seed can be repaired. Per-attempt
 `localRepairs` metadata records patch counts, exposure before/after, rollback or

@@ -104,6 +104,12 @@ MapGen.Intent.Registry = MapGen.Intent.Registry || {};
         var fallbackId = biome === "ice" ? "ice_open_arena" :
             (biome === "jungle" ? "jungle_open_arena" : "");
 
+        // Regional ice composes ordinary styles; named maze, neck and cliff
+        // contracts continue through their specialised authors below.
+        var regional = MapGen.Intent.Registry.ice_regional;
+        if(biome === "ice" && regional && regional.appliesTo(profile, dimensions, plan))
+            return regional;
+
         for(var id in MapGen.Intent.Registry) {
             if(!MapGen.Intent.Registry.hasOwnProperty(id)) {
                 continue;

@@ -571,6 +571,9 @@ MapGen.Grammar.Intent = {
         if(!pProfile || pProfile.TargetPackProfile !== "grammar_ice")
             return null;
 
+        var smallGenericIce = String(pProfile.Name || "") === "grammar_ice" &&
+            Number(pProfile.Width) * Number(pProfile.Height) < 3200;
+
         styleRandom = this.IceStyleRandom(pRandom, 4219);
 
         // ice_outpost is the only style that exercises the crossroads /
@@ -669,7 +672,8 @@ MapGen.Grammar.Intent = {
             weights.ice_cliff_checkpoint = 0;
             weights.ice_cliff_terrace = 0;
         }
-        if(pArchetype === "cliff_heavy" || pArchetype === "cliff_structure_ice") {
+        if(!smallGenericIce &&
+            (pArchetype === "cliff_heavy" || pArchetype === "cliff_structure_ice")) {
             // These corpus archetypes promise a visible cliff. The other ice
             // styles still carry legacy CliffChance values, but their v3
             // Concepts own the terrain plane and do not author cliff cells.

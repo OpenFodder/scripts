@@ -37,16 +37,20 @@ MapGen.Layout = MapGen.Layout || {};
     // edge biomes, clearings, outcrops — is identical and defined once here.
     MapGen.Layout.Build = function(pContext) {
         var multiplayer = MapGen.Context.IsMultiplayer(pContext);
+        MapGen.Layout.RegionIntents.Prepare(pContext);
 
         if(MapGen.Layout.Archipelago)
             MapGen.Layout.Archipelago.Build(pContext);
         if(MapGen.Layout.Continent)
             MapGen.Layout.Continent.Build(pContext);
 
-        callTemplate(pContext, multiplayer ? "BuildAnchorsMultiplayer" : "BuildAnchorsCampaign");
+        if(!MapGen.Layout.RegionIntents.PlaceAnchors(pContext))
+            callTemplate(pContext, multiplayer ? "BuildAnchorsMultiplayer" : "BuildAnchorsCampaign");
         // grammar_beach campaign anchors (internally gated; no-op otherwise).
         if(!multiplayer)
             applyGrammarBeachAnchors(pContext);
+
+        MapGen.Variation.MoveAnchors(pContext);
 
         // Keep authored campaign clearings apart before the skeleton route
         // consumes their neighborhoods. Jungle anchors may collapse onto one

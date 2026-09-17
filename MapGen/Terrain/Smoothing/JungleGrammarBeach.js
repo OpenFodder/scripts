@@ -90,7 +90,14 @@ MapGen.Terrain.Smoothing.Jungle = MapGen.Terrain.Smoothing.Jungle || {};
             live.beachTemplateOrigin &&
             pY >= Math.round(live.beachTemplateOrigin.y) + mapm5BeachRows - 2);
         var mapm6River = !!(live && live.beachTemplate === "mapm6_bridge_channel");
-        var grammarRiver = mapm5River || mapm6River;
+        var interiorRiver = this.Sub1IsInteriorRiverCell(pContext, pX, pY);
+        // Inland water needs the complete grass/water river atlas. The ocean
+        // subset only has open-water pieces and cannot close a lagoon bank.
+        var grammarRiver = mapm5River || mapm6River || interiorRiver;
+
+        if(interiorRiver && (ch === this.Chars.water ||
+            this.HasNearbyChar(pChars, pX, pY, this.Chars.water, 1)))
+            return "river";
 
         if(ch === this.Chars.bank)
             return "quicksand";
@@ -115,6 +122,18 @@ MapGen.Terrain.Smoothing.Jungle = MapGen.Terrain.Smoothing.Jungle || {};
         }
 
         return null;
+    },
+
+    Sub1IsInteriorRiverCell: function(pContext, pX, pY) {
+        var live = pContext && pContext.GrammarLiveTerrain ?
+            pContext.GrammarLiveTerrain : null;
+        var bodies = live && live.interiorWaterBodies || [];
+        for(var i = 0; i < bodies.length; ++i) {
+            var bounds = bodies[i].bounds;
+            if(pX >= bounds.minX && pX <= bounds.maxX &&
+                pY >= bounds.minY && pY <= bounds.maxY) return true;
+        }
+        return false;
     },
 
     Sub1ClassForChar: function(pFeature, pChar) {
@@ -159,6 +178,20 @@ MapGen.Terrain.Smoothing.Jungle = MapGen.Terrain.Smoothing.Jungle || {};
                     return false;
 
                 return true;
+            }
+
+            // Interior grammar-beach lagoons use the river atlas. Permit the
+            // water-centred closing pieces only at their actual water/land
+            // contour; plain interior water remains untouched. The bounds
+            // guard keeps this opt-in local to the authored lagoon and avoids
+            // changing the open-ocean and named beach families.
+            if(pFeature === "river" && this.Sub1IsInteriorRiverCell(pContext, pX, pY)) {
+                for(var riverEdgeIndex = 0; riverEdgeIndex < offsets.length; ++riverEdgeIndex) {
+                    var rx = pX + offsets[riverEdgeIndex][0];
+                    var ry = pY + offsets[riverEdgeIndex][1];
+                    if(core.GetChar(pChars, rx, ry, this.Chars.ground) !== this.Chars.water)
+                        return true;
+                }
             }
 
             return false;
@@ -504,6 +537,30 @@ MapGen.Terrain.Smoothing.Jungle = MapGen.Terrain.Smoothing.Jungle || {};
 
         return this.Sub1EdgeProfileFitsClasses(pRecord, pDirection, pCurrentClass, pNeighbourClass, true) &&
             this.Sub1EdgeGlyphsFitClasses(pRecord.edges[pDirection], pCurrentClass, pNeighbourClass);
+    },
+
+    Sub1InteriorRiverEdgeFits: function(pContext, pChars, pX, pY, pRecord, pDirection, pClass, pNeighbour) {
+        var offsets = {N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0]};
+        var offset = offsets[pDirection], edge = pRecord.edges[pDirection];
+        var ground = 0, water = 0;
+        for(var i = 0; i < edge.length; ++i) {
+            if(edge.charAt(i) === "G" || edge.charAt(i) === "L") ++ground;
+            if(edge.charAt(i) === "W") ++water;
+        }
+        if(pClass !== pNeighbour) return pNeighbour === "water" ? water >= 4 : ground >= 4;
+        var opposite = pClass === "water" ? this.Chars.ground : this.Chars.water;
+        var mixed = pClass === "water" ? ground : water;
+        if(mixed <= 2) return true;
+        // Adjacent bank tiles have the same centre class but share a mixed
+        // grass/water edge. Requiring a pure grass edge discarded straight
+        // bank strips, leaving square water holes in otherwise legal lagoons.
+        var nx = pX + offset[0], ny = pY + offset[1];
+        var core = MapGen.Terrain.Smoothing.Core, crossX = offset[1], crossY = offset[0];
+        for(var side = -1; side <= 1; side += 2)
+            if(core.GetChar(pChars, pX + crossX * side, pY + crossY * side, opposite) === opposite &&
+                core.GetChar(pChars, nx + crossX * side, ny + crossY * side, opposite) === opposite)
+                return true;
+        return false;
     },
 
     Sub1CandidatePenaltyForDirection: function(pRecord, pDirection, pCurrentClass, pNeighbourClass) {
@@ -1207,6 +1264,7 @@ MapGen.Terrain.Smoothing.Jungle = MapGen.Terrain.Smoothing.Jungle || {};
                 var southHint = this.Sub1GlyphForClass(southClass);
                 var westHint = this.Sub1GlyphForClass(westClass);
                 var classMask = northHint + eastHint + southHint + westHint;
+                var interiorRiver = feature === "river" && this.Sub1IsInteriorRiverCell(pContext, x, y);
                 var bestTile = candidates[0];
                 var bestScore = -1e9;
                 var foundCandidate = false;
@@ -1237,7 +1295,12 @@ MapGen.Terrain.Smoothing.Jungle = MapGen.Terrain.Smoothing.Jungle || {};
                         var rec = group.tiles[String(tileId)];
                         if(!rec || !rec.edges)
                             continue;
-                        if(!fallback && (!this.Sub1CandidateFitsDirection(rec, "N", cls, northClass, strictSameClass) ||
+                        if(interiorRiver && (!this.Sub1InteriorRiverEdgeFits(pContext, pChars, x, y, rec, "N", cls, northClass) ||
+                            !this.Sub1InteriorRiverEdgeFits(pContext, pChars, x, y, rec, "E", cls, eastClass) ||
+                            !this.Sub1InteriorRiverEdgeFits(pContext, pChars, x, y, rec, "S", cls, southClass) ||
+                            !this.Sub1InteriorRiverEdgeFits(pContext, pChars, x, y, rec, "W", cls, westClass)))
+                            continue;
+                        if(!interiorRiver && !fallback && (!this.Sub1CandidateFitsDirection(rec, "N", cls, northClass, strictSameClass) ||
                             !this.Sub1CandidateFitsDirection(rec, "E", cls, eastClass, strictSameClass) ||
                             !this.Sub1CandidateFitsDirection(rec, "S", cls, southClass, strictSameClass) ||
                             !this.Sub1CandidateFitsDirection(rec, "W", cls, westClass, strictSameClass)))

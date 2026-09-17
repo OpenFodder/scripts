@@ -70,6 +70,49 @@ MapGen.Integration = MapGen.Integration || {};
         };
     };
 
+    // Keep menu size presets close to their intended area while allowing the
+    // campaign canvas to be square-ish, landscape, portrait, or elongated.
+    // This is a pure hash choice: retries receive the same dimensions and no
+    // generation RNG state is consumed.
+    pIntegration.CampaignMapDimensions = function(pWidth, pHeight, pSeed) {
+        var width = Math.max(32, Math.floor(Number(pWidth) || 0));
+        var height = Math.max(32, Math.floor(Number(pHeight) || 0));
+        var area = width * height;
+        var hash = MapGen.Random.HashTile(pSeed || 0, 811, 29, 50017);
+        // Include both directions of the elongated layout.  The reciprocal
+        // is intentional: portrait maps need the same safe aspect bound.
+        var ratios = [1.0, 1.45, 1 / 1.45, 2.10, 1 / 2.10];
+        var ratio = ratios[hash % ratios.length];
+        var outWidth = Math.round(Math.sqrt(area * ratio));
+        var outHeight = Math.round(area / Math.max(1, outWidth));
+
+        outWidth = Math.max(32, Math.min(160, outWidth));
+        outHeight = Math.max(32, Math.min(160, outHeight));
+        // Clamping one side can perturb area at the XL elongated extreme;
+        // adjust the other side within the same safety bounds.
+        if(outWidth === 160 && ratio > 1)
+            outHeight = Math.max(32, Math.min(160, Math.round(area / outWidth)));
+        if(outHeight === 160 && ratio < 1)
+            outWidth = Math.max(32, Math.min(160, Math.round(area / outHeight)));
+
+        return {Width: outWidth, Height: outHeight,
+            area: outWidth * outHeight, requestedArea: area,
+            ratio: outWidth / outHeight, choice: hash % ratios.length};
+    };
+
+    pIntegration.ApplyCampaignMapProportion = function(pOverrides, pProfileName) {
+        if(!pOverrides || (pProfileName !== "grammar_jungle" &&
+            pProfileName !== "grammar_ice" && pProfileName !== "grammar_beach"))
+            return pOverrides;
+        if(this.CampaignProfileOwnsMapSize(pProfileName))
+            return pOverrides;
+        var dimensions = this.CampaignMapDimensions(
+            pOverrides.Width, pOverrides.Height, this.CampaignSeed());
+        pOverrides.Width = dimensions.Width;
+        pOverrides.Height = dimensions.Height;
+        return pOverrides;
+    };
+
     pIntegration.CommonOverrides = function() {
         var overrides = this.SizeOverrides();
 
@@ -336,6 +379,8 @@ MapGen.Integration = MapGen.Integration || {};
             delete overrides.Height;
             delete overrides.AspectRatioPalette;
         }
+        else
+            this.ApplyCampaignMapProportion(overrides, profileName);
         if(coverRange)
             overrides.TreeCoverage = coverRange;
         if(decorRange)

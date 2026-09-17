@@ -619,10 +619,37 @@ MapGen.Intent = MapGen.Intent || {};
         };
     };
 
+    // Specialised ice routes keep their authored graph and clearances while
+    // sharing the regional forest field. A separate cover plan must not replace
+    // the maze/neck/cliff's gameplay anchors or enable regional route carving.
+    pIntent.Variety.RegionalForestDensity = function(c, density, strength) {
+        if(!c || c.Profile.Name !== "grammar_ice" || !c.Profile.RegionalComposition ||
+            MapGen.Context.IsMultiplayer(c)) return null;
+        var cover = {Width:c.Width, Height:c.Height, Seed:c.Seed,
+            Profile:c.Profile, GameMode:c.GameMode};
+        MapGen.Layout.RegionIntents.Prepare(cover);
+        if(!cover.RegionalPlan) return null;
+        var field = MapGen.Layout.RegionIntents.ForestField(cover);
+        var mean = 0, low = Infinity, high = -Infinity;
+        for(var i = 0; i < field.length; ++i) {
+            mean += field[i]; low = Math.min(low,field[i]); high = Math.max(high,field[i]);
+        }
+        mean /= field.length;
+        var range = Math.max(0.01, high - low);
+        for(var j = 0; j < field.length; ++j)
+            field[j] = Math.max(0.05, Math.min(0.95,
+                density + (field[j] - mean) / range * strength * 2));
+        c.IntentStyleContract = c.IntentStyleContract || {};
+        c.IntentStyleContract.regionalCover = {shape:cover.RegionalPlan.forestShape,
+            regions:cover.RegionalPlan.regions.length, density:density, strength:strength};
+        return field;
+    };
+
     pIntent.Variety.StampForestCellularAutomata = function(pIntentMap, region, opts, rng) {
         opts = opts || {};
         var iterations = opts.iterations || 4;
         var seedDensity = opts.seedDensity !== undefined ? opts.seedDensity : 0.50;
+        var densityField = opts.seedDensityField || null;
         var skipPredicate = opts.skipPredicate || null;
         var minX = region.minX, maxX = region.maxX;
         var minY = region.minY, maxY = region.maxY;
@@ -673,7 +700,8 @@ MapGen.Intent = MapGen.Intent || {};
                     continue;
                 }
                 var u = unitFloat(rng);
-                current[(y * w) + x] = (u < seedDensity) ? 1 : 0;
+                var density = densityField ? densityField[ay * pIntentMap.width + ax] : seedDensity;
+                current[(y * w) + x] = (u < density) ? 1 : 0;
             }
         }
 

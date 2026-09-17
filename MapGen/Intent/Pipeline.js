@@ -102,7 +102,8 @@ MapGen.Intent = MapGen.Intent || {};
     pIntent.Pipeline.PickConceptForContext = function(pContext) {
         var profile = pContext.Profile;
         var plan = pContext.GrammarPlan || {};
-        var dimensions = { width: pContext.Width, height: pContext.Height };
+        var dimensions = { width: pContext.Width, height: pContext.Height,
+            multiplayer: MapGen.Context.IsMultiplayer(pContext) };
 
         // Tag profile.biome from TerrainType so PickConcept's biome filter works.
         // This is a pure read — does not mutate the profile object. We attach
@@ -315,11 +316,33 @@ MapGen.Intent = MapGen.Intent || {};
                     pContext.GrammarPlan || {}, intentMap, rngs, pContext);
             });
         } catch(authorErr) {
+            var authorMessage = authorErr && authorErr.message ?
+                authorErr.message : String(authorErr);
+            var authorStack = authorErr && authorErr.stack ?
+                " stack=" + authorErr.stack : "";
             authorResult = pIntent.AuthorResult.Fail(
                 pIntent.AuthorReason.UnknownAuthoringFailure,
                 [pIntent.AuthorResult.Diagnostic(
                     picked.concept.id + ".author",
-                    "exception during author: " + authorErr
+                    "exception during author: " + authorMessage + authorStack,
+                    {severity: "error"}
+                )]
+            );
+        }
+        // Authors must return an AuthorResult. Normalize legacy/bare false
+        // returns so retries record which concept violated the contract.
+        if(!authorResult || typeof authorResult !== "object" ||
+            typeof authorResult.ok !== "boolean") {
+            var malformedMessage = authorResult === false ?
+                "author returned false" : "author returned an invalid result";
+            authorResult = pIntent.AuthorResult.Fail(
+                authorResult === false ?
+                    pIntent.AuthorReason.ProfileConstraintUnsatisfied :
+                    pIntent.AuthorReason.UnknownAuthoringFailure,
+                [pIntent.AuthorResult.Diagnostic(
+                    picked.concept.id + ".author",
+                    malformedMessage,
+                    {severity: "error"}
                 )]
             );
         }

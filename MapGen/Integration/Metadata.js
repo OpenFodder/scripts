@@ -310,6 +310,8 @@ MapGen.Integration = MapGen.Integration || {};
                 fallback: !!pContext.ConceptIsFallback,
                 authorReason: pContext.AuthorResult && !pContext.AuthorResult.ok ?
                     pContext.AuthorResult.reason : null,
+                authorDiagnostics: pContext.AuthorResult && !pContext.AuthorResult.ok ?
+                    (pContext.AuthorResult.diagnostics || []) : [],
                 drift: pContext.RenderDrift || null,
                 // Phase 3 P3.2: post-commit drift queries Map.TileTerrainFeature
                 // (engine collision oracle) and is the authoritative report.
@@ -344,6 +346,7 @@ MapGen.Integration = MapGen.Integration || {};
                 height: pContext.Height,
                 profile: pContext.Profile ? pContext.Profile.Name : "",
                 compositionVariant: pContext.Profile ? pContext.Profile.CompositionVariant || "" : "",
+                regionalPlan: pContext.RegionalPlan || null,
                 terraceCover: pContext.TerraceCover || null,
                 layoutTemplate: pContext.Profile ? pContext.Profile.LayoutTemplate || "" : "",
                 profileKnobOwnership: pContext.Profile ? pContext.Profile.ProfileKnobOwnership || null : null,
@@ -416,7 +419,8 @@ MapGen.Integration = MapGen.Integration || {};
                     runtimeProfile: pContext.Profile ? {
                         style: pContext.Profile.GrammarIceLayoutStyle ||
                             pContext.Profile.ForcedIceLayoutStyle || "",
-                        patchAndGrow: pContext.Profile.ForestPatchAndGrow,
+                          patchAndGrow: pContext.Profile.ForestPatchAndGrow,
+                          authoredMask: pContext.Profile.ForestUseAuthoredMask,
                         jungleMazeFill: pContext.Profile.JungleMazeForestFill,
                         treeCoverage: pContext.Profile.TreeCoverage,
                         minTreeCoverage: pContext.Profile.MinTreeCoverage,
