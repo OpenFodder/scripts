@@ -43,48 +43,8 @@ MapGen.Terrain.Smoothing.GrassVariantSmoother = (function() {
         return a * (1 - fy) + b * fy;
     }
 
-    // Sum 1/(1+d^2) over neighbour cells inside pRadius where pPredicate hits.
-    function haloAmount(pContext, pX, pY, pRadius, pPredicate) {
-        if(pRadius <= 0) return 0;
-        var layers = pContext.Layers;
-        var sum = 0;
-        for(var dy = -pRadius; dy <= pRadius; ++dy) {
-            for(var dx = -pRadius; dx <= pRadius; ++dx) {
-                if(dx === 0 && dy === 0) continue;
-                var nx = pX + dx, ny = pY + dy;
-                if(!MapGen.Layers.InBounds(layers.blocked, nx, ny)) continue;
-                if(pPredicate(layers, nx, ny))
-                    sum += 1 / (1 + dx * dx + dy * dy);
-            }
-        }
-        return sum;
-    }
-
-    function isShadowCell(pLayers, pX, pY) {
-        return MapGen.Layers.Get(pLayers.blocked, pX, pY, 0) ||
-            MapGen.Layers.Get(pLayers.occupied, pX, pY, 0);
-    }
-
-    function isLightCell(pLayers, pX, pY) {
-        return MapGen.Layers.Get(pLayers.water, pX, pY, 0) ||
-            MapGen.Layers.Get(pLayers.coast, pX, pY, 0);
-    }
-
-    // Bias target in luminance units. Range tuned to the JungleGrassEdges
-    // spread (observed 72..93 across 40 tiles). Centred low (~78) because the
-    // mainland tiles 123/124 sit at luminance 75 — biasing the target up
-    // crowds them out of the gaussian picker.
-    function biasFor(pContext, pX, pY, pNoiseScale, pDarkRadius, pLightRadius, pSalt) {
-        var target = 72 + sampleNoise(pContext.Seed, pX, pY, pNoiseScale, pSalt) * 12;
-        target -= 6 * haloAmount(pContext, pX, pY, pDarkRadius,  isShadowCell);
-        target += 5 * haloAmount(pContext, pX, pY, pLightRadius, isLightCell);
-        if(target < 68) target = 68;
-        if(target > 92) target = 92;
-        return target;
-    }
-
-    // Same as biasFor but reads precomputed halo fields instead of scanning
-    // neighbour layers. Caller indexes by (x+1, y+1) into a (W+2)x(H+2) grid.
+    // Read the cached shadow and shoreline halos instead of scanning them
+    // again for every cell and each of its gradient neighbours.
     function biasForCached(pContext, pX, pY, pNoiseScale, pSalt, pShadowField, pLightField, pStride) {
         var idx = (pY + 1) * pStride + (pX + 1);
         var target = 72 + sampleNoise(pContext.Seed, pX, pY, pNoiseScale, pSalt) * 12;
@@ -280,6 +240,10 @@ MapGen.Terrain.Smoothing.GrassVariantSmoother = (function() {
         if(pContext.Profile.TerrainType !== Terrain.Types.Jungle)
             return 0;
 
+        // Scene profiles fit complete light/dark materials after final terrain
+        // flushes. Transition tiles must not be chosen as brightness variants.
+        if(MapGen.Terrain.GrassRegions.Enabled(pContext)) return 0;
+
         var data = MapGen.Terrain.Smoothing.JungleGrassEdges;
         if(!data || !data.tiles)
             return 0;
@@ -299,7 +263,10 @@ MapGen.Terrain.Smoothing.GrassVariantSmoother = (function() {
 
         var tileIds = [];
         for(var key in data.tiles) {
-            if(data.tiles.hasOwnProperty(key))
+            // 28/29 are a two-cell tuft stamp, not interchangeable grass.
+            // Edge matching ignored rarity weights and scattered their halves
+            // across otherwise quiet ground. SurfaceDetail owns complete pairs.
+            if(data.tiles.hasOwnProperty(key) && !(profile.VisualComposition && (key === "28" || key === "29")))
                 tileIds.push(parseInt(key, 10) | 0);
         }
         if(!tileIds.length)

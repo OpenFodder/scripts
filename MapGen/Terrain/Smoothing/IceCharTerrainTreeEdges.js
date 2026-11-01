@@ -177,6 +177,11 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
                 // when a one-column side tail hangs below a wider canopy body.
                 if(s || !n || e === w)
                     continue;
+                // A complete atlas-backed side stack is the grove's contour,
+                // not a dangling tail. Trimming it makes the next pass shave
+                // the newly exposed column again.
+                if(self.TreeExplicitSideStackFits(isTree, w ? "rightedge" : "leftedge", x, y))
+                    continue;
 
                 var inwardDx = w ? -1 : 1;
                 var outwardDx = -inwardDx;
@@ -423,6 +428,8 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
             var w = isTree(x - 1, y);
             if(e === w)
                 return;
+            if(self.TreeExplicitSideStackFits(isTree, w ? "rightedge" : "leftedge", x, y))
+                return;
 
             var inwardDx = w ? -1 : 1;
             var outwardDx = -inwardDx;
@@ -456,6 +463,8 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
             var e = isTree(x + 1, y);
             var w = isTree(x - 1, y);
             if(e === w)
+                return;
+            if(self.TreeExplicitSideStackFits(isTree, w ? "rightedge" : "leftedge", x, y))
                 return;
 
             var inwardDx = w ? -1 : 1;

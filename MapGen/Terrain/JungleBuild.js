@@ -27,6 +27,17 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
             return;
         }
 
+        var scenes = MapGen.Layout.SceneForests.Field(pContext);
+        if(scenes) {
+            for(var sy = 0; sy < pContext.Height; ++sy)
+                for(var sx = 0; sx < pContext.Width; ++sx) {
+                    pContext.Layers.blocked[sx][sy] = 0;
+                    if(scenes[sy*pContext.Width+sx] && !this.IsExcluded(pContext,sx,sy))
+                        this.MarkTreeCell(pContext,sx,sy);
+                }
+            return;
+        }
+
         if(pContext.Profile && pContext.Profile.ForestPatchAndGrow) {
             this.PatchAndGrow(pContext);
             this.ApplySectorForestFill(pContext);
@@ -73,7 +84,8 @@ MapGen.Terrain.Cover = MapGen.Terrain.Cover || {};
         // fraction to the remaining dry cells underfills deeper shores and
         // makes retries favour the same shallow layout. Rank enough forest
         // up front; all route, water and building exclusions still apply.
-        var coverArea = pContext.RegionalPlan && pContext.Profile.Name === "grammar_beach" ?
+        var coverArea = pContext.Profile.ForestCoverageWholeMap ||
+            pContext.RegionalPlan && pContext.Profile.Name === "grammar_beach" ?
             pContext.Width * pContext.Height : candidates.length;
         targetCount = Math.max(0, Math.min(candidates.length, Math.round(coverArea * coverage)));
 

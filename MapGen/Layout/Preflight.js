@@ -23,11 +23,14 @@ MapGen.Layout.ValidatePlannedStructures = function(c, report) {
     for(var i = 0; i < plan.entries.length; ++i) {
         var e = plan.entries[i], site = e.candidate;
         var region = MapGen.Encounters.NearestEncounterRegion(c, site.clearing, false);
-        placements.push({rect : site.rect, spec : e.spec, regionId : region ? region.id : ""});
+        placements.push({rect : site.rect, spec : e.spec, settlementLot:site.settlementLot,
+            regionId : region ? region.id : ""});
     }
     report.counts = report.counts || {};
     var probe = {
         Width : c.Width, Height : c.Height, Profile : c.Profile,
+        MissionLayout : c.MissionLayout,
+        SettlementPlan : c.SettlementPlan,
         LiveStructurePlacements : placements
     };
     MapGen.Integration.ValidateLiveStructureSpacing(report, probe);

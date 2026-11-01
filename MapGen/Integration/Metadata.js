@@ -347,6 +347,17 @@ MapGen.Integration = MapGen.Integration || {};
                 profile: pContext.Profile ? pContext.Profile.Name : "",
                 compositionVariant: pContext.Profile ? pContext.Profile.CompositionVariant || "" : "",
                 regionalPlan: pContext.RegionalPlan || null,
+                jungleCliffCourse: pContext.Plateau && pContext.Plateau.jungleCourse || null,
+                visualComposition: pContext.Profile.VisualComposition || null,
+                waterComposition: pContext.Profile.WaterSeed === undefined ? null : {
+                    seed:pContext.Profile.WaterSeed, kind:pContext.Profile.WaterBodyKind || null,
+                    variation:pContext.Profile.WaterVariation
+                },
+                surfaceDetail: pContext.SurfaceDetail || null,
+                groundScenes: pContext.GroundScenes || null,
+                missionLayout: pContext.MissionLayout || null,
+                settlementPlan: pContext.SettlementPlan || null,
+                settlementDetails: pContext.SettlementDetails || null,
                 terraceCover: pContext.TerraceCover || null,
                 layoutTemplate: pContext.Profile ? pContext.Profile.LayoutTemplate || "" : "",
                 profileKnobOwnership: pContext.Profile ? pContext.Profile.ProfileKnobOwnership || null : null,

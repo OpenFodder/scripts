@@ -3,6 +3,12 @@ MapGen.Layout = MapGen.Layout || {};
 
 MapGen.Layout.Rivers = {
 
+    Random: function(c) {
+        if(c.Profile.WaterSeed === undefined) return c.Random;
+        if(!c._riverRandom) c._riverRandom=MapGen.Layout.WaterGeography.Random(c,c.Random,24723);
+        return c._riverRandom;
+    },
+
     Policy: function(pContext) {
         if(MapGen.Terrain && MapGen.Terrain.TileCatalog && MapGen.Terrain.TileCatalog.WaterPolicyForTerrain)
             return MapGen.Terrain.TileCatalog.WaterPolicyForTerrain(pContext.Profile.TerrainType);
@@ -59,7 +65,7 @@ MapGen.Layout.Rivers = {
         var profile = pContext.Profile || {};
         var cap = profile.MaxWaterCoverage;
         if(MapGen.Terrain && MapGen.Terrain.TileCatalog && MapGen.Terrain.TileCatalog.MaxWaterCoverage)
-            cap = MapGen.Terrain.TileCatalog.MaxWaterCoverage(profile.TerrainType, profile.MaxWaterCoverage);
+            cap = MapGen.Terrain.TileCatalog.MaxWaterCoverage(profile.TerrainType, profile.MaxWaterCoverage, profile);
         var fraction = Number(cap);
         if(isNaN(fraction) || fraction <= 0)
             fraction = 0.6;
@@ -86,8 +92,8 @@ MapGen.Layout.Rivers = {
                 max = swap;
             }
             return pInteger ?
-                pContext.Random.Int(Math.floor(min), Math.floor(max)) :
-                pContext.Random.Float(min, max);
+                MapGen.Layout.Rivers.Random(pContext).Int(Math.floor(min), Math.floor(max)) :
+                MapGen.Layout.Rivers.Random(pContext).Float(min, max);
         }
 
         var value = Number(pValue);
@@ -103,7 +109,7 @@ MapGen.Layout.Rivers = {
         if(this.PolicyMax(pContext, "maxRiverCount", profile.MaxRiverCount) < 1)
             return false;
 
-        return pContext.Random.Chance(this.ScaledChance(pContext, profile.RiverChance, "riverChanceScale"));
+        return MapGen.Layout.Rivers.Random(pContext).Chance(this.ScaledChance(pContext, profile.RiverChance, "riverChanceScale"));
     },
 
     ShouldBuildPond: function(pContext) {
@@ -115,7 +121,7 @@ MapGen.Layout.Rivers = {
         if(this.PolicyMax(pContext, "maxPondCount", profile.MaxPondCount) < 1)
             return false;
 
-        return pContext.Random.Chance(this.ScaledChance(pContext, profile.PondChance, "pondChanceScale"));
+        return MapGen.Layout.Rivers.Random(pContext).Chance(this.ScaledChance(pContext, profile.PondChance, "pondChanceScale"));
     },
 
     ShouldBuildLake: function(pContext) {
@@ -127,7 +133,7 @@ MapGen.Layout.Rivers = {
         if(this.PolicyMax(pContext, "maxLakeCount", profile.MaxLakeCount) < 1)
             return false;
 
-        return pContext.Random.Chance(this.ScaledChance(pContext, this.ResolveRange(pContext, profile.LakeChance, false, 0), "lakeChanceScale"));
+        return MapGen.Layout.Rivers.Random(pContext).Chance(this.ScaledChance(pContext, this.ResolveRange(pContext, profile.LakeChance, false, 0), "lakeChanceScale"));
     },
 
     RiverWidth: function(pContext) {
@@ -149,7 +155,7 @@ MapGen.Layout.Rivers = {
         if(!isNaN(policyRadius) && policyRadius > 0)
             maxRadius = Math.min(maxRadius, policyRadius);
 
-        return pContext.Random.Int(2, Math.max(2, maxRadius));
+        return MapGen.Layout.Rivers.Random(pContext).Int(2, Math.max(2, maxRadius));
     },
 
     LakeRadius: function(pContext) {
@@ -160,11 +166,11 @@ MapGen.Layout.Rivers = {
         if(!isNaN(policyRadius) && policyRadius > 0)
             profileRadius = Math.min(profileRadius, policyRadius);
 
-        return pContext.Random.Int(3, Math.max(3, profileRadius));
+        return MapGen.Layout.Rivers.Random(pContext).Int(3, Math.max(3, profileRadius));
     },
 
     EdgePoint: function(pContext, pSide) {
-        var random = pContext.Random;
+        var random = MapGen.Layout.Rivers.Random(pContext);
         var profileMargin = Math.floor(Number(
             pContext.Profile && pContext.Profile.RiverSpineMargin
         ));
@@ -236,7 +242,7 @@ MapGen.Layout.Rivers = {
     // the river cuts across that path; otherwise it's a coin flip. Falls back
     // to a coin flip when anchors aren't available (eg. unusual templates).
     PickRiverAxis: function(pContext) {
-        var random = pContext.Random;
+        var random = MapGen.Layout.Rivers.Random(pContext);
         var forcedAxis = String((pContext.Profile || {}).RiverAxis || "").toLowerCase();
         if(forcedAxis === "horizontal")
             return true;
@@ -985,12 +991,12 @@ MapGen.Layout.Rivers = {
         if(!profile.MaxStreamCount || profile.MaxStreamCount < 1)
             return false;
 
-        return pContext.Random.Chance(this.ScaledChance(pContext, profile.StreamChance, "riverChanceScale"));
+        return MapGen.Layout.Rivers.Random(pContext).Chance(this.ScaledChance(pContext, profile.StreamChance, "riverChanceScale"));
     },
 
     StreamWidth: function(pContext) {
         var max = Math.max(1, Math.min(2, Math.floor(this.RiverWidth(pContext))));
-        return Math.max(1, Math.min(max, pContext.Random.Int(1, max)));
+        return Math.max(1, Math.min(max, MapGen.Layout.Rivers.Random(pContext).Int(1, max)));
     },
 
     BuildStreams: function(pContext) {
@@ -998,7 +1004,7 @@ MapGen.Layout.Rivers = {
             return null;
 
         var maxCount = Math.max(1, Math.floor(pContext.Profile.MaxStreamCount || 1));
-        var attempts = pContext.Random.Int(1, maxCount);
+        var attempts = MapGen.Layout.Rivers.Random(pContext).Int(1, maxCount);
         var built = [];
 
         for(var index = 0; index < attempts; ++index) {
@@ -1012,17 +1018,17 @@ MapGen.Layout.Rivers = {
 
     BuildStream: function(pContext) {
         var sides = ["left", "right", "top", "bottom"];
-        var startSide = sides[pContext.Random.Int(0, 3)];
+        var startSide = sides[MapGen.Layout.Rivers.Random(pContext).Int(0, 3)];
         var endSide;
 
         if(startSide === "left")
-            endSide = pContext.Random.Chance(0.7) ? "right" : "bottom";
+            endSide = MapGen.Layout.Rivers.Random(pContext).Chance(0.7) ? "right" : "bottom";
         else if(startSide === "right")
-            endSide = pContext.Random.Chance(0.7) ? "left" : "top";
+            endSide = MapGen.Layout.Rivers.Random(pContext).Chance(0.7) ? "left" : "top";
         else if(startSide === "top")
-            endSide = pContext.Random.Chance(0.7) ? "bottom" : "right";
+            endSide = MapGen.Layout.Rivers.Random(pContext).Chance(0.7) ? "bottom" : "right";
         else
-            endSide = pContext.Random.Chance(0.7) ? "top" : "left";
+            endSide = MapGen.Layout.Rivers.Random(pContext).Chance(0.7) ? "top" : "left";
 
         var stream = {
             start: this.EdgePoint(pContext, startSide),
@@ -1433,8 +1439,8 @@ MapGen.Layout.Rivers = {
         var margin = Math.max(6, pContext.Profile.ClearingRadius || 4);
 
         return {
-            x: pContext.Random.Int(margin, Math.max(margin, pContext.Width - margin - 1)),
-            y: pContext.Random.Int(margin, Math.max(margin, pContext.Height - margin - 1)),
+            x: MapGen.Layout.Rivers.Random(pContext).Int(margin, Math.max(margin, pContext.Width - margin - 1)),
+            y: MapGen.Layout.Rivers.Random(pContext).Int(margin, Math.max(margin, pContext.Height - margin - 1)),
             role: "pond"
         };
     },
@@ -1489,8 +1495,8 @@ MapGen.Layout.Rivers = {
 
         for(var attempt = 0; attempt < 40; ++attempt) {
             var point = {
-                x: pContext.Random.Int(margin, Math.max(margin, pContext.Width - margin - 1)),
-                y: pContext.Random.Int(margin, Math.max(margin, pContext.Height - margin - 1)),
+                x: MapGen.Layout.Rivers.Random(pContext).Int(margin, Math.max(margin, pContext.Width - margin - 1)),
+                y: MapGen.Layout.Rivers.Random(pContext).Int(margin, Math.max(margin, pContext.Height - margin - 1)),
                 role: "lake"
             };
 
@@ -1773,7 +1779,7 @@ MapGen.Layout.Rivers = {
         if(branchChance <= 0 || maxDepth <= 0)
             return;
 
-        if(pContext.RegionalPlan ? !pParent.branchPlanned : !pContext.Random.Chance(branchChance))
+        if(pContext.RegionalPlan ? !pParent.branchPlanned : !MapGen.Layout.Rivers.Random(pContext).Chance(branchChance))
             return;
 
         this.BuildBranchRecursive(pContext, pParent, 1, maxDepth, true);
@@ -1783,7 +1789,7 @@ MapGen.Layout.Rivers = {
         if(pDepth > pMaxDepth)
             return;
 
-        var random = pContext.Random;
+        var random = MapGen.Layout.Rivers.Random(pContext);
         var points = pParent.points;
         if(!points || points.length < 6)
             return;
@@ -1911,7 +1917,7 @@ MapGen.Layout.Rivers = {
         var a = points[Math.max(0, jointIndex - 3)], b = points[Math.min(points.length - 1, jointIndex + 3)];
         var dx = b.x - a.x, dy = b.y - a.y, span = Math.max(1, Math.sqrt(dx * dx + dy * dy));
         var sign = fallback ? (MapGen.Random.HashTile(c.Seed, joint.x, joint.y, 19427) % 2 ? 1 : -1) :
-            (c.Random.Chance(0.5) ? 1 : -1);
+            (MapGen.Layout.Rivers.Random(c).Chance(0.5) ? 1 : -1);
         length = Math.min(length, Math.round(Math.min(c.Width, c.Height) * 0.28));
         for(var side = 0; side < 2; ++side) {
             var direction = side ? -sign : sign;
@@ -2015,9 +2021,9 @@ MapGen.Layout.Rivers = {
 
     StampIrregularLake: function(pContext, pLake) {
         var radius = Math.max(3, pLake.radius | 0);
-        var rx = radius + pContext.Random.Int(0, 2);
-        var ry = Math.max(3, radius - pContext.Random.Int(0, 1));
-        var angle = pContext.Random.Float(0, Math.PI);
+        var rx = radius + MapGen.Layout.Rivers.Random(pContext).Int(0, 2);
+        var ry = Math.max(3, radius - MapGen.Layout.Rivers.Random(pContext).Int(0, 1));
+        var angle = MapGen.Layout.Rivers.Random(pContext).Float(0, Math.PI);
         var cosA = Math.cos(angle);
         var sinA = Math.sin(angle);
         var maxR = Math.max(rx, ry) + 2;
@@ -2045,13 +2051,13 @@ MapGen.Layout.Rivers = {
             }
         }
 
-        var satellites = pContext.Random.Int(1, 2);
+        var satellites = MapGen.Layout.Rivers.Random(pContext).Int(1, 2);
         for(var index = 0; index < satellites; ++index) {
-            var satelliteAngle = pContext.Random.Float(0, Math.PI * 2);
-            var distance = pContext.Random.Int(Math.max(2, Math.floor(radius * 0.45)), Math.max(3, radius));
+            var satelliteAngle = MapGen.Layout.Rivers.Random(pContext).Float(0, Math.PI * 2);
+            var distance = MapGen.Layout.Rivers.Random(pContext).Int(Math.max(2, Math.floor(radius * 0.45)), Math.max(3, radius));
             var sx = Math.round(pLake.x + Math.cos(satelliteAngle) * distance);
             var sy = Math.round(pLake.y + Math.sin(satelliteAngle) * distance);
-            var sr = Math.max(2, Math.floor(radius * pContext.Random.Float(0.35, 0.55)));
+            var sr = Math.max(2, Math.floor(radius * MapGen.Layout.Rivers.Random(pContext).Float(0.35, 0.55)));
             var radiusSq = sr * sr;
 
             for(var sdx = -sr; sdx <= sr; ++sdx) {
@@ -2079,7 +2085,7 @@ MapGen.Layout.Rivers = {
             return null;
 
         var maxCount = Math.max(1, this.PolicyMax(pContext, "maxLakeCount", pContext.Profile.MaxLakeCount || 1));
-        var count = pContext.Random.Int(1, maxCount);
+        var count = MapGen.Layout.Rivers.Random(pContext).Int(1, maxCount);
         var lakes = [];
         var stampedTotal = 0;
 
@@ -2118,7 +2124,7 @@ MapGen.Layout.Rivers = {
         if(!this.ShouldBuildPond(pContext))
             return null;
 
-        var count = pContext.Random.Int(1, Math.max(1, this.PolicyMax(pContext, "maxPondCount", pContext.Profile.MaxPondCount || 1)));
+        var count = MapGen.Layout.Rivers.Random(pContext).Int(1, Math.max(1, this.PolicyMax(pContext, "maxPondCount", pContext.Profile.MaxPondCount || 1)));
         var ponds = [];
 
         for(var index = 0; index < count; ++index) {

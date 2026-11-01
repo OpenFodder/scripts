@@ -555,7 +555,9 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
                     style === "ice_tree_blob" ||
                     style === "ice_neck_route";
             },
-            author: authorIceForestCorridor,
+            author: function(plan, map, rngs, c) {
+                return pIntent.AuthorForestAxis(authorIceForestCorridor, plan, map, rngs, c);
+            },
             intentHardValidators: [
                 {
                     id: "forest_density_floor",
@@ -637,13 +639,15 @@ MapGen.Intent.Concepts = MapGen.Intent.Concepts || {};
                                 for(var gx = gate.x;
                                     gx < gate.x + gate.thickness; ++gx) {
                                     for(var gy = gate.yStart; gy <= gate.yEnd; ++gy) {
-                                        var ii = (gy * pIntentMap.width) + gx;
+                                        var cellX = gate.transposed ? gy : gx;
+                                        var cellY = gate.transposed ? gx : gy;
+                                        var ii = (cellY * pIntentMap.width) + cellX;
                                         if(pIntentMap.movement[ii] &
                                             (M.ROUTE_PRIMARY | M.ROUTE_SECONDARY |
                                              M.KEEP_CLEAR)) continue;
                                         ++tested;
                                         if(MapGen.Metrics && MapGen.Metrics.IsTreeBlocked &&
-                                            MapGen.Metrics.IsTreeBlocked(pContext, gx, gy))
+                                            MapGen.Metrics.IsTreeBlocked(pContext, cellX, cellY))
                                             ++treeCells;
                                     }
                                 }

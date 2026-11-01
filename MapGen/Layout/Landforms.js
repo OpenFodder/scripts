@@ -8,10 +8,11 @@ MapGen.Layout.Landforms = {
     Build: function(c) {
         var form = c.Profile.JungleLandform;
         if(form !== "basin" && form !== "islands") return false;
-        var W = c.Width, H = c.Height, random = c.Random;
+        var W = c.Width, H = c.Height, random = MapGen.Layout.WaterGeography.Random(c,c.Random,24713);
         var horizontal = random.Chance(0.5), cells = [], seeds = [], patches = [];
         var regions = c.RegionalPlan && c.RegionalPlan.regions;
-        var basin = form === "basin" ? MapGen.Layout.WaterGeography.Plan(random) : null;
+        var basin = form === "basin" ? MapGen.Layout.WaterGeography.Plan(random, W, H, c.Profile.SceneForests,c.Profile.WaterBodyKind) : null;
+        if(basin) basin.detailed=!!c.Profile.WaterBodyKind;
         var divideStrength = c.Profile.RiverChance > 0 ? 0.90 :
             1.5 + (MapGen.Random.HashTile(c.Seed, 17, 23, 19109) / 4294967296) * 3;
         var divideScale = c.Profile.RiverChance > 0 ? 16 : 5;
@@ -59,7 +60,7 @@ MapGen.Layout.Landforms = {
         cells.sort(function(a, b) { return a.score - b.score || a.y - b.y || a.x - b.x; });
         // A scattered lake district can be mostly dry; an elongated basin
         // occupies much more ground. Equal quotas made both silhouettes merge.
-        var fraction = basin ? (basin.kind === "lakes" ? random.Float(0.88, 0.95) :
+        var fraction = basin ? (basin.waterFraction !== undefined ? 1 - basin.waterFraction :
             basin.kind === "lake_chain" ? random.Float(0.82, 0.91) : random.Float(0.78, 0.88)) :
             random.Float(0.71, 0.78);
         // A mixed island/river composition needs a separate water allowance

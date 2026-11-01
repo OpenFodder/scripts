@@ -9,24 +9,32 @@ MapGen.Layout = MapGen.Layout || {};
     }
     P.Prepare = function(c) {
         var I = MapGen.Integration, get = MapGen.Layers.Get, water = [], cliff = [], occupied = [], bridge = [];
+        var scenicWater=c.Profile.TargetPackProfile==="grammar_beach" ? [] : null;
         for(var y = 0; y < c.Height; ++y) {
             water[y] = [];
+            if(scenicWater) scenicWater[y] = [];
             cliff[y] = [];
             occupied[y] = [];
             bridge[y] = [];
             for(var x = 0; x < c.Width; ++x) {
                 bridge[y][x] = MapGen.Repair.IsBridgeWaterApproach(c, x, y) ? 1 : 0;
                 water[y][x] = I.StructureCellIsWaterLike(c, x, y) ? 1 : 0;
+                if(scenicWater) scenicWater[y][x] = get(c.Layers.water,x,y,0) || get(c.Layers.coast,x,y,0) ? 1 : 0;
                 cliff[y][x] = I.IsStructureCliffProtectedCell(c, x, y) ||
                     MapGen.Layout.Reservations.IsHardTerrain(c, x, y) ? 1 : 0;
                 occupied[y][x] = I.IsStructureOccupiedTile(get(c.Layers.occupied, x, y, 0)) ? 1 : 0;
             }
         }
+        var woodland=MapGen.Layout.BuildingTerrain.Woodland(c);
         return {
+            woodlandSAT : woodland,
+            woodlandCoreSAT : MapGen.Layout.BuildingTerrain.SupportedWoodland(c,woodland),
+            cliffArtSAT : MapGen.Layout.BuildingTerrain.CliffArt(c),
             water : water,
             cliff : cliff,
             bridgeSAT : I.BuildStructureSAT(bridge, c.Width, c.Height),
             waterSAT : I.BuildStructureSAT(water, c.Width, c.Height),
+            scenicWaterSAT : scenicWater ? I.BuildStructureSAT(scenicWater, c.Width, c.Height) : null,
             cliffSAT : I.BuildStructureSAT(cliff, c.Width, c.Height),
             occupiedSAT : I.BuildStructureSAT(occupied, c.Width, c.Height)
         };
@@ -44,7 +52,10 @@ MapGen.Layout = MapGen.Layout || {};
         // non-integer rectangle bounds.
         var candidateBlocked = new Uint8Array(N);
         for(var entryIndex = 0; entryIndex < entries.length; ++entryIndex) {
-            var candidateRect = entries[entryIndex].candidate.rect;
+            var entry = entries[entryIndex].candidate, candidateRect = entry.rect;
+            var fence = entry.fenceCells || [];
+            for(var fi = 0; fi < fence.length; ++fi)
+                candidateBlocked[fence[fi].y * W + fence[fi].x] = 1;
             var minX = Math.max(0, Math.ceil(candidateRect.minX));
             var maxX = Math.min(W - 1, Math.floor(candidateRect.maxX));
             var minY = Math.max(0, Math.ceil(candidateRect.minY));
@@ -145,8 +156,10 @@ MapGen.Layout = MapGen.Layout || {};
         var field = routeField(c, g, entries, policy === "maze"), shortlist = [], occupiedRows = {},
             occupiedSectors = {}, regions = {};
         var start = c.Anchors && c.Anchors.start;
+        var mission = c.MissionLayout, centers = [];
         for(var e = 0; e < entries.length; ++e) {
             var old = entries[e].candidate, center = I.StructureRectCenter(old.rect);
+            centers.push(center);
             var sx = Math.min(2, Math.floor(center.x * 3 / c.Width)),
                 sy = Math.min(2, Math.floor(center.y * 3 / c.Height));
             occupiedRows[sy] = true;
@@ -154,24 +167,9 @@ MapGen.Layout = MapGen.Layout || {};
             if(old.clearing.regionId)
                 regions[old.clearing.regionId] = true;
         }
-        var settlement = c.RegionalPlan && c.RegionalPlan.settlement;
-        var regionalGrouping = entries.length >= 2 &&
-            (settlement === "compound" || settlement === "camps");
-        var regionalFloorsMet = false;
-        if(regionalGrouping) {
-            var area = c.Width * c.Height;
-            var sectorFloor = area >= 10000 ? 5 : (area >= 6000 ? 4 :
-                (area >= 3200 ? 3 : 2));
-            var regionFloor = area >= 10000 ? 4 :
-                (area >= 6000 ? 4 : (area >= 3200 ? 3 : 2));
-            var rowFloor = area >= 10000 ? 3 : 0;
-            // These are the complete live-validation floors. Do not clamp
-            // them to entries.length: a two-site prefix must not suppress
-            // ranking bonuses when the eventual plan needs three or more.
-            regionalFloorsMet = Object.keys(occupiedSectors).length >= sectorFloor &&
-                Object.keys(regions).length >= regionFloor &&
-                Object.keys(occupiedRows).length >= rowFloor;
-        }
+        var missionCounts = mission ? MapGen.Layout.MissionLayout.Counts(mission, centers) : null;
+        var lot = search && search.missionTarget ? null : MapGen.Layout.Settlements.Next(c, entries);
+        var terrain=MapGen.Layout.BuildingTerrain.ForEntries(c,g,entries);
         var water = I.StructureWaterClearance(c, spec), cliff = I.StructureCliffClearance(c, spec);
         var clear = I.StructureClearance(spec), spacing = I.StructureSpacing(spec, c),
             margin = Math.max(3, I.StructureMapMargin(c));
@@ -183,6 +181,10 @@ MapGen.Layout = MapGen.Layout || {};
                 points.push({x : x, y : y});
             }
         }
+        var lotTargets=lot ? lot.alternatives || [lot] : [];
+        for(var li=0;li<lotTargets.length;++li)
+            for(var ly=-4;ly<=4;++ly) for(var lx=-4;lx<=4;++lx)
+                add(lotTargets[li].x+lx,lotTargets[li].y+ly);
         for(var ci = 0; ci < clearings.length; ++ci) {
             if(clearings[ci].role === "start")
                 continue;
@@ -226,15 +228,18 @@ MapGen.Layout = MapGen.Layout || {};
                 continue;
             var conflict = false;
             for(var bi = 0; bi < entries.length; ++bi)
-                if(I.StructureSiteConflictsPlaced(rect, [ entries[bi].candidate ], spacing)) {
+                if(I.StructureSiteConflictsPlaced(rect, [ entries[bi].candidate ],
+                    I.StructurePairSpacing(c, {spec:spec,settlementLot:lot},
+                        {spec:entries[bi].spec,settlementLot:entries[bi].candidate.settlementLot}))) {
                     conflict = true;
                     break;
                 }
             if(conflict)
                 continue;
-            for(var ry = rect.minY; ry <= rect.maxY && !conflict; ++ry)
-                for(var rx = rect.minX; rx <= rect.maxX; ++rx) {
-                    if(R.At(c, rx, ry) & (R.CLEAR | R.FLOOR)) {
+            for(var ry = clearance.minY; ry <= clearance.maxY && !conflict; ++ry)
+                for(var rx = clearance.minX; rx <= clearance.maxX; ++rx) {
+                    var flags = R.At(c,rx,ry);
+                    if(flags & R.DETAIL || inside(rect,rx,ry) && flags & (R.CLEAR | R.FLOOR)) {
                         conflict = true;
                         break;
                     }
@@ -263,15 +268,20 @@ MapGen.Layout = MapGen.Layout || {};
             var geographicBonus = (occupiedSectors[col + "," + row] ? 0 : 600) +
                         (occupiedRows[row] ? 0 : 500) +
                         (region && !regions[region.id] ? 500 : 0);
-            // The live validator requires sector/region coverage (and, on
-            // very large maps, three row bands). Once those floors are
-            // already met by the first placements, compound/camp regional
-            // modes may spend later slots near their preferred region. This
-            // changes ranking only; all footprint, route, spacing and live
-            // validation checks remain unchanged.
-            if(regionalFloorsMet)
-                geographicBonus = 0;
+            if(lot) geographicBonus = MapGen.Layout.Settlements.Score(lot, pt) +
+                MapGen.Layout.MissionLayout.SeparationScore(mission, pt, centers);
+            else if(mission) geographicBonus = MapGen.Layout.MissionLayout.Score(
+                mission, pt, entries.length, missionCounts, centers);
+            if(search && search.missionTarget) geographicBonus =
+                MapGen.Layout.MissionLayout.TargetScore(search.missionTarget, pt);
             var score = geographicBonus - Math.sqrt(nearDistance) * 3;
+            var setting = MapGen.Layout.BuildingTerrain.Context(c,terrain,rect,clearance,lot ? lot.camp : entries.length,water);
+            score += setting.score;
+            var landmark=MapGen.Layout.Landmarks.Setting(c,pt,lot) ||
+                search && search.missionTarget && search.missionTarget.landmark;
+            if(!MapGen.Layout.Landmarks.Visible(landmark,setting) ||
+                !MapGen.Layout.Landmarks.Fits(landmark,pt)) landmark=null;
+            score+=MapGen.Layout.Landmarks.Score(landmark,pt,setting);
             // Secure the required map span with the second landmark before
             // spending the remaining slots on geographic/encounter coverage.
             if(entries.length === 1) {
@@ -279,10 +289,12 @@ MapGen.Layout = MapGen.Layout || {};
                 var span = Math.sqrt((pt.x - first.x) * (pt.x - first.x) + (pt.y - first.y) * (pt.y - first.y));
                 var target = Number(c.Profile.MinLiveStructureMapSpanFraction || 0) *
                              Math.sqrt(c.Width * c.Width + c.Height * c.Height);
+                if(mission) target = mission.minSpanTiles;
                 if(span >= target + 2)
                     score += 1500;
             }
-            if(entries.length === 0 && nearest && nearest.role === "compound_objective")
+            if(entries.length === 0 && !(search && search.missionTarget) &&
+                nearest && nearest.role === "compound_objective")
                 score += 900;
             score += MapGen.Variation.BuildingBias(c, pt.x, pt.y, entries.length);
             shortlist.push({
@@ -291,6 +303,9 @@ MapGen.Layout = MapGen.Layout || {};
                 rect : rect,
                 clearance : clearance,
                 score : score,
+                terrainSetting : setting.setting,
+                terrainShelterSide : setting.shelterSide,
+                landmark : landmark,
                 waterClearance : water,
                 cliffClearance : cliff,
                 clearing : nearest,
@@ -327,7 +342,14 @@ MapGen.Layout = MapGen.Layout || {};
         // Retry geographically distinct sites instead of adjacent origins
         // that all consume the same space needed by the remaining buildings.
         var alternatives = [], alternativeDistance = Math.max(3, Math.floor(spacing / 2));
+        var fencePreferred = lot && !search && spec.building === "barracks" && c.Profile.TerrainType === Terrain.Types.Ice;
+        // One architectural landmark per map; repeating a yard at every
+        // barracks overwhelms the small settlements with identical enclosures.
+        for(var ei = 0; ei < entries.length && fencePreferred; ++ei)
+            if(entries[ei].candidate.fenceCells) fencePreferred = false;
+        var fallback = null;
         for(var s = 0; s < shortlist.length; ++s) {
+            if(fallback && (s >= 48 || shortlist[s].score < fallback.score-1400)) return fallback;
             if(search && search.candidateLimit !== undefined && s >= search.candidateLimit) break;
             var candidate = shortlist[s], nearbyAlternative = false;
             if(search && search.diverse) {
@@ -355,9 +377,17 @@ MapGen.Layout = MapGen.Layout || {};
             if(!path)
                 continue;
             candidate.accessPath = path;
+            if(lot) candidate.settlementLot = MapGen.Layout.Settlements.Resolve(lot,I.StructureRectCenter(candidate.rect));
             candidate.accessPoint = path[0];
             candidate.accessTarget = path[path.length - 1];
             candidate.accessRouteLength = path.length;
+            if(fencePreferred) {
+                candidate.fenceCells = MapGen.Layout.SettlementDetails.FindFence(c,g,candidate);
+                if(!candidate.fenceCells) {
+                    if(!fallback) fallback = candidate;
+                    continue;
+                }
+            }
             if(search && search.skip > 0) {
                 alternatives.push(candidate);
                 --search.skip;
@@ -365,6 +395,6 @@ MapGen.Layout = MapGen.Layout || {};
             }
             return candidate;
         }
-        return null;
+        return fallback;
     };
 })(MapGen.Layout.BuildingSites = MapGen.Layout.BuildingSites || {});

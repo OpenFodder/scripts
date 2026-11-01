@@ -566,47 +566,7 @@ MapGen.Integration = MapGen.Integration || {};
                 if(!right || !right.rect)
                     continue;
 
-                var minSpacing = 0;
-                if(this.StructureSpacing) {
-                    minSpacing = Math.max(
-                        minSpacing,
-                        this.StructureSpacing(left.spec || {}, pContext),
-                        this.StructureSpacing(right.spec || {}, pContext)
-                    );
-                }
-                if(pContext.Profile && typeof pContext.Profile.LiveStructureMinSpacing === "number")
-                    minSpacing = Math.max(minSpacing, Math.floor(pContext.Profile.LiveStructureMinSpacing));
-                // Required whole-map fallback records the narrower spacing it
-                // was explicitly allowed to use. Validate that exact audited
-                // contract for pairs involving the fallback, while all normal
-                // placements retain the profile's preferred minimum.
-                if(typeof left.spacingOverride === "number")
-                    minSpacing = Math.min(minSpacing, left.spacingOverride);
-                if(typeof right.spacingOverride === "number")
-                    minSpacing = Math.min(minSpacing, right.spacingOverride);
-
-                // Buildings deliberately authored inside the same compound
-                // clearing are one tactical site, not two supposedly spread
-                // whole-map objectives. Preserve a readable internal lane but
-                // do not apply the cross-map spacing contract within that one
-                // compound. Pairs in different clearings still retain the
-                // full profile minimum.
-                var leftPoint = left.clearingPoint || null;
-                var rightPoint = right.clearingPoint || null;
-                var sameCompound =
-                    left.clearingRole === "compound_objective" &&
-                    right.clearingRole === "compound_objective" &&
-                    leftPoint && rightPoint &&
-                    leftPoint.x === rightPoint.x &&
-                    leftPoint.y === rightPoint.y;
-                if(sameCompound) {
-                    minSpacing = Math.min(
-                        minSpacing,
-                        Math.max(2, Math.floor(Number(
-                            (pContext.Profile || {}).LiveCompoundInternalMinSpacing || 2
-                        )))
-                    );
-                }
+                var minSpacing = this.StructurePairSpacing(pContext, left, right);
 
                 var distance = this.RectDistance(left.rect, right.rect);
                 if(minObserved === null || distance < minObserved)
@@ -634,6 +594,9 @@ MapGen.Integration = MapGen.Integration || {};
             return;
 
         var target = Number(pContext.Profile.MinLiveStructureMapSpanFraction || 0);
+        var mission = pContext.MissionLayout;
+        if(mission) target = mission.minSpanTiles /
+            Math.max(1, Math.sqrt(pContext.Width * pContext.Width + pContext.Height * pContext.Height));
         var placements = pContext.LiveStructurePlacements;
         var centers = [];
         var maxDistance = 0;
@@ -716,9 +679,9 @@ MapGen.Integration = MapGen.Integration || {};
             encounterRegions: structureRegionCount
         };
 
-        // Large maps must spend their extra area on gameplay. A low span means
-        // all buildings can be cleared in one local encounter while most of
-        // the generated terrain is optional scenery.
+        // Count and minimum separation still apply to every mission. Generic
+        // campaigns then validate their intended targets; authored profiles
+        // retain the established map-wide distribution contract below.
         var structureFloor = Math.max(0, Math.floor(Number(
             pContext.Profile.MapScaleStructureFloor || 0
         )));
@@ -741,6 +704,10 @@ MapGen.Integration = MapGen.Integration || {};
                 );
         }
 
+        if(mission) {
+            MapGen.Layout.MissionLayout.Validate(pContext, centers, pReport);
+            return;
+        }
         var area = pContext.Width * pContext.Height;
         var iceStyle = String(pContext.Profile.GrammarIceLayoutStyle ||
             pContext.Profile.ForcedIceLayoutStyle || "");
@@ -1238,11 +1205,11 @@ MapGen.Integration = MapGen.Integration || {};
         if(authoredPhases < requiredPhases)
             this.LiveFail(pReport, "gameplay_topology_phase_gap:" +
                 authoredPhases + "/" + requiredPhases);
-        if(context.Width * context.Height >= 10000 && sites.length >= 3 &&
+        if(!context.MissionLayout && context.Width * context.Height >= 10000 && sites.length >= 3 &&
             siteRowCount < 2)
             this.LiveFail(pReport, "gameplay_topology_rows_too_low:" +
                 siteRowCount + "/2");
-        if(context.Width * context.Height >= 10000 && sites.length >= 3 &&
+        if(!context.MissionLayout && context.Width * context.Height >= 10000 && sites.length >= 3 &&
             northernOffAxisSites < 1)
             this.LiveFail(pReport, "gameplay_topology_northern_sector_unused");
     };

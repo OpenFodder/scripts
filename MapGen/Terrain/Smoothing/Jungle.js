@@ -127,6 +127,10 @@ MapGen.Terrain.Smoothing.Jungle = {
             return this.Chars.beach;
 
         if(MapGen.Layers.Get(layers.path, pX, pY, 0)) {
+            // Navigation corridors need not be painted as light-grass roads.
+            // Keep the original ground treatment; crossings above retain their
+            // dedicated art, and movement reservations remain untouched.
+            if(pContext.Profile.NaturalJungleGround) return this.Chars.ground;
             // Original forest mazes read as grass corridors through trees, not
             // as a bright paved overlay on every navigable cell. Keep a little
             // authored path texture for visual guidance, while letting most of
@@ -160,6 +164,7 @@ MapGen.Terrain.Smoothing.Jungle = {
             return this.Chars.tree;
 
         if(MapGen.Layers.Get(layers.terrainEdge, pX, pY, 0)) {
+            if(pContext.Profile.NaturalJungleGround) return this.Chars.ground;
             // Maze soft-edge halos are routing/render bookkeeping around a
             // grass corridor. Emitting them as '+' causes FixCharMap to eat
             // every adjacent tree, widening narrow cuts by several cells.
@@ -428,13 +433,21 @@ MapGen.Terrain.Smoothing.Jungle = {
             MapGen.Layers.Get(layers.riverBank, pX, pY, 0);
     },
 
+    IsOccupiedForTree: function(pContext, pX, pY) {
+        var occupied = MapGen.Layers.Get(pContext.Layers.occupied, pX, pY, 0);
+        // Jungle outcrops use the forest palette. Their generic reservation
+        // must not freeze the raw tree seed tiles before canopy fitting.
+        return occupied && !(pContext.Profile.SceneForests && occupied === 1 &&
+            MapGen.Layers.Get(pContext.Layers.outcrop, pX, pY, 0));
+    },
+
     IsProtectedChar: function(pContext, pX, pY) {
         return this.IsOuterCoverBuffer(pContext, pX, pY) ||
             this.IsAuthoredLiveTerrainChar(pContext, pX, pY) ||
             MapGen.Layers.Get(pContext.Layers.keepClear, pX, pY, 0) ||
             MapGen.Layers.Get(pContext.Layers.path, pX, pY, 0) ||
             MapGen.Layers.Get(pContext.Layers.crossing, pX, pY, 0) ||
-            MapGen.Layers.Get(pContext.Layers.occupied, pX, pY, 0);
+            this.IsOccupiedForTree(pContext, pX, pY);
     },
 
     SurroundChars: function(pChars, pX, pY, pDefaultChar) {
@@ -931,7 +944,7 @@ MapGen.Terrain.Smoothing.Jungle = {
             MapGen.Layers.Get(pContext.Layers.crossing, pX, pY, 0) ||
             MapGen.Layers.Get(pContext.Layers.water, pX, pY, 0) ||
             MapGen.Layers.Get(pContext.Layers.coast, pX, pY, 0) ||
-            MapGen.Layers.Get(pContext.Layers.occupied, pX, pY, 0);
+            this.IsOccupiedForTree(pContext, pX, pY);
     },
 
     OverlayProtectedTiles: function(pContext, pTiles) {
@@ -1060,7 +1073,8 @@ MapGen.Terrain.Smoothing.Jungle = {
             return self.OverlayGrammarLiveTerrainTiles(pContext, chars, tiles);
         }) || 0;
         var grammarBeachBankPolishCount = MapGen.Context.Time(pContext, "Smoothing.Jungle.GrammarBeachBankFinal", function() {
-            return self.RepairSub1GrammarBeachDryGrassEdges(pContext, chars, tiles);
+            return self.RepairSub1GrammarBeachDryGrassEdges(pContext, chars, tiles)+
+                self.RefineInteriorWaterJoins(pContext,chars,tiles);
         }) || 0;
         var protectedCount = MapGen.Context.Time(pContext, "Smoothing.Jungle.OverlayProtected", function() {
             return self.OverlayProtectedTiles(pContext, tiles);

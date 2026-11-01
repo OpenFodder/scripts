@@ -354,6 +354,9 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
             anchors.start, anchors.objective);
         if(!primary || primary.length < 16) { return plan; }
         var desired = topologyDesiredCount(pContext, primary.length);
+        var mission = MapGen.Layout.MissionLayout.Prepare(pContext, anchors);
+        if(mission && mission.kind === "compound") desired = Math.min(desired, 2);
+        else if(mission && mission.kind === "linked_camps") desired = Math.min(desired, 3);
         plan.desired = desired;
         // Three legs are desirable on a large map, but two genuinely useful
         // detours are the hard gameplay floor. XL maps must fit three.
@@ -367,7 +370,7 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
         }
         var minSide = Math.min(pContext.Width, pContext.Height);
         var topologyArea = pContext.Width * pContext.Height;
-        var isXLTopology = topologyArea >= 10000;
+        var isXLTopology = topologyArea >= 10000 && !mission;
         var topologyDistanceScale = topologyArea >= 10000 ? 0.30 :
             (topologyArea >= 6000 ? 0.27 : 0.23);
         var topologyDistanceCeiling = topologyArea >= 10000 ? 34 :
@@ -378,9 +381,11 @@ MapGen.Intent.Pipeline = MapGen.Intent.Pipeline || {};
         ));
         var initialSide = pRng && pRng.Chance && pRng.Chance(0.5) ? 1 : -1;
         var wantsLoop = desired >= 3 && primary.length >= 44 && minSide >= 46;
+        if(mission && mission.kind === "linked_camps") wantsLoop = false;
         var spurCount = desired - (wantsLoop ? 1 : 0);
         for(var si = 0; si < spurCount; ++si) {
             var fraction = topologySpurFraction(si, spurCount);
+            if(mission) fraction = MapGen.Layout.MissionLayout.SpurFraction(mission, si, spurCount);
             var routePhase = topologyRoutePhase(fraction);
             plan.phaseTargets[routePhase] += 1;
             var routeIndex = Math.max(4, Math.min(primary.length - 5,

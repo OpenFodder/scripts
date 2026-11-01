@@ -711,7 +711,6 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
         var upperSide = (tgb.upperSide && tgb.upperSide.length) ? tgb.upperSide : [24];
         var middleSide = (tgb.middleSide && tgb.middleSide.length) ? tgb.middleSide : [63];
         var lowerSide = (tgb.lowerSide && tgb.lowerSide.length) ? tgb.lowerSide : [45];
-        var upperCorner = (tgb.upperCorner && tgb.upperCorner.length) ? tgb.upperCorner : [44];
         var changed = 0;
 
         function isTreeChar(x, y) {
@@ -799,30 +798,6 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
             return MapGen.Layers.Get(pTiles, x, y, 0) & 0x1FF;
         }
 
-        function listContains(list, tile) {
-            for(var index = 0; index < list.length; ++index) {
-                if((list[index] & 0x1FF) === tile)
-                    return true;
-            }
-            return false;
-        }
-
-        function isSideBoundaryTile(tile) {
-            return listContains(upperSide, tile) ||
-                listContains(middleSide, tile) ||
-                listContains(lowerSide, tile);
-        }
-
-        function cornerTileFor(x, y) {
-            if(!isTreeChar(x - 1, y + 1))
-                return null;
-            if(isTreeChar(x - 1, y) || isTreeChar(x, y + 1) || isTreeChar(x + 1, y))
-                return null;
-            if(!isSideBoundaryTile(tileAt(x - 1, y)) || !listContains(upperSide, tileAt(x, y + 1)))
-                return null;
-            return upperCorner[0];
-        }
-
         var bounds = this.LocalRenderBounds(pContext, 0);
         for(var x = Math.max(1, bounds.minX); x <= Math.min(width - 2, bounds.maxX); ++x) {
             for(var y = Math.max(1, bounds.minY); y <= Math.min(height - 2, bounds.maxY); ++y) {
@@ -847,8 +822,9 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
 
                 if(isolatedSideGap || diagonalCornerSideGap)
                     tile = sideTileFor(x - 1, y);
-                else
-                    tile = cornerTileFor(x, y);
+                // East edges of 24/63/45 are snow. Adding tile 44 outside a
+                // diagonal step puts its shaded west edge against that snow,
+                // producing a detached triangle rather than a canopy shadow.
                 if(tile === null)
                     continue;
                 if(currentTile === tile)

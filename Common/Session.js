@@ -73,6 +73,9 @@ var Session = {
      * @var {Array<cPosition>} HutPositions
      */
     HutPositions: [],
+
+    // Soldier huts are demolition targets; civilian huts are not.
+    EnemyHutPositions: [],
     
     /**
      * @var {cPosition}
@@ -131,6 +134,7 @@ var Session = {
         this.BarracksPositions = [];
         this.BunkerPositions = [];
         this.HutPositions = [];
+        this.EnemyHutPositions = [];
 
         this.HostageGroupPositions = [];
         this.CivilianPositions = [];
@@ -152,7 +156,7 @@ var Session = {
 
     getEnemyBuildings: function() {
 
-        return this.BunkerPositions.concat(this.BarracksPositions);
+        return this.BunkerPositions.concat(this.BarracksPositions, this.EnemyHutPositions);
     },
 
     /**

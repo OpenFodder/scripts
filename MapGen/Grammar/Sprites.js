@@ -1350,7 +1350,8 @@ MapGen.Grammar.Sprites = {
             "civilians",
             "extraction",
             "hazards",
-            "decor"
+            "decor",
+            "birds"
         ];
         var result = [];
 
@@ -1376,6 +1377,7 @@ MapGen.Grammar.Sprites = {
             extraction: pOut.extraction.length,
             hazards: pOut.hazards.length,
             decor: pOut.decor.length,
+            birds: pOut.birds.length,
             structureSprites: pOut.structureSprites.length,
             support: pOut.support.length
         };
@@ -1421,6 +1423,7 @@ MapGen.Grammar.Sprites = {
         self.AddHostagesAndExtraction(pContext, targets, pPlan, out);
         self.AddCivilians(pContext, targets, pPlan, out);
         self.AddHazardsAndDecor(pContext, targets, pPlan, out);
+        MapGen.Grammar.Birds.Apply(pContext, out);
 
         var needSupport = self.ObjectiveNeedsSupportPickup(pPlan);
         if(needSupport && !out.pickups.length)
@@ -1457,6 +1460,7 @@ MapGen.Grammar.Sprites = {
             support: out.support,
             hazards: out.hazards,
             decor: out.decor,
+            birds: out.birds,
             structureSprites: out.structureSprites,
             placementIntents: self.PlacementIntents(out),
             roleCounts: self.RoleCountSummary(out),

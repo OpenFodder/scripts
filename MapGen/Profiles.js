@@ -183,7 +183,7 @@ MapGen.Profiles = (function() {
         validateMinimum(validation, pProfile, "Width", 16);
         validateMinimum(validation, pProfile, "Height", 16);
         validateRange(validation, pProfile, "TreeCoverage", 0, 0.9);
-        if(pProfile.ForestShape && ["groves", "belts", "heartwood", "rim"].indexOf(pProfile.ForestShape) < 0)
+        if(pProfile.ForestShape && ["groves", "belts", "heartwood", "rim", "clearings", "bank", "branches"].indexOf(pProfile.ForestShape) < 0)
             addIssue(validation, "errors", "ForestShape", "unknown forest shape");
         if(pProfile.JungleLandform && ["basin", "islands"].indexOf(pProfile.JungleLandform) < 0)
             addIssue(validation, "errors", "JungleLandform", "unknown jungle landform");
@@ -2591,7 +2591,7 @@ MapGen.Profiles = (function() {
         return "";
     }
 
-    function resolve(pName, pOverrides, pRandom) {
+    function resolve(pName, pOverrides, pRandom, pGameMode) {
         var requestedName = pName || defaults.Name;
         var resolvedName = requestedName;
         var random = pRandom || MapGen.Random.CreateSeeded(0);
@@ -2610,10 +2610,20 @@ MapGen.Profiles = (function() {
         // Look up general-purpose compositions after inheritance, so a named
         // maze/neck/crossing retains its own terrain contract.
         MapGen.Variation.ConfigureProfile(raw, resolvedName, random);
-        compositionVariant = resolveCompositionVariant(random, raw.CompositionVariants ||
-            (MapGen.ProfileCompositions && MapGen.ProfileCompositions[resolvedName]));
+        compositionVariant = resolveCompositionVariant(random, (pOverrides && pOverrides.CompositionVariants) || raw.CompositionVariants ||
+            (MapGen.ProfileCompositions && MapGen.ProfileCompositions.ForProfile(resolvedName, pOverrides, pGameMode)));
+        var visualStyle=null;
+        if(!pGameMode || pGameMode.kind!=="multiplayer") {
+            visualStyle=MapGen.VisualCompositions.Choose(resolvedName,random.InitialSeed,
+                compositionVariant ? compositionVariant.name : "",pOverrides);
+            compositionVariant=MapGen.ProfileCompositions.ForVisual(resolvedName,visualStyle,
+                random.InitialSeed,pOverrides,compositionVariant);
+        }
         if(compositionVariant)
             raw = merge(raw, compositionVariant.overrides);
+        if(!pGameMode || pGameMode.kind !== "multiplayer")
+            MapGen.VisualCompositions.Configure(raw, resolvedName, random.InitialSeed,
+                compositionVariant ? compositionVariant.name : "", pOverrides, visualStyle);
         raw = merge(raw, pOverrides || {});
         extremeFields = (raw.ExtremeFields instanceof Array) ? raw.ExtremeFields : [];
         isExtreme = function(pField) {
@@ -2757,6 +2767,12 @@ MapGen.Profiles = (function() {
 
         if(MapGen.ProfileOwnership && MapGen.ProfileOwnership.Apply)
             MapGen.ProfileOwnership.Apply(resolved, raw, requestedName, resolvedName);
+
+        // Snapshot resolved ranges and explicit caller values, not raw arrays,
+        // for the late mission-tuning hook.
+        var visualSettings = resolved.VisualCompositionSettings;
+        if(visualSettings) for(var setting in visualSettings)
+            if(visualSettings.hasOwnProperty(setting)) visualSettings[setting] = resolved[setting];
 
         return resolved;
     }

@@ -95,5 +95,45 @@ MapGen.ProfileCompositions = {
                 JungleLandform: "basin", MaxWaterCoverage: 0.22
             }
         }
-    ]
+    ],
+
+    ForVisual: function(name, style, seed, overrides, fallback) {
+        if(name!=="grammar_jungle" || !style || overrides && overrides.CompositionVariants) return fallback;
+        var families={forest_clearings:["inland_trails","lake_basin","forest_labyrinth"],
+            open_woods:["lake_basin","river_valley","coastal_woods"],
+            forest_bank:["river_valley","river_fork_cliffs","coastal_woods"],
+            broken_woods:["lake_basin","island_chain","river_island_chain"],
+            branching_woods:["river_fork_cliffs","river_valley","lake_basin"],
+            forest_heartland:["inland_trails","lake_basin","coastal_woods"],cliff_country:["inland_trails"]};
+        var names=families[style];
+        if(!names) return fallback;
+        var hash=0;
+        for(var k=0;k<style.length;++k) hash=(hash*31+style.charCodeAt(k))>>>0;
+        var chosen=names[MapGen.Random.HashTile(seed,hash,13,24707)%names.length];
+        var choices=this.ForProfile(name,overrides);
+        for(var i=0;i<choices.length;++i) if(choices[i].name===chosen) return choices[i];
+        return fallback;
+    },
+
+    ForProfile: function(name, overrides, mode) {
+        var choices = this[name];
+        if(name !== "grammar_jungle" || mode && mode.kind === "multiplayer" ||
+            overrides && (overrides.VisualComposition === false || overrides.RegionalComposition === false))
+            return choices;
+        // The original jungle corpus includes dry woods as well as rivers.
+        // Seven equally weighted wet landscapes crowded that range out.
+        var result = [];
+        for(var i = 0; i < choices.length; ++i) {
+            var source = choices[i], settings = {};
+            for(var key in source.overrides) if(source.overrides.hasOwnProperty(key))
+                settings[key] = source.overrides[key];
+            if(source.name === "forest_labyrinth") {
+                settings.JungleLandform = null;
+                settings.MaxWaterCoverage = 0.02;
+            }
+            result.push({name:source.name, overrides:settings,
+                weight:source.name === "inland_trails" ? 4 : source.name === "forest_labyrinth" ? 2 : source.weight});
+        }
+        return result;
+    }
 };

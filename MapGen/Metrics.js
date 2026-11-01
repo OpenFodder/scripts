@@ -683,6 +683,9 @@ MapGen.Metrics = {
 
         if(!MapGen.Layers.Get(layers.blocked, pX, pY, 0))
             return false;
+        // Live collision marks deep water blocked too; it is not forest.
+        if(MapGen.Layers.Get(layers.water, pX, pY, 0))
+            return false;
         if(layers.outcrop && MapGen.Layers.Get(layers.outcrop, pX, pY, 0))
             return false;
         if(layers.owner && MapGen.Layers.Get(layers.owner, pX, pY, 0) > MapGen.Layers.Owner.TREE)

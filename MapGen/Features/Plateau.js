@@ -144,24 +144,17 @@ MapGen.Features.Plateau = (function() {
         return { clearCols: clearCols, clearRunLongest: bestRun };
     }
 
-    // Legacy v1 scorer: longest contiguous run of x where the cliff strip
-    // footprint is free of water/riverBank. Used by jungle/desert.
+    // Jungle/desert use flat bands. Score the same footprint the stamper
+    // accepts, including routes and clearances, so a winning band can render.
     function scoreBandYLegacy(pContext, pBandY, pStampHeight) {
         var topRowY = pBandY - (pStampHeight - 1);
         if(topRowY < 0 || pBandY >= pContext.Height) return 0;
-        var water = pContext.Layers.water;
-        var bank = pContext.Layers.riverBank;
         var bestRun = 0;
         var run = 0;
+        var options = pContext.Profile.HelicopterTransit === true ? {allowRouteTransit:true} : null;
         for(var x = 0; x < pContext.Width; ++x) {
-            var blocked = false;
-            for(var r = 0; r < pStampHeight; ++r) {
-                var y = topRowY + r;
-                if(MapGen.Layers.Get(water, x, y, 0) ||
-                   MapGen.Layers.Get(bank, x, y, 0)) {
-                    blocked = true; break;
-                }
-            }
+            var blocked = !MapGen.Features.PlateauCliffs.ColumnFits(
+                pContext, x, topRowY, pStampHeight, null, options);
             if(blocked) {
                 if(run > bestRun) bestRun = run;
                 run = 0;
@@ -731,10 +724,11 @@ MapGen.Features.Plateau = (function() {
         }
         var bandY = picked.y;
         var topRowY = bandY - (stampHeight - 1);
+        var jungleCourse = MapGen.Features.JungleCliffCourse.Plan(pContext,cliff,
+            bandY-((cliff && cliff.StampHeight || stampHeight)-1));
 
-        // For the legacy (jungle/desert) path no cliffPath is produced; build
-        // a flat topRowYByColumn at baseTopY so downstream consumers still
-        // have a per-column array to read.
+        // Ice and curved Jungle courses supply per-column heights. Other
+        // cliffs retain a flat array for downstream elevation consumers.
         var topRowYByColumn;
         if(picked.path) {
             topRowYByColumn = picked.path.topRowYByColumn;
@@ -742,6 +736,9 @@ MapGen.Features.Plateau = (function() {
             topRowYByColumn = new Array(pContext.Width);
             for(var ti = 0; ti < pContext.Width; ++ti) topRowYByColumn[ti] = topRowY;
         }
+
+        if(jungleCourse) for(var ji = 0; ji < pContext.Width; ++ji)
+            topRowYByColumn[ji] = jungleCourse.columns[ji].topY;
 
         // Per-column elevation: y < topRowYByColumn[x] is plateau.
         var plateauCells = 0;
@@ -760,6 +757,7 @@ MapGen.Features.Plateau = (function() {
             bandY: bandY,
             topRowY: topRowY,
             cliffPath: picked.path || null,
+            jungleCourse: jungleCourse,
             topRowYByColumn: topRowYByColumn,
             stampHeight: stampHeight,
             area: plateauCells,

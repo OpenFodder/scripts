@@ -630,7 +630,10 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
             }
         }
 
-        raw.sort(function(left, right) { return right.cells.length - left.cells.length; });
+        // Equal-sized fingers must keep their discovery order in both native
+        // JS runtimes; one runtime's Array.sort is unstable on equal keys.
+        for(var order=0;order<raw.length;++order) raw[order].order=order;
+        raw.sort(function(left, right) { return right.cells.length - left.cells.length || left.order - right.order; });
         var candidates = [];
         for(var rawIndex = 0; rawIndex < raw.length; ++rawIndex) {
             var item = raw[rawIndex];
@@ -696,7 +699,7 @@ MapGen.Terrain.Smoothing.Ice = MapGen.Terrain.Smoothing.Ice || {};
             var rightThickness = right.cells.length / right.length;
             if(leftThickness !== rightThickness)
                 return rightThickness - leftThickness;
-            return right.cells.length - left.cells.length;
+            return right.cells.length - left.cells.length || left.order - right.order;
         });
 
         var changed = 0;

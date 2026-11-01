@@ -103,11 +103,33 @@ MapGen.Integration = MapGen.Integration || {};
         else
             spacing = 4;
 
+        // Mission districts own the distance between separate buildings;
+        // footprint/apron overlap remains independently forbidden.
+        if(pContext && pContext.MissionLayout)
+            return Math.max(spacing, pContext.MissionLayout.minSpacing || 6);
         if(pContext && pContext.Profile && typeof pContext.Profile.StructureMinSpacing === "number")
             spacing = Math.max(spacing, Math.floor(pContext.Profile.StructureMinSpacing));
         if(pContext && pContext.Profile && typeof pContext.Profile.LiveStructureMinSpacing === "number")
             spacing = Math.max(spacing, Math.floor(pContext.Profile.LiveStructureMinSpacing));
 
+        return spacing;
+    };
+
+    // One spacing contract for planning and both validators. Current visual
+    // missions never relax their gap for camp membership or fallback metadata.
+    pIntegration.StructurePairSpacing = function(c, left, right) {
+        var spacing = Math.max(this.StructureSpacing(left.spec || {},c),
+            this.StructureSpacing(right.spec || {},c));
+        if(c && c.MissionLayout && c.MissionLayout.version >= 2) return spacing;
+        // Preserve explicitly authored legacy layouts and their audited
+        // fallback clearances. These exceptions do not apply to visual maps.
+        if(typeof left.spacingOverride === "number") spacing = Math.min(spacing,left.spacingOverride);
+        if(typeof right.spacingOverride === "number") spacing = Math.min(spacing,right.spacingOverride);
+        var a = left.clearingPoint, b = right.clearingPoint;
+        if(left.clearingRole === "compound_objective" && right.clearingRole === "compound_objective" &&
+            a && b && a.x === b.x && a.y === b.y)
+            spacing = Math.min(spacing,Math.max(2,Math.floor(Number(
+                (c && c.Profile || {}).LiveCompoundInternalMinSpacing || 2))));
         return spacing;
     };
 
@@ -399,6 +421,7 @@ MapGen.Integration = MapGen.Integration || {};
                 pPlacement.cliffClearance :
                 this.StructureCliffClearance(pContext, pSpec),
             contextCover: pPlacement.contextCover || null,
+            settlementLot: pPlacement.settlementLot || null,
             placementSource: pPlacement.fallback ? "fallback" :
                 ((pPlacement.clearing && pPlacement.clearing.source) || "clearing"),
             clearingRole: pPlacement.clearing ? (pPlacement.clearing.role || "") : "",

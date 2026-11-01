@@ -64,7 +64,7 @@ MapGen.Context = {
         var random = options.Random || MapGen.Random.CreateSeeded(seed);
 
         if(!profile)
-            profile = MapGen.Profiles.Resolve(options.ProfileName, options.Overrides, random);
+            profile = MapGen.Profiles.Resolve(options.ProfileName, options.Overrides, random, options.GameMode);
 
         var width = this.SafeDimension(profile.Width);
         var height = this.SafeDimension(profile.Height);

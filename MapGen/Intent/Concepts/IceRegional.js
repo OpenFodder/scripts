@@ -11,7 +11,7 @@ MapGen.Intent = MapGen.Intent || {};
         MapGen.Layout.RegionIntents.Prepare(c, cliffPlan ? cliffPlan.regions : null);
         var regional = c.RegionalPlan, W = map.width, H = map.height;
         if(!regional) return I.AuthorResult.Fail(I.AuthorReason.InsufficientOpenArea);
-        var random = rngs.terrain, regions = regional.regions, spine = regional.spine;
+        var random = MapGen.Layout.WaterGeography.Random(c,rngs.terrain,24717), regions = regional.regions, spine = regional.spine;
         var mode = c.Profile.RegionalIceTerrain;
         regional.landscape = mode;
         map.regions = [];
@@ -49,15 +49,31 @@ MapGen.Intent = MapGen.Intent || {};
         }
         var angle = random.Float(0, Math.PI), co = Math.cos(angle), si = Math.sin(angle);
         var phase = random.Float(0, Math.PI * 2), edge = random.Int(0, 3);
-        var basin = MapGen.Layout.WaterGeography.Plan(random);
-        if(mode === "lakes" || mode === "woodland") regional.waterGeography = basin;
+        var basin = MapGen.Layout.WaterGeography.Plan(random, W, H, c.Profile.SceneForests,c.Profile.WaterBodyKind);
+        basin.detailed=!!c.Profile.WaterBodyKind;
+        if(c.Profile.WaterBodyKind) mode=basin.kind;
+        if(c.Profile.WaterBodyKind && mode==="inlets") {
+            // Bend the coast around objective ground before hard reservations
+            // cut it. Each dry headland stays attached to the mainland.
+            basin.shoreSites=[];
+            for(var site=0;site<regions.length;++site) {
+                var point=regions[site].point, nx=point.x/(W-1), ny=point.y/(H-1);
+                basin.shoreSites.push({along:basin.edge<2 ? nx : ny,
+                    inward:basin.edge===0 ? ny : basin.edge===1 ? 1-ny : basin.edge===2 ? nx : 1-nx,
+                    margin:10/(basin.edge<2 ? H-1 : W-1),length:basin.edge<2 ? W-1 : H-1});
+            }
+        }
+        regional.landscape=mode;
+        if(c.Profile.WaterBodyKind || mode === "lakes" || mode === "woodland") regional.waterGeography = basin;
         var proposals = [];
         for(var wy = 0; wy < H; ++wy) for(var wx = 0; wx < W; ++wx) {
             if(protectedCells[wy * W + wx]) continue;
             var nx = wx / (W - 1), ny = wy / (H - 1), score = -10;
             var u = (nx - 0.5) * co + (ny - 0.5) * si;
             var v = (ny - 0.5) * co - (nx - 0.5) * si;
-            if(mode === "inlets") {
+            if(c.Profile.WaterBodyKind) {
+                score=MapGen.Layout.WaterGeography.Score(basin,nx,ny);
+            } else if(mode === "inlets") {
                 var along = edge < 2 ? nx : ny;
                 var inward = edge === 0 ? ny : edge === 1 ? 1 - ny : edge === 2 ? nx : 1 - nx;
                 var coast = 0.10 + 0.12 * (1 + Math.sin(along * Math.PI * 3 + phase));
@@ -69,12 +85,14 @@ MapGen.Intent = MapGen.Intent || {};
             } else {
                 score = MapGen.Layout.WaterGeography.Score(basin, nx, ny);
             }
-            proposals.push({i: wy * W + wx, score: score});
+            if(!basin.shoreSites || score>0) proposals.push({i: wy * W + wx, score: score});
         }
         proposals.sort(function(a, b) { return b.score - a.score || a.i - b.i; });
         // Leave headroom for the renderer's wider shallow-water transitions.
         var budget = Math.floor(W * H * Math.min(c.Profile.RegionalIceWaterCoverage,
-            c.Profile.MaxWaterCoverage * 0.78));
+            c.Profile.MaxWaterCoverage * 0.78,
+            c.Profile.WaterBodyKind && basin.waterFraction !== undefined ? basin.waterFraction :
+                mode === "lakes" && basin.segments ? basin.waterFraction : 1));
         regional.waterCoverageTarget = budget / (W * H);
         for(var wi = 0; wi < Math.min(budget, proposals.length); ++wi) water[proposals[wi].i] = 1;
         var seen = new Uint8Array(W * H), waterCells = 0;
@@ -114,10 +132,12 @@ MapGen.Intent = MapGen.Intent || {};
             [I.AuthorResult.Diagnostic("ice_regional.routes", "No dry route or bounded crossing fits the terrain")]);
         // Smooth spatial fields grow substantial bodies, avoiding per-cell
         // scatter which is mostly discarded by the ice tree tile grammar.
-        var field = MapGen.Layout.RegionIntents.ForestField(c), scores = [];
+        MapGen.Layout.RouteScenes.Prepare(c,map);
+        var field = MapGen.Layout.RegionIntents.ForestField(c,map), scores = [];
         for(var fy = 3; fy < H - 3; ++fy) for(var fx = 3; fx < W - 3; ++fx) {
             var fi = fy * W + fx;
-            if(map.terrain[fi] !== T.LAND || map.movement[fi] & M.KEEP_CLEAR) continue;
+            if(map.terrain[fi] !== T.LAND || map.movement[fi] & M.KEEP_CLEAR ||
+                c._sceneForestField && !field[fi]) continue;
             var noise = Math.sin(fx * 0.19 + phase) * Math.cos(fy * 0.17 - phase) * 0.12;
             scores.push({i: fi, score: field[fi] + noise});
         }
@@ -127,7 +147,8 @@ MapGen.Intent = MapGen.Intent || {};
         // complete bodies with headroom for both sources of lost canopy.
         var forestCoverage = c.Profile.TreeCoverage + (W * H < 3200 ? 0.05 : 0) +
             waterCells / (W * H) * 0.15;
-        var target = Math.min(scores.length, Math.floor(W * H * forestCoverage));
+        var target = c._sceneForestField ? scores.length :
+            Math.min(scores.length, Math.floor(W * H * forestCoverage));
         for(var ti = 0; ti < target; ++ti) {
             var cell = scores[ti].i;
             I.Map.SetTerrain(map, cell % W, Math.floor(cell / W), T.FOREST);

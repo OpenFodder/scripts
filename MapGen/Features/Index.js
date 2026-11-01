@@ -236,7 +236,13 @@ MapGen.Features = {
     },
 
     AddPlacement: function(pContext, pGroup, pPlacement) {
-        this.ReservePlacement(pContext, pPlacement);
+        // Exact gameplay lots already reserve the buildings. Schematic sites
+        // still supply encounter metadata, but reserving their old discs over
+        // existing trees prevents canopy/trunk rendering at those coordinates.
+        var schematic = pGroup === "structures" && pContext.Profile.SceneForests &&
+            pContext.GameplayPlan && pContext.GameplayPlan.ok &&
+            (pPlacement.kind === "structure_cluster" || pPlacement.kind === "objective_structure");
+        if(!schematic) this.ReservePlacement(pContext, pPlacement);
         pContext.Placements[pGroup].push(pPlacement);
         return pPlacement;
     },

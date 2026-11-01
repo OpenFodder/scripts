@@ -93,6 +93,10 @@ MapGen.Integration = MapGen.Integration || {};
             return true;
         });
 
+        Scenario.Random.LiveTime(grammarContext, "SettlementDetails", function() {
+            MapGen.Layout.SettlementDetails.Commit(grammarContext);
+        });
+
         Scenario.Random.RequireTimedPlacement(
             grammarContext,
             "PlaceCampaignPickups",
@@ -104,7 +108,7 @@ MapGen.Integration = MapGen.Integration || {};
             grammarContext,
             "PlaceGrammarSpriteGroups",
             function() {
-                return MapGen.Integration.PlaceGrammarSpriteGroups(["structureSprites", "enemies", "vehicles", "callpads", "hazards", "decor"]);
+                return MapGen.Integration.PlaceGrammarSpriteGroups(["structureSprites", "enemies", "vehicles", "callpads", "hazards", "decor", "birds"]);
             },
             "MapGen failed to place grammar planned sprites"
         );
@@ -122,6 +126,15 @@ MapGen.Integration = MapGen.Integration || {};
             Scenario.Random.RequirePlacement(commit && commit.ok,
                 "Final terrain contract failed: " + ((commit && commit.reasons) || []).join(", "));
         }
+
+        // All terrain/structure flushes are complete. Only complete dry-ground
+        // stamps may be added here, before the engine checks the final map.
+        grammarContext.GroundScenes = Scenario.Random.LiveTime(grammarContext, "GroundScenes", function() {
+            return MapGen.Terrain.GroundScenes.Commit(grammarContext);
+        });
+        grammarContext.SurfaceDetail = Scenario.Random.LiveTime(grammarContext, "SurfaceDetail", function() {
+            return MapGen.Terrain.SurfaceDetail.Commit(grammarContext);
+        });
 
         grammarContext.AttemptStage = "live_validation";
         if(grammarContext.FastTileIteration) {

@@ -273,7 +273,7 @@ MapGen.Repair = {
         var maxCoverage = profile.MaxWaterCoverage;
 
         if(MapGen.Terrain && MapGen.Terrain.TileCatalog && MapGen.Terrain.TileCatalog.MaxWaterCoverage)
-            maxCoverage = MapGen.Terrain.TileCatalog.MaxWaterCoverage(profile.TerrainType, profile.MaxWaterCoverage);
+            maxCoverage = MapGen.Terrain.TileCatalog.MaxWaterCoverage(profile.TerrainType, profile.MaxWaterCoverage, profile);
 
         if(maxCoverage === undefined)
             return false;
@@ -381,7 +381,11 @@ MapGen.Repair = {
 
     CanGrowTreeAt: function(c, x, y) {
         var L = MapGen.Layers, layers = c.Layers;
+        // Capacity and growth must count the same cells as IsTreeBlocked.
+        // Drying water or coast does not necessarily release its owner claim.
         return !L.Get(layers.blocked, x, y, 0) &&
+            !L.Get(layers.outcrop, x, y, 0) &&
+            L.Get(layers.owner, x, y, 0) <= L.Owner.TREE &&
             !MapGen.Terrain.Cover.IsExcluded(c, x, y) &&
             !L.Get(layers.water, x, y, 0) && !L.Get(layers.keepClear, x, y, 0) &&
             !L.Get(layers.path, x, y, 0) && !L.Get(layers.occupied, x, y, 0);
@@ -398,6 +402,7 @@ MapGen.Repair = {
     GrowTreesToTarget: function(pContext) {
         var profile = pContext.Profile;
         var target = profile.MinTreeCoverage !== undefined ? profile.MinTreeCoverage : (profile.TreeCoverage || 0) * 0.75;
+        target = MapGen.Layout.SceneForests.MinimumCoverage(pContext, target);
         var area = pContext.Width * pContext.Height;
         // Validation compares the fraction directly; rounding down can leave
         // a fractional target one tree short even after a successful repair.

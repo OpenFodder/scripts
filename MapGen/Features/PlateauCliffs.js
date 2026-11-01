@@ -628,6 +628,7 @@ MapGen.Features.PlateauCliffs = (function() {
         var bandY = pContext.Plateau.bandY;
         var topRowY = bandY - (stampHeight - 1);
         var flatStrips = pCliff.FlatStrips || pCliff.Strips;
+        var course = pContext.Plateau.jungleCourse;
 
         pContext.Cliffs = pContext.Cliffs || [];
         pContext.CliffRejectStats = pContext.CliffRejectStats || {};
@@ -639,11 +640,12 @@ MapGen.Features.PlateauCliffs = (function() {
         var fitOptions = pContext.Profile && pContext.Profile.HelicopterTransit === true ?
             { allowRouteTransit: true } : null;
         for(var x = 0; x < pContext.Width; ++x) {
-            if(columnFits(pContext, x, topRowY, stampHeight, fitOptions))
+            var columnTop = course ? course.columns[x].topY : topRowY;
+            if(columnFits(pContext, x, columnTop, stampHeight, fitOptions))
                 fitting.push({ x: x });
         }
 
-        if(pContext.Profile && pContext.Profile.RequireFullWidthCliffs === true &&
+        if((course || pContext.Profile && pContext.Profile.RequireFullWidthCliffs === true) &&
             fitting.length !== pContext.Width) {
             MapGen.Context.AddLog(pContext, "Cliff terrace skipped: uninterrupted full-width fit=" +
                 fitting.length + "/" + pContext.Width + " bandY=" + bandY);
@@ -685,7 +687,10 @@ MapGen.Features.PlateauCliffs = (function() {
             var allowed = previousStripX === ox - 1 &&
                 pCliff.FlatAdjacency && previousStripIndex !== null ?
                 pCliff.FlatAdjacency[previousStripIndex] : null;
-            if(allowed && allowed.length) {
+            if(course) {
+                stripIdx = course.columns[ox].stripIndex;
+            }
+            else if(allowed && allowed.length) {
                 stripIdx = allowed[pickIndex(
                     pContext, ox, 7001, allowed.length)];
             }
@@ -693,10 +698,13 @@ MapGen.Features.PlateauCliffs = (function() {
                 stripIdx = pickIndex(pContext, ox, 7001,
                     flatStrips.length);
             }
-            var strip = flatStrips[stripIdx];
+            var strip = course ? MapGen.JungleCliffGrammar.strips[stripIdx].tiles : flatStrips[stripIdx];
 
             var topEdgeTile = null;
-            if(pCliff.FlatTopEdge &&
+            if(course) {
+                topEdgeTile = MapGen.JungleCliffGrammar.strips[stripIdx].top;
+            }
+            else if(pCliff.FlatTopEdge &&
                 stripIdx < pCliff.FlatTopEdge.length) {
                 topEdgeTile = pCliff.FlatTopEdge[stripIdx];
             }
@@ -705,9 +713,11 @@ MapGen.Features.PlateauCliffs = (function() {
                 topEdgeTile = pCliff.TopEdge[edgeIdx];
             }
 
-            var triplets = commitColumn(pContext, ox, topRowY, strip, topEdgeTile);
+            var columnTop = course ? course.columns[ox].topY : topRowY;
+            var triplets = commitColumn(pContext, ox, columnTop, strip, topEdgeTile);
             record.columns.push({
                 x: ox,
+                topY: columnTop,
                 stripIndex: stripIdx,
                 topEdgeTile: topEdgeTile,
                 triplets: triplets
@@ -726,8 +736,8 @@ MapGen.Features.PlateauCliffs = (function() {
         record.bounds = {
             minX: 0,
             maxX: pContext.Width - 1,
-            minY: topRowY - (pCliff.TopEdge ? 1 : 0),
-            maxY: bandY
+            minY: (course ? course.minY : topRowY) - (pCliff.TopEdge ? 1 : 0),
+            maxY: course ? course.maxY+stampHeight-1 : bandY
         };
 
         pContext.Cliffs.push(record);

@@ -310,7 +310,7 @@ MapGen.Validate = {
 
             var maxWaterCoverage = profile.MaxWaterCoverage;
             if(MapGen.Terrain && MapGen.Terrain.TileCatalog && MapGen.Terrain.TileCatalog.MaxWaterCoverage)
-                maxWaterCoverage = MapGen.Terrain.TileCatalog.MaxWaterCoverage(profile.TerrainType, profile.MaxWaterCoverage);
+                maxWaterCoverage = MapGen.Terrain.TileCatalog.MaxWaterCoverage(profile.TerrainType, profile.MaxWaterCoverage, profile);
 
             if(maxWaterCoverage !== undefined && metrics.Coverage.water > maxWaterCoverage)
                 self.Fail(report, "water_coverage_too_high", false);
@@ -409,6 +409,7 @@ MapGen.Validate = {
         var metrics = pReport.metrics;
         var treeTarget = profile.TreeCoverage || 0;
         var minTree = profile.MinTreeCoverage !== undefined ? profile.MinTreeCoverage : treeTarget * 0.60;
+        minTree = MapGen.Layout.SceneForests.MinimumCoverage(pContext, minTree);
         var maxTree = profile.MaxTreeCoverage !== undefined ? profile.MaxTreeCoverage : Math.min(0.90, treeTarget * 1.35);
         var pathTarget = profile.PathCoverage || 0;
         var minPath = profile.MinPathCoverage !== undefined ? profile.MinPathCoverage : pathTarget * 0.65;
@@ -832,20 +833,7 @@ MapGen.Validate = {
                 if(!right || !right.rect)
                     continue;
 
-                var minSpacing = 0;
-                if(MapGen.Integration.StructureSpacing) {
-                    minSpacing = Math.max(
-                        minSpacing,
-                        MapGen.Integration.StructureSpacing(left.spec || {}, pContext),
-                        MapGen.Integration.StructureSpacing(right.spec || {}, pContext)
-                    );
-                }
-                if(pContext.Profile && typeof pContext.Profile.LiveStructureMinSpacing === "number")
-                    minSpacing = Math.max(minSpacing, Math.floor(pContext.Profile.LiveStructureMinSpacing));
-                if(typeof left.spacingOverride === "number")
-                    minSpacing = Math.min(minSpacing, left.spacingOverride);
-                if(typeof right.spacingOverride === "number")
-                    minSpacing = Math.min(minSpacing, right.spacingOverride);
+                var minSpacing = MapGen.Integration.StructurePairSpacing(pContext,left,right);
 
                 if(minSpacing <= 0)
                     continue;

@@ -44,7 +44,7 @@ MapGen.Layout.Continent = {
 
         var W = pContext.Width;
         var H = pContext.Height;
-        var random = pContext.Random;
+        var random = MapGen.Layout.WaterGeography.Random(pContext,pContext.Random,24719);
 
         var land = this.AllocateMask(W, H);
 

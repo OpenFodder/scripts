@@ -129,6 +129,8 @@ MapGen.Intent = MapGen.Intent || {};
         if(!structureSync.ok)
             return structureSync;
 
+        MapGen.Layout.SettlementDetails.Repaint(pContext);
+
         var validation = pIntent.Validate && pIntent.Validate.RunRenderedHard ?
             pIntent.Validate.RunRenderedHard(
                 pContext, concept || { renderedHardValidators: [] },

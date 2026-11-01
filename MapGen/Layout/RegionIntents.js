@@ -8,8 +8,19 @@ MapGen.Layout.RegionIntents = {
         if(!c.Profile.RegionalComposition || MapGen.Context.IsMultiplayer(c)) return;
         var random = MapGen.Random.CreateSeeded(MapGen.Random.HashTile(c.Seed, 7, 13, 19201));
         var topology = ["branching", "circuit", "hub"][random.Int(0, 2)];
+        var mission = MapGen.Layout.MissionLayout.Kind(c);
+        if(mission) topology = {compound: "branching", linked_camps: "chain",
+            exploration: "hub", crossing: "circuit"}[mission];
+        // Jungle's full-width cliff has no stair atlas. Keep walking sites on
+        // one terrace and leave a complete dry band before the site planner.
+        if(!terrainRegions && c.Profile.Name === "grammar_jungle" &&
+            c.Profile.VisualComposition === "cliff_country") {
+            var inset = Math.min(18, Math.floor(c.Height * 0.25));
+            terrainRegions = [{x:2, y:inset, w:c.Width - 4, h:c.Height - inset - 2}];
+        }
         var regions = terrainRegions || [{x: 2, y: 2, w: c.Width - 4, h: c.Height - 4}];
         var count = random.Int(topology === "hub" ? 4 : 3, c.Width * c.Height >= 6500 ? 6 : 4);
+        if(mission === "compound") count = Math.min(count, 4);
         // Mazes and cliff faces need disjoint rectangular reservations. Other
         // landscapes use irregular districts with wilderness between them,
         // rather than inheriting a complete rectangular tiling every time.
@@ -63,16 +74,8 @@ MapGen.Layout.RegionIntents = {
             if(maze) { maze.kind = "maze"; maze.cover = 1; }
         }
         var settlement = ["compound", "camps", "scattered"][random.Int(0, 2)];
-        // Cover centers are independent of route anchors: otherwise every
-        // region becomes the same clearing with forest pushed to its edges.
-        for(var ci = 0; ci < regions.length; ++ci) {
-            var cr = regions[ci], angle = random.Float(0, Math.PI);
-            cr.forest = {x: cr.x + cr.w * random.Float(0.25, 0.75),
-                y: cr.y + cr.h * random.Float(0.25, 0.75),
-                rx: Math.max(6, cr.w * random.Float(0.24, 0.45)),
-                ry: Math.max(6, cr.h * random.Float(0.24, 0.45)),
-                co: Math.cos(angle), si: Math.sin(angle)};
-        }
+        if(mission) settlement = mission === "compound" ? "compound" :
+            mission === "exploration" ? "scattered" : "camps";
         c.RegionalPlan = {version: 2, regions: regions, links: graph.links, spine: spine,
             arrangement: scattered ? "districts" : "partition",
             topology: topology, settlement: settlement, forestShape: c.Profile.ForestShape || "groves",
@@ -181,6 +184,18 @@ MapGen.Layout.RegionIntents = {
             links.push({a: a, b: b}); adjacency[a].push(b); adjacency[b].push(a);
         }
         for(var i = 0; i < count; ++i) adjacency.push([]);
+        if(topology === "chain") {
+            var chain = [random.Int(0, count - 1)], used = {};
+            used[chain[0]] = true;
+            while(chain.length < count) {
+                var at = chain[chain.length - 1], next = -1, closest = Infinity;
+                for(var n = 0; n < count; ++n) if(!used[n] && distance(at, n) < closest) {
+                    next = n; closest = distance(at, n);
+                }
+                link(at, next); used[next] = true; chain.push(next);
+            }
+            return {links: links, spine: chain};
+        }
         if(topology === "circuit") {
             var cx = 0, cy = 0, order = [];
             for(var r = 0; r < count; ++r) { cx += regions[r].point.x; cy += regions[r].point.y; order.push(r); }
@@ -294,44 +309,13 @@ MapGen.Layout.RegionIntents = {
         }
         // Ranking and repair ask for the same immutable shape repeatedly.
         if(!c._regionalForestField) c._regionalForestField = this.ForestField(c);
-        return c._regionalForestField[y * c.Width + x] * 0.80 + noise * 0.20;
+        // Hard reservations already protect routes and aprons. Let geography
+        // survive the soft edge penalties instead of tracing every route.
+        return c._regionalForestField[y * c.Width + x] * 1.60 + noise * 0.20;
     },
 
-    ForestField: function(c) {
-        var plan = c.RegionalPlan, field = new Float32Array(c.Width * c.Height);
-        var angle = Number(c.Profile.ForestShapeAngle) || 0, co = Math.cos(angle), si = Math.sin(angle);
-        var phase = Number(c.Profile.ForestShapePhase) || 0, bands = Number(c.Profile.ForestShapeBands) || 2;
-        // Heartwood is one forest mass; rim is one broad clearing surrounded
-        // by forest. Using every region's ellipse for both made them variants
-        // of groves, irrespective of the advertised shape. This independent
-        // stream leaves route and settlement decisions unchanged.
-        var random = MapGen.Random.CreateSeeded(MapGen.Random.HashTile(c.Seed, 77, 31, 19403));
-        var rim = plan.forestShape === "rim";
-        var geometry = {x: random.Float(rim ? 0.32 : 0.18, rim ? 0.68 : 0.82),
-            y: random.Float(rim ? 0.32 : 0.18, rim ? 0.68 : 0.82),
-            rx: random.Float(0.25, 0.55), ry: random.Float(0.14, 0.34), angle: angle};
-        plan.forestGeometry = geometry;
-        for(var y = 0; y < c.Height; ++y) {
-            for(var x = 0; x < c.Width; ++x) {
-                var nx = x / c.Width - geometry.x, ny = y / c.Height - geometry.y;
-                var u = nx * co + ny * si, v = ny * co - nx * si;
-                var bend = Math.sin(v * 7 + phase) * 0.06, value = 0;
-                if(plan.forestShape === "belts") {
-                    value = 0.5 + Math.cos((u + bend) * bands * Math.PI * 2 + phase) * 0.5;
-                } else if(plan.forestShape === "heartwood" || rim) {
-                    u = (u + bend) / geometry.rx; v /= geometry.ry;
-                    var radius = u * u + v * v;
-                    value = rim ? radius / (0.4 + radius) : 1 / (0.4 + radius);
-                } else for(var i = 0; i < plan.regions.length; ++i) {
-                    var r = plan.regions[i], f = r.forest, dx = x - f.x, dy = y - f.y;
-                    var gx = (dx * f.co + dy * f.si) / f.rx, gy = (dy * f.co - dx * f.si) / f.ry;
-                    var d = gx * gx + gy * gy;
-                    value = Math.max(value, (0.65 + r.cover * 0.35) / (1 + d * d));
-                }
-                field[y * c.Width + x] = value;
-            }
-        }
-        return field;
+    ForestField: function(c, terrain) {
+        return MapGen.Layout.ForestGeography.Field(c,terrain);
     },
 
     BuildingScore: function(c, x, y, slot) {
@@ -341,6 +325,7 @@ MapGen.Layout.RegionIntents = {
             var maze = plan.regions[plan.maze];
             if(x >= maze.x && y >= maze.y && x < maze.x + maze.w && y < maze.y + maze.h) return -3000;
         }
+        if(c.MissionLayout) return 0;
         var targets = plan.buildingRegions, position = slot;
         if(plan.settlement === "compound" && slot >= 2) position = 0;
         if(plan.settlement === "camps") position %= 2;

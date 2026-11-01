@@ -8,6 +8,8 @@ MapGen.Layout = MapGen.Layout || {};
     R.ROUTE = 4;
     R.BUFFER = 8;
     R.FLEX = 16;
+    R.DETAIL = 32;
+    R.DRY = 64;
 
     R.Ensure = function(c) {
         if(!c.GameplayReservations)
@@ -130,6 +132,8 @@ MapGen.Layout = MapGen.Layout || {};
                 l.keepClear[x][y] = 1;
             if(flags & R.FLOOR && l.structureGround)
                 l.structureGround[x][y] = 1;
+            if(flags & R.DETAIL && l.occupied && !l.occupied[x][y])
+                l.occupied[x][y] = "settlement_detail_plan";
         }
         return r.cells.length;
     };
@@ -148,8 +152,9 @@ MapGen.Layout = MapGen.Layout || {};
                 continue;
             var value = chars[x][y];
             // Wet ice is walkable clearance, including spawn and buffer cells.
-            // Only a building floor needs to replace its shoreline apron.
-            if(!(flags & R.FLOOR) && value === ice.Chars.wet)
+            // Floors and planned architectural details require dry backing.
+            // DRY covers the full fitting margin, not just the fence tile.
+            if(!(flags & (R.FLOOR | R.DRY)) && value === ice.Chars.wet)
                 continue;
             if(value !== ice.Chars.ground) {
                 chars[x][y] = ice.Chars.ground;

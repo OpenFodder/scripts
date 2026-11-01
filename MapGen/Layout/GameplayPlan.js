@@ -12,6 +12,8 @@ MapGen.Layout = MapGen.Layout || {};
             return "maze";
         if(p.CliffLayoutPhase || name.indexOf("cliff") >= 0 || name.indexOf("terrace") >= 0)
             return "cliffs";
+        if(p.VisualComposition && (p.RiverChance>0 || p.JungleLandform==="islands"))
+            return "water";
         if(name.indexOf("river") >= 0 || name.indexOf("beach") >= 0 || name.indexOf("island") >= 0)
             return "water";
         return "open";
@@ -26,6 +28,7 @@ MapGen.Layout = MapGen.Layout || {};
             return null;
         }
         var specs = I.FlattenBuildings(I.CampaignBuildingRequirements(c));
+        MapGen.Layout.MissionLayout.Prepare(c);
         var enemyCount = specs.length;
         var label = String(c.Profile.GrammarLiveObjectiveLabel ||
                            (c.GrammarPlan && c.GrammarPlan.intent && c.GrammarPlan.intent.objectiveLabel) || "");
@@ -33,8 +36,12 @@ MapGen.Layout = MapGen.Layout || {};
             specs.push({building : "hut", sprite : "civilian_rescue"});
         var plan = {version : 1, policy : P.Policy(c), entries : [], required : specs.length, ok : true};
         c.GameplayPlan = plan;
+        MapGen.Layout.RouteScenes.Prepare(c,c.IntentMap);
         MapGen.Encounters.BuildCampaignRegions(c);
         var g = MapGen.Layout.BuildingSites.Prepare(c);
+        MapGen.Layout.Landmarks.Prepare(c,g);
+        MapGen.Layout.MissionLayout.Fit(c, g, specs, plan.policy);
+        MapGen.Layout.Settlements.Prepare(c, specs, plan.policy);
         function snapshot() {
             var r = R.Ensure(c);
             return {mask: new Uint8Array(r.mask), cells: r.cells.slice(0),
@@ -52,6 +59,12 @@ MapGen.Layout = MapGen.Layout || {};
             R.Rect(c, expanded(candidate.rect, Math.max(2, candidate.waterClearance)), R.BUFFER);
             R.Rect(c, candidate.clearance, R.CLEAR);
             R.Rect(c, candidate.rect, R.CLEAR | R.FLOOR);
+            var fence = candidate.fenceCells || [];
+            for(var fi = 0; fi < fence.length; ++fi) {
+                var cell = fence[fi];
+                R.Rect(c,{minX:cell.x-1,minY:cell.y-1,maxX:cell.x+1,maxY:cell.y+1},R.CLEAR | R.DRY);
+                R.Rect(c,{minX:cell.x,minY:cell.y,maxX:cell.x,maxY:cell.y},R.DETAIL);
+            }
             c.Paths.push({role : "planned_structure_access", radius : 0, points : candidate.accessPath});
             for(var pi = 0; pi < candidate.accessPath.length; ++pi) {
                 var p = candidate.accessPath[pi];
@@ -183,12 +196,16 @@ MapGen.Layout = MapGen.Layout || {};
             }
             return plan;
         }
+        MapGen.Layout.SceneClearings.Apply(c);
+        MapGen.Layout.SettlementTerrain.Build(c, g);
+        MapGen.Layout.SettlementDetails.Plan(c);
         R.Apply(c);
         R.AuthorIntent(c);
         MapGen.Layout.TerrainSpace.Build(c);
         return plan;
     };
     P.FinishTerrain = function(c) {
+        MapGen.Layout.SettlementTerrain.ApplyShelters(c);
         var entries = c.GameplayPlan ? c.GameplayPlan.entries : [];
         for(var i = 0; i < entries.length; ++i) {
             MapGen.Integration.PaintStructureClearance(c, entries[i].spec, entries[i].candidate);

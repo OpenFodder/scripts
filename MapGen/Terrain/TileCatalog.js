@@ -214,10 +214,10 @@ MapGen.Terrain.TileCatalog = {
                 relationship: "Jump ramps are stamped only as complete authored shapes on clear `0|1` snow, with a clean snow margin and no protected route, water, bank, blocker, or occupied feature overlap. Current authored data covers down, up, and left-facing ramps; no right-facing ramp is emitted."
             },
             {
-                id: "iceFence",
-                tiles: [245, 246, 247, 264, 265, 267, 284, 285, 287],
-                use: "Rare small ice fence/structure stamp.",
-                relationship: "Fence tiles are emitted as a complete 3x3 shape on clear snow only. They use the same protected-route and clean-margin rules as jump ramps so they stay out of paths, crossings, structures, water, and cover."
+                id: "iceFenceArt",
+                tiles: [252, 253, 254, 272, 273, 274, 292, 294, 304, 305, 306, 324, 325, 326, 345, 346, 364, 365, 366, 383, 384, 385, 386],
+                use: "Authored wire-fence and wood-fence art tiles.",
+                relationship: "These tiles are blocked in original HIT/BHT data. SettlementDetails uses wood rails 304/324, corners 325/326/345/346 and caps 305/306, verified in Amiga maps 11/15/16. Whole plots are reserved before terrain and actors, leaving open route entrances. Wire fences and blocked gate art are not emitted."
             }
         ],
 
@@ -300,10 +300,14 @@ MapGen.Terrain.TileCatalog = {
         return this.SupportsWaterFeature(pProfile.TerrainType, pFeature);
     },
 
-    MaxWaterCoverage: function(pTerrainType, pProfileLimit) {
+    MaxWaterCoverage: function(pTerrainType, pProfileLimit, pProfile) {
         var policy = this.WaterPolicyForTerrain(pTerrainType);
         var profileLimit = Number(pProfileLimit);
         var policyLimit = Number(policy.maxCoverage);
+        // A regional coast reserves dry mission sites before painting water.
+        // Its broad ocean is not constrained by the inland swamp budget.
+        if(pProfile && pProfile.Name === "grammar_beach" && pProfile.RegionalComposition)
+            policyLimit = 0.48;
 
         if(isNaN(profileLimit))
             profileLimit = 0.6;

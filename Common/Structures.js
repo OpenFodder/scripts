@@ -387,6 +387,9 @@ var Structures = {
             Map.SpriteAdd(Sprites[count][2], SpritePosition.x, SpritePosition.y);
         }
 
+        if(pStructType === "hut" && String(pSpriteSet).toLowerCase().indexOf("soldier") === 0)
+            Session.EnemyHutPositions.push(pPosition);
+
         return true;
     },
 

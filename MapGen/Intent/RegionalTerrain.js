@@ -8,14 +8,20 @@ MapGen.Intent = MapGen.Intent || {};
         PlanIceCliff: function(c) {
             var W = c.Width, H = c.Height;
             var hash = MapGen.Random.HashTile(c.Seed, 31, 67, 19501);
-            if(W < 56 || H < 72 || (hash >>> 8) % 3 === 0) return null;
+            if(c.Profile.RegionalIceCliff === false) return null;
+            var required = c.Profile.RegionalIceCliff === true;
+            if(W < (required ? 40 : 56) || H < (required ? 48 : 72) ||
+                !required && (hash >>> 8) % 3 === 0) return null;
             var top = Math.max(22, Math.min(H - 26, Math.round(H * (hash % 2 ? 0.32 : 0.64))));
             var cross = Math.max(8, Math.min(W - 11, Math.round(W * (0.25 + (hash % 501) / 1000))));
+            var course = I.CliffCourse.Regional(c, top, cross);
+            if(course) top = course.top;
+            var north = course ? course.min : top, south = course ? course.max : top;
             // Partition settlements around the reserved face, so forest
             // fields, anchors and building targets agree from the outset.
-            return {top:top, crossing:{x:cross + 1,y:top + 2}, regions:[
-                {x:2,y:2,w:W - 4,h:top - 6},
-                {x:2,y:top + 8,w:W - 4,h:H - top - 10}]};
+            return {top:top, course:course, crossing:{x:cross + 1,y:top + 2}, regions:[
+                {x:2,y:2,w:W - 4,h:north - 6},
+                {x:2,y:south + 8,w:W - 4,h:H - south - 10}]};
         },
 
         IceCliff: function(map, plan) {
@@ -23,6 +29,7 @@ MapGen.Intent = MapGen.Intent || {};
             var W = map.width, H = map.height, T = I.Terrain, M = I.Movement;
             var top = plan.top, cross = plan.crossing.x - 1;
             for(var x = 0; x < W; ++x) {
+                top = plan.course ? plan.course.columns[x].topY : plan.top;
                 var apron = Math.min(x, W - 1 - x) < 5 ? 7 : 3;
                 for(var y = Math.max(0, top - apron); y <= Math.min(H - 1, top + 3 + apron); ++y) {
                     var at = y * W + x, face = y >= top && y <= top + 3;
@@ -33,17 +40,20 @@ MapGen.Intent = MapGen.Intent || {};
                     map.owner[at] = face && !stair ? I.Owner.CLIFF : I.Owner.OPEN;
                 }
             }
-            map.regions.push({id:"regional.cliff", kind:"cliff", axis:"horizontal",
-                topRowY:top, bandY:top + 3, stampHeight:4, waterClearance:3,
-                terminalLandingWidth:5, terminalMaxClearance:7, cells:W * 4 - 12});
-            map.regions.push({id:"regional.stairs", kind:"crossing", at:{x:cross,y:top + 2}, width:3, cells:12});
-            return {top:top, crossing:{x:cross + 1,y:top + 2}};
+            var cliff = {id:"regional.cliff", kind:"cliff", axis:plan.course ? "stepped" : "horizontal",
+                topRowY:plan.top, bandY:plan.top + 3, stampHeight:4, waterClearance:3,
+                terminalLandingWidth:5, terminalMaxClearance:7, cells:W * 4 - 12};
+            if(plan.course) cliff.columns = plan.course.columns;
+            map.regions.push(cliff);
+            map.regions.push({id:"regional.stairs", kind:"crossing", at:{x:cross,y:plan.top + 2}, width:3, cells:12});
+            return {top:plan.top, crossing:plan.crossing, shape:plan.course ? plan.course.shape : "flat"};
         },
 
         IceRoutes: function(c, map) {
             var W = map.width, H = map.height, T = I.Terrain, M = I.Movement;
             var links = c.RegionalPlan.links, regions = c.RegionalPlan.regions;
             var finder = MapGen.Connectivity, costs = [], cells = 0, crossings = 0;
+            c._regionalSceneRoutes = [];
             function install(allowWater) {
                 var flat = [], shore = new Uint8Array(W * H);
                 // Build the bank clearance once per terrain change rather
@@ -107,6 +117,7 @@ MapGen.Intent = MapGen.Intent || {};
                 // Restore dry costs after a crossing; subsequent links reuse
                 // its narrow corridor instead of opening another wide gap.
                 if(relaxed) install(false);
+                c._regionalSceneRoutes.push({points:path});
             }
             return {cells:cells, crossings:crossings};
         }

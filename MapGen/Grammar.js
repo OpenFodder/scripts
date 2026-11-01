@@ -515,6 +515,7 @@ MapGen.Grammar = {
             profile.EncounterClearingRadius = Math.min(profile.EncounterClearingRadius, 2);
 
         this.ApplyIceLayoutToRuntimeProfile(pContext);
+        MapGen.VisualCompositions.ApplyRuntime(pContext);
         this.ApplyMapScaleStructureProgression(pContext);
     },
 

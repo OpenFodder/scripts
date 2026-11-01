@@ -85,10 +85,22 @@ MapGen.Integration = MapGen.Integration || {};
             bunkers = 0;
         }
 
+        // Both ordinary door types are valid demolition targets. A district
+        // can contain dwellings as well as barracks; selecting only the latter
+        // made every generated settlement use the same silhouette. Sub1 has
+        // no hut art, so retain its supported barracks there.
+        var huts = 0;
+        if(profile.VisualComposition && barracks > 1 &&
+            this.StructureInfo({building: "hut", sprite: "soldier"}, context)) {
+            var mix = MapGen.Random.HashTile(context.Seed, count, 0, 20201);
+            huts = Math.max(1, Math.floor(barracks * (mix % 3 === 0 ? 0.67 : 0.4)));
+            barracks -= huts;
+        }
+
         return {
             barracks : {soldier : barracks},
             bunker : {soldier_heavy_explosion_only : bunkers},
-            hut : {soldier : 0}
+            hut : {soldier : huts}
         };
     };
 })(MapGen.Integration);

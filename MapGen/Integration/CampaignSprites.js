@@ -552,6 +552,15 @@ MapGen.Integration = MapGen.Integration || {};
             return false;
         }
 
+        // Ambient ground decor is optional. Terrain may have changed since its
+        // point was planned; omit invalid scenery rather than floating shrubs
+        // offshore. Airborne birds have their own kind and remain unaffected.
+        if(context.Profile.SceneForests && pPlacement.kind === "ambient_decor" &&
+            !this.GroundActorCellStandable(context,Math.floor(x/16),Math.floor(y/16))) {
+            pPlacement.droppedTerrain = true;
+            return false;
+        }
+
         // Ground-combat actors must not be left standing on a tree (blocked) or in
         // water: the plan picks their tile (and the matching runtimePosition) from
         // route/anchor offsets BEFORE the live terrain exists, so cover/water can

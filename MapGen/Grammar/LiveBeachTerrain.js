@@ -2,6 +2,9 @@ var MapGen = MapGen || {};
 MapGen.Grammar = MapGen.Grammar || {};
 
 (function(pGrammar) {
+    // Monotone profiles are shared by site planning and coast painting.
+    var regionalCoastCourses = [[0, 0.25, 0.5, 0.75, 1], [0, 0.03, 0.12, 0.82, 1],
+        [0, 0.58, 0.76, 0.82, 1], [0, 0.38, 0.42, 0.92, 1]];
     var liveBeachTerrain = {
     ShouldOwnLiveBeachTerrain: function(pContext) {
         return !!(pContext &&
@@ -249,6 +252,8 @@ MapGen.Grammar = MapGen.Grammar || {};
         var seed = pContext ? pContext.Seed || 0 : 0;
         if(pUseRequestedSeed && pContext && pContext.RequestedSeed !== undefined)
             seed = pContext.RequestedSeed;
+        if(pContext && pContext.Profile.WaterVariation)
+            seed=MapGen.Random.HashTile(seed,pContext.Profile.WaterVariation,41,24701);
 
         // HashTile is excellent for spatial noise, but its additive seed input
         // leaves neighbouring seeds correlated when the result is reduced to a
@@ -630,15 +635,37 @@ MapGen.Grammar = MapGen.Grammar || {};
     RegionalBeachCoastDimensions: function(c) {
         var form = [0, 0, 1, 2][this.GrammarBeachVariantHash(c, 3697, false) % 4];
         var roll = this.GrammarBeachVariantHash(c, 3691, false) % 4;
-        return {form: form,
-            depth: form === 1 ? 0.18 + roll * 0.05 : form === 2 ? 0.32 + roll * 0.05 : 0.14 + roll * 0.07,
-            entry: form === 1 ? 0.02 + roll * 0.02 : form === 2 ? 0.06 + roll * 0.02 : 0,
-            curve: 0.7 + (this.GrammarBeachVariantHash(c, 3701, false) % 1000) / 1000};
+        var depth = form === 1 ? 0.12 + roll * 0.08 :
+            form === 2 ? 0.24 + roll * 0.14 : 0.10 + roll * 0.10;
+        var dimensions={form: form,
+            depth: depth,
+            entry: form === 1 ? depth * 0.70 : form === 2 ? 0.02 : 0,
+            course: this.GrammarBeachVariantHash(c, 3701, false) % 4};
+        if(c.Profile.VisualComposition === "coastal_shelf") {
+            dimensions.form=1; dimensions.depth=0.40+roll*0.03; dimensions.entry=0.26+roll*0.02;
+        }
+        if(c.Profile.WaterVariation) {
+            // Unequal shelf lengths and concentrated advances give each coast
+            // its own rhythm. Positive increments preserve the one-sided art.
+            var values=[0], total=0;
+            for(var i=0;i<6;++i) {
+                total+=1+this.GrammarBeachVariantHash(c,3711+i*2,false)%12;
+                values.push(total);
+            }
+            for(var j=1;j<values.length;++j) values[j]/=total;
+            dimensions.values=values;
+        }
+        return dimensions;
     },
 
     RegionalBeachDepthFraction: function(dimensions, progress) {
+        // Broad shelves and concentrated bends change the map's silhouette.
+        // Every course is monotone: sub1 has no reverse-facing beach caps.
+        var values = dimensions.values || regionalCoastCourses[dimensions.course], segments=values.length-1;
+        var at = Math.max(0, Math.min(1, progress)) * segments;
+        var index = Math.min(segments-1, Math.floor(at)), t = at - index;
         return dimensions.entry + (dimensions.depth - dimensions.entry) *
-            Math.pow(Math.max(0, Math.min(1, progress)), dimensions.curve);
+            (values[index] + (values[index + 1] - values[index]) * t);
     },
 
     BuildComposableGrammarBeachCoast: function(pContext, pFamily) {
@@ -653,12 +680,11 @@ MapGen.Grammar = MapGen.Grammar || {};
         var coastForm = dimensions ? dimensions.form : 0;
         var spanFractions = [0.42, 0.50, 0.58, 0.66, 0.74, 0.84];
         var span = Math.round(axisLength * spanFractions[lengthVariant]);
-        var spanProfile = 0, shelfProfile = 0, widthProfile = 0;
+        var spanProfile = 0, widthProfile = 0;
         if(regional) {
             // Keep the original edge families and monotone contour, while
             // varying regional shelf extent independently of route topology.
             spanProfile = this.GrammarBeachVariantHash(pContext, 3683, false) % 3;
-            shelfProfile = this.GrammarBeachVariantHash(pContext, 3685, false) % 3;
             widthProfile = this.GrammarBeachVariantHash(pContext, 3687, false) % 3;
             span += Math.round(axisLength * (spanProfile - 1) * 0.07);
         }
@@ -713,9 +739,6 @@ MapGen.Grammar = MapGen.Grammar || {};
                     verticalRun = 1 + (roll % 3);
                 else
                     verticalRun = 2 + (roll % 2);
-                if(regional && shelfProfile === 0) ++verticalRun;
-                if(regional && shelfProfile === 1 && (pChange % 2) === 0)
-                    verticalRun = Math.max(1, verticalRun - 1);
                 return verticalRun;
             }
             var horizontalRun;
@@ -725,13 +748,10 @@ MapGen.Grammar = MapGen.Grammar || {};
                 horizontalRun = 2 + (roll % 4);
             else
                 horizontalRun = 3 + (roll % 3);
-            if(regional && shelfProfile === 0) ++horizontalRun;
-            if(regional && shelfProfile === 1 && (pChange % 2) === 0)
-                horizontalRun = Math.max(1, horizontalRun - 1);
             return horizontalRun;
         }
 
-        var runRemaining = nextRunLength(
+        var runRemaining = regional ? 0 : nextRunLength(
             start + 17,
             0
         );
@@ -753,33 +773,21 @@ MapGen.Grammar = MapGen.Grammar || {};
                 maximumWaterDepth = Math.max(waterDepth, maximumWaterDepth);
             }
             regional.coast = {family: pFamily, depth: maximumWaterDepth, span: span,
-                form: ["corner", "shelf", "deep"][coastForm],
-                spanProfile: spanProfile, shelfProfile: shelfProfile,
+                form: ["corner", "shelf", "deep"][coastForm], course:dimensions.course,
+                spanProfile: spanProfile,
                 widthProfile: widthProfile};
         }
 
         for(var offset = 0; offset < span; ++offset) {
             if(offset > 0) {
-                --runRemaining;
-                if(coastForm === 0 && runRemaining <= 0 && waterDepth < maximumWaterDepth) {
+                if(!regional) --runRemaining;
+                if(!regional && runRemaining <= 0 && waterDepth < maximumWaterDepth) {
                     ++waterDepth;
                     ++depthChanges;
                     runRemaining = nextRunLength(
                         start + offset,
                         depthChanges
                     );
-                    if(regional) {
-                        // Alternate broad shelves with steeper sections using
-                        // only the monotone one-tile joins the sand atlas has.
-                        var section = Math.floor(offset * 3 / span);
-                        if(shelfProfile === 0 && section === 0)
-                            runRemaining += 4;
-                        else if(shelfProfile === 1 && section === 2)
-                            runRemaining += 3;
-                        else if(shelfProfile === 2 &&
-                            (section + courseVariant) % 2 === 0)
-                            runRemaining += 2;
-                    }
                 }
 
                 --widthRemaining;
@@ -809,7 +817,7 @@ MapGen.Grammar = MapGen.Grammar || {};
                 }
             }
 
-            if(coastForm !== 0)
+            if(regional)
                 waterDepth = Math.min(offset ? depths[offset - 1] + 1 : maximumWaterDepth,
                     Math.max(1, Math.round(crossLimit * this.RegionalBeachDepthFraction(
                         dimensions, offset / Math.max(1, span - 1)))));
@@ -980,7 +988,7 @@ MapGen.Grammar = MapGen.Grammar || {};
     FitMapm6ChannelHeight: function(pContext, pHeight) {
         var profile = pContext.Profile;
         var coverage = MapGen.Terrain.TileCatalog.MaxWaterCoverage(
-            profile.TerrainType, profile.MaxWaterCoverage);
+            profile.TerrainType, profile.MaxWaterCoverage, profile);
         if(!isFinite(coverage) || coverage <= 0) return pHeight;
         // The channel spans the whole width. Reserve one row for its depth
         // variation, retaining the five-row minimum required by the atlas.

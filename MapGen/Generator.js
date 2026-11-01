@@ -400,6 +400,7 @@ MapGen.PipelineStages = function() {
             var treeBlocked = MapGen.Metrics.TreeBlockedCount(c);
             var treeCoverage = treeBlocked / area;
             var minTree = profile.MinTreeCoverage !== undefined ? profile.MinTreeCoverage : treeTarget * 0.60;
+            minTree = MapGen.Layout.SceneForests.MinimumCoverage(c, minTree);
             if(treeCoverage < minTree) {
                 var capacity = MapGen.Repair.TreeGrowthCapacity(c);
                 if(capacity < Math.ceil(area * minTree)) {
@@ -476,7 +477,10 @@ MapGen.BuildCampaignPlan = function(pOptions) {
 };
 
 MapGen.BuildMultiplayerPlan = function(pOptions) {
-    var context = MapGen.Context.Create(pOptions || {});
+    var input = pOptions || {}, options = {};
+    for(var key in input) if(input.hasOwnProperty(key)) options[key] = input[key];
+    options.GameMode = options.GameMode || MapGen.Context.GameModes.Multiplayer();
+    var context = MapGen.Context.Create(options);
     context.GameMode = context.GameMode || MapGen.Context.GameModes.Multiplayer();
 
     return MapGen.RunPipeline(context, MapGen.PipelineStages(),
