@@ -63,7 +63,7 @@ var SpriteTypes = {
 
     BoilingPot: 60,
     Civilian: 61,
-    Civilian2: 62,
+    Civilian_Fast: 62,
     VehicleNoGun_Human: 63,
     VehicleGun_Human: 64,
     Tank_Human: 65,
@@ -112,7 +112,7 @@ var SpriteTypes = {
     Helicopter_Homing_Human_Called: 104,
     Turret_HomingMissile_Enemy: 105,
     Enemy_Leader: 106,
-    Helicopter_Homing_Enemy2: 107,
+    Helicopter_Homing_Enemy_Called: 107,
     Computer_1: 108,
     Computer_2: 109,
     Computer_3: 110,

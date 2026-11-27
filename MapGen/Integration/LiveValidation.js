@@ -50,7 +50,7 @@ MapGen.Integration = MapGen.Integration || {};
             "Turret_Missile2_Enemy", "Turret_HomingMissile_Enemy",
             "Helicopter_Grenade_Enemy", "Helicopter_Grenade2_Enemy",
             "Helicopter_Missile_Enemy", "Helicopter_Homing_Enemy",
-            "Helicopter_Homing_Enemy2"
+            "Helicopter_Homing_Enemy_Called"
         ]);
     };
 
