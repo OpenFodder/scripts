@@ -295,8 +295,8 @@ MapGen.Grammar.Sprites = {
 
         if(this.IsUnsafeSpriteType(pContext, pRole, fallback))
             return {
-                type: this.SpriteTypeId("Bird_Right", 67),
-                name: "Bird_Right"
+                type: this.SpriteTypeId("Bird_Right_CameraRespawn", 67),
+                name: "Bird_Right_CameraRespawn"
             };
 
         return fallback;

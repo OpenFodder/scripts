@@ -36,8 +36,8 @@ MapGen.Grammar.Birds = {
             var left = random.Chance(0.5);
             out.birds.push(MapGen.Grammar.Sprites.Placement("bird_" + points.length,
                 "decor", "ambient_bird", point,
-                {type:left ? SpriteTypes.Bird_Left : SpriteTypes.Bird_Right,
-                    name:left ? "Bird_Left" : "Bird_Right"}, "sparse_birds"));
+                {type:left ? SpriteTypes.Bird_Left_CameraRespawn : SpriteTypes.Bird_Right_CameraRespawn,
+                    name:left ? "Bird_Left_CameraRespawn" : "Bird_Right_CameraRespawn"}, "sparse_birds"));
             points.push(point);
         }
     }

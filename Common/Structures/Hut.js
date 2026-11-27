@@ -24,7 +24,7 @@ Structures.Jungle.Hut = {
 
     Types: {
         "soldier": [
-            [21, 43, SpriteTypes.BuildingDoor2]
+            [21, 43, SpriteTypes.BuildingDoor_Hut]
         ],
         "civilian": [
             [21, 44, SpriteTypes.Door_Civilian]
@@ -71,7 +71,7 @@ Structures.Desert.Hut = {
 
     Types: {
         "soldier": [
-            [35, 40, SpriteTypes.BuildingDoor2]
+            [35, 40, SpriteTypes.BuildingDoor_Hut]
         ],
         "civilian": [
             [35, 40, SpriteTypes.Door_Civilian]
@@ -110,7 +110,7 @@ Structures.Ice.Hut = {
     Types: {
         "soldier": [
             [21, 17, SpriteTypes.Shrub], // In this case 'Shrub' is roof
-            [14, 38, SpriteTypes.BuildingDoor2]
+            [14, 38, SpriteTypes.BuildingDoor_Hut]
         ],
         "civilian": [
             [21, 17, SpriteTypes.Shrub], // In this case 'Shrub' is roof
@@ -164,7 +164,7 @@ Structures.Moors.Hut = {
 
     Types: {
         "soldier": [
-            [28, 65, SpriteTypes.BuildingDoor2]   
+            [28, 65, SpriteTypes.BuildingDoor_Hut]
         ],
         "civilian": [
             [28, 65, SpriteTypes.Door_Civilian]   
@@ -193,7 +193,7 @@ Structures.Interior.Hut = {
 
     Types: {
         "soldier": [
-            [3, 5, SpriteTypes.BuildingDoor2]     
+            [3, 5, SpriteTypes.BuildingDoor_Hut]
         ],
         "civilian": [
             [3, 5, SpriteTypes.Door_Civilian]   

@@ -109,7 +109,7 @@ MapGen.Layout = MapGen.Layout || {};
     function approach(c, field, r, info, spec, tx, ty) {
         var sprites = info.info.Types[spec.sprite] || [];
         var doors = [
-            SpriteTypes.BuildingDoor, SpriteTypes.BuildingDoor2, SpriteTypes.BunkerDoor_HeavyExplosionOnly,
+            SpriteTypes.BuildingDoor, SpriteTypes.BuildingDoor_Hut, SpriteTypes.BunkerDoor_HeavyExplosionOnly,
             SpriteTypes.BunkerDoor_ReinforcedHeavyExplosionOnly, SpriteTypes.Door_Civilian, SpriteTypes.Door_Civilian_Spear,
             SpriteTypes.Door_Civilian_Rescue
         ];
