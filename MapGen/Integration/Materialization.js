@@ -113,6 +113,8 @@ MapGen.Integration = MapGen.Integration || {};
             "MapGen failed to place grammar planned sprites"
         );
 
+        MapGen.Integration.PlaceCampaignSupportHelicopter(grammarContext);
+
         Scenario.Random.LiveTime(grammarContext, "PolishFinalIceMap", function() {
             return MapGen.Integration.PolishFinalIceMap ?
                 MapGen.Integration.PolishFinalIceMap(grammarContext) :

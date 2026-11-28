@@ -98,12 +98,22 @@ MapGen.Grammar.Sprites = {
     },
 
     RoleCount: function(pContext, pTargets, pRole, pCompositionRole, pFallback, pMin, pMax) {
+        var stats = this.RoleCountStats(pTargets, pRole, pCompositionRole);
         var count = this.PickStatNumber(
             pContext.Random,
-            this.RoleCountStats(pTargets, pRole, pCompositionRole),
+            stats,
             true,
             pFallback || 0
         );
+
+        // Integer sampling rounds a target band below one down to zero.
+        // Give rare observed roles a chance to appear using their corpus mean.
+        var variants = (pContext.Profile || {}).CampaignSpriteVariants || {};
+        if(!count && !pMin && variants[pRole] && stats && stats.mean > 0) {
+            var range = this.StatRange(stats, false);
+            if(range && range[1] < 1 && pContext.Random.Float(0, 1) < stats.mean)
+                count = 1;
+        }
 
         count = Math.max(pMin || 0, count);
         if(pMax !== undefined)
@@ -373,13 +383,28 @@ MapGen.Grammar.Sprites = {
         return changed ? result : pWeights;
     },
 
-    PickSpriteType: function(pContext, pTargets, pRole, pFallbackType, pFallbackName) {
+    PickSpriteType: function(pContext, pTargets, pRole, pFallbackType, pFallbackName, pAllowCampaignVariants) {
         var fallback = this.SafeFallbackSpriteType(pContext, pRole, pFallbackType, pFallbackName);
-        var weights = this.FilteredTypeWeights(pContext, this.TypeWeights(pTargets, pRole), pRole);
+        var weights = this.TypeWeights(pTargets, pRole);
+        var variants = pAllowCampaignVariants &&
+            ((pContext.Profile || {}).CampaignSpriteVariants || {})[pRole];
+        if(variants) {
+            var combined = {};
+            var keys = this.Keys(weights);
+            for(var index = 0; index < keys.length; ++index)
+                combined[keys[index]] = weights[keys[index]];
+            keys = this.Keys(variants);
+            for(var index = 0; index < keys.length; ++index)
+                combined[keys[index]] = variants[keys[index]];
+            weights = combined;
+        }
+        weights = this.FilteredTypeWeights(pContext, weights, pRole);
         var picked = this.WeightedPick(pContext.Random, weights, null);
         var parsed = this.ParseSpriteType(picked, fallback.type, fallback.name);
         parsed.role = pRole;
         parsed.source = picked ? "spriteRolePlacement.roles." + pRole + ".types" : "fallback";
+        if(picked && variants && this.HasOwn(variants, picked))
+            parsed.source = "profile.CampaignSpriteVariants." + pRole;
         return parsed;
     },
 
@@ -975,7 +1000,7 @@ MapGen.Grammar.Sprites = {
                     point: function(index, anchor) {
                         return self.PairOffsetPoint(pContext, pTargets, spec.pair, anchor, index + roleIndex, 5);
                     },
-                    sprite: function() { return self.PickSpriteType(pContext, pTargets, spec.role, spec.fallbackType, spec.fallbackName); },
+                    sprite: function() { return self.PickSpriteType(pContext, pTargets, spec.role, spec.fallbackType, spec.fallbackName, true); },
                     extra: function() { return { pressureRole: "objective_guard" }; },
                     also: function(placement) {
                         if(spec.role === "enemy_helicopters")
@@ -1163,6 +1188,31 @@ MapGen.Grammar.Sprites = {
             extra: function() { return { requiredByMobility: forceVehicle }; },
             also: function(placement) { pOut.support.push(placement); }
         });
+
+        var turretChance = pContext.Profile.CampaignSupportTurretChance;
+        if(!turretChance || pContext.Random.Float(0, 1) >= turretChance)
+            return;
+
+        // Turrets are stationary support and cannot satisfy a vehicle route.
+        this.PlaceRole(pContext, pOut, {
+            count: 1,
+            group: "vehicles",
+            idPrefix: "support_turret_",
+            role: "human_turrets",
+            kind: "support_turret",
+            source: "profile.CampaignSupportTurretChance",
+            anchor: function() {
+                return self.RoutePathPoint(pPlan.routePlan || {}, 1, 3) ||
+                    { x: Math.floor(pContext.Width / 2), y: Math.floor(pContext.Height / 2) };
+            },
+            point: function(index, anchor) {
+                return self.OffsetPoint(pContext, anchor, 2, 2, 1);
+            },
+            sprite: function() {
+                return self.PickSpriteType(pContext, null, "human_turrets", 78, "Turret_Cannon_Human", true);
+            },
+            also: function(placement) { pOut.support.push(placement); }
+        });
     },
 
     AddHelicoptersAndCallpads: function(pContext, pTargets, pPlan, pOut) {
@@ -1185,7 +1235,11 @@ MapGen.Grammar.Sprites = {
                     { x: 2, y: 2 };
             },
             point: function(index, anchor) { return self.OffsetPoint(pContext, anchor, index % 2 ? 3 : -3, -2, 1); },
-            sprite: function() { return self.PickSpriteType(pContext, pTargets, "human_helicopters", 50, "Helicopter_Unarmed_Human"); },
+            sprite: function() {
+                if(pContext.Profile.CampaignSpriteVariants)
+                    return self.PickSpriteType(pContext, null, "human_helicopters", 49, "Helicopter_Grenade_Human", true);
+                return self.PickSpriteType(pContext, pTargets, "human_helicopters", 50, "Helicopter_Unarmed_Human");
+            },
             extra: function() { return { requiredByMobility: forceHelicopter }; },
             also: function(placement) { pOut.support.push(placement); }
         });

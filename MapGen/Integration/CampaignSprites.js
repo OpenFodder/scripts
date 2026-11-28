@@ -73,7 +73,8 @@ MapGen.Integration = MapGen.Integration || {};
     // so the base is ICE-ONLY.
     var TURRET_BASE_LEFT = 381;
     var TURRET_BASE_RIGHT = 382;
-    var ENEMY_TURRET_SPRITES = { 84: true, 85: true };
+    var ENEMY_TURRET_SPRITES = { 84: true, 85: true, 105: true };
+    var HUMAN_TURRET_SPRITES = { 78: true, 79: true };
 
     // Ground-combat actors must stand on walkable terrain. The grammar sprite
     // plan computes their tiles from route/anchor offsets BEFORE the live terrain
@@ -288,9 +289,18 @@ MapGen.Integration = MapGen.Integration || {};
     // Spiral outward deterministically (ring by ring, no RNG draw) from a planned
     // point for the nearest tile whose 2-wide footprint is open. pMargin toggles the
     // P2 water-free requirement; pMaxRadius bounds the search. Returns {x,y} or null.
-    pIntegration.FindTurretBaseSpot = function(pContext, pTileX, pTileY, pMargin, pMaxRadius) {
+    pIntegration.FindTurretBaseSpot = function(pContext, pTileX, pTileY, pMargin, pMaxRadius, pPlayerTurret) {
+        var self = this;
+        function valid(tx, ty) {
+            if(!self.TurretBaseFootprintOpen(pContext, tx, ty, pMargin))
+                return false;
+            if(!pPlayerTurret)
+                return true;
+            var access = new cPosition(tx * 16 + TURRET_SPRITE_OFFSET_X, (ty + 1) * 16);
+            return Reachability.VerifyReachable(SpriteTypes.Player, Session.HumanPosition, access);
+        }
         var maxRadius = pMaxRadius || 8;
-        if(this.TurretBaseFootprintOpen(pContext, pTileX, pTileY, pMargin))
+        if(valid(pTileX, pTileY))
             return { x: pTileX, y: pTileY };
 
         for(var radius = 1; radius <= maxRadius; ++radius) {
@@ -301,7 +311,7 @@ MapGen.Integration = MapGen.Integration || {};
                         continue;
                     var tx = pTileX + dx;
                     var ty = pTileY + dy;
-                    if(this.TurretBaseFootprintOpen(pContext, tx, ty, pMargin))
+                    if(valid(tx, ty))
                         return { x: tx, y: ty };
                 }
             }
@@ -321,16 +331,26 @@ MapGen.Integration = MapGen.Integration || {};
     // (no baseless orphan, no base in water). Verified on a 40-map/76-turret ice
     // corpus: Tier 1 bases 72/76 margin-clean, 0 water-adjacent, 0 on-start, 4 dropped
     // (genuinely water-locked) — vs 39 water-adjacent / 10 baseless / 2 on-start before.
-    pIntegration.ResolveTurretBaseSpot = function(pContext, pTileX, pTileY) {
-        return this.FindTurretBaseSpot(pContext, pTileX, pTileY, true, 16) ||
-               this.FindTurretBaseSpot(pContext, pTileX, pTileY, false, 8);
+    pIntegration.ResolveTurretBaseSpot = function(pContext, pTileX, pTileY, pPlayerTurret) {
+        return this.FindTurretBaseSpot(pContext, pTileX, pTileY, true, 16, pPlayerTurret) ||
+               this.FindTurretBaseSpot(pContext, pTileX, pTileY, false, 8, pPlayerTurret);
     };
 
-    pIntegration.IsIceEnemyTurretPlacement = function(pContext, pPlacement, pType) {
+    pIntegration.IsIceTurretPlacement = function(pContext, pPlacement, pType) {
         return !!(pContext && pContext.Profile &&
             pContext.Profile.TerrainType === Terrain.Types.Ice &&
-            pPlacement && pPlacement.kind === "enemy_turret" &&
-            ENEMY_TURRET_SPRITES[pType]);
+            (HUMAN_TURRET_SPRITES[pType] ||
+                (pPlacement.kind === "enemy_turret" && ENEMY_TURRET_SPRITES[pType])));
+    };
+
+    pIntegration.RepaintLiveIceTurretBases = function(pContext) {
+        var bases = pContext.LiveIceTurretBases || [];
+        var tiles = pContext.RenderedMap.Tiles;
+        for(var index = 0; index < bases.length; ++index) {
+            var base = bases[index];
+            tiles[base.x][base.y] = TURRET_BASE_LEFT;
+            tiles[base.x + 1][base.y] = TURRET_BASE_RIGHT;
+        }
     };
 
     // Engine terrain features (eTerrainFeature) a ground actor must NOT be spawned
@@ -506,7 +526,7 @@ MapGen.Integration = MapGen.Integration || {};
         if(type === undefined || type === null)
             return false;
 
-        // Ice enemy turrets stand on a 2-wide 381/382 base. Resolve a base spot that
+        // Ice turrets stand on a 2-wide 381/382 base. Resolve a base spot that
         // is standable, water-margin-clean, riverBank-free and away from the player
         // start (see ResolveTurretBaseSpot's tiers), stamp the base there, and place
         // the sprite ON it. If NO dry 2-wide footprint exists within radius 16 (a
@@ -514,12 +534,16 @@ MapGen.Integration = MapGen.Integration || {};
         // a base in the water — both are worse than one fewer turret, and shipped ice
         // maps never show a baseless or water-bound turret.
         var context = Session.MapGenContext;
-        if(point && this.IsIceEnemyTurretPlacement(context, pPlacement, type) &&
+        var playerTurret = !!HUMAN_TURRET_SPRITES[type];
+        if(point && this.IsIceTurretPlacement(context, pPlacement, type) &&
             typeof Map !== "undefined" && Map.TileSet) {
-            var spot = this.ResolveTurretBaseSpot(context, point.x, point.y);
+            var spot = this.ResolveTurretBaseSpot(context, point.x, point.y, playerTurret);
             if(spot) {
                 Map.TileSet(spot.x, spot.y, TURRET_BASE_LEFT);
                 Map.TileSet(spot.x + 1, spot.y, TURRET_BASE_RIGHT);
+                if(!context.LiveIceTurretBases)
+                    context.LiveIceTurretBases = [];
+                context.LiveIceTurretBases.push(spot);
                 // Keep these cells out of later placement reuse.
                 if(context.Layers && context.Layers.occupied) {
                     MapGen.Layers.Set(context.Layers.occupied, spot.x, spot.y, "turret_base");
@@ -537,7 +561,7 @@ MapGen.Integration = MapGen.Integration || {};
             }
             // No dry footprint within radius 16: drop the turret (return true so the
             // caller counts it as handled, not a placement failure).
-            return true;
+            return !!spot || !playerTurret;
         }
 
         if(runtime) {
@@ -567,11 +591,15 @@ MapGen.Integration = MapGen.Integration || {};
         // grow over it. Snap the final pixel position to the nearest walkable tile,
         // preserving the sub-tile pixel offset. No-op + byte-identical when the
         // tile is already walkable, so only the broken placements move.
-        if(pPlacement.kind && GROUND_ACTOR_KINDS[pPlacement.kind]) {
+        if(playerTurret || GROUND_ACTOR_KINDS[pPlacement.kind]) {
             var tileX = Math.floor(x / 16);
             var tileY = Math.floor(y / 16);
             var snapped = this.SnapGroundActorToReachable(context, tileX, tileY, x - tileX * 16, y - tileY * 16);
-            if(!snapped) throw new Error("ground_actor_has_no_reachable_site:" + tileX + "," + tileY);
+            if(!snapped) {
+                if(playerTurret)
+                    return false;
+                throw new Error("ground_actor_has_no_reachable_site:" + tileX + "," + tileY);
+            }
             if(snapped && (snapped.x !== tileX || snapped.y !== tileY)) {
                 x += (snapped.x - tileX) * 16;
                 y += (snapped.y - tileY) * 16;

@@ -86,7 +86,9 @@ var Validation = {
         this.canAccessWeapons(report);
 
         if(Session.HelicopterMinimum >= 0 && this.AllowCampaignHelicopterFallback()) {
-            var type = SpriteTypes.Helicopter_Grenade_Human + Session.HelicopterMinimum;
+            var types = [SpriteTypes.Helicopter_Grenade_Human,
+                SpriteTypes.Helicopter_Missile_Human, SpriteTypes.Helicopter_Homing_Human];
+            var type = types[Session.HelicopterMinimum];
             Session.Helicopter = Helicopters.Human.Random(type);
 
             if(!Session.Helicopter || !Reachability.VerifyReachable(SpriteTypes.Player, Session.Helicopter, Session.HumanPosition))

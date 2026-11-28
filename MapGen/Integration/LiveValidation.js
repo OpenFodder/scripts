@@ -968,8 +968,11 @@ MapGen.Integration = MapGen.Integration || {};
             return;
 
         var turretTypes = [
+            SpriteTypes.Turret_Cannon_Human,
+            SpriteTypes.Turret_Missile_Human,
             SpriteTypes.Turret_Missile_Enemy,
-            SpriteTypes.Turret_Missile2_Enemy
+            SpriteTypes.Turret_Missile2_Enemy,
+            SpriteTypes.Turret_HomingMissile_Enemy
         ];
         var checked = 0;
         var overlaps = 0;
@@ -1511,8 +1514,13 @@ MapGen.Integration = MapGen.Integration || {};
                     this.LiveFail(report, "rescue_tent_missing");
             }
 
-            if(Settings.hasObjective(Objectives.GetCivilianHome))
-                this.ValidateMinimumCount(report, "civilianHomeActors", this.SpriteCount(SpriteTypes.Civilian_Spear), expected.civilians || 1);
+            if(Settings.hasObjective(Objectives.GetCivilianHome)) {
+                var civilianTypes = this.CivilianHomeSpriteTypes();
+                var civilianCount = 0;
+                for(var index = 0; index < civilianTypes.length; ++index)
+                    civilianCount += this.SpriteCount(civilianTypes[index]);
+                this.ValidateMinimumCount(report, "civilianHomeActors", civilianCount, expected.civilians || 1);
+            }
         }
 
         if(Session.HumanPosition) {

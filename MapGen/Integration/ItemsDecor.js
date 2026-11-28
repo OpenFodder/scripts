@@ -984,15 +984,37 @@ MapGen.Integration = MapGen.Integration || {};
         if(!placement)
             return false;
 
+        var sprite = MapGen.Grammar.Sprites.PickSpriteType(context, null,
+            "human_helicopters", SpriteTypes.Helicopter_Grenade_Human,
+            "Helicopter_Grenade_Human", true);
         var position = this.TileToPosition(placement.point);
-        Session.Helicopter = Helicopters.Human.Random(
-            SpriteTypes.Helicopter_Grenade_Human,
-            position
-        );
+        Session.Helicopter = Helicopters.Human.Random(sprite.type, position);
         context.CliffHelicopterMaterialized = true;
         context.LiveCliffHelicopterPosition = position;
 
         return !!Session.Helicopter && Helicopters.Human.HaveAny();
+    };
+
+    pIntegration.PlaceCampaignSupportHelicopter = function(pContext) {
+        if(!pContext.Profile.CampaignSpriteVariants || pContext.CliffHelicopterMaterialized)
+            return;
+
+        var plan = this.GrammarSpritePlan();
+        var helicopters = (plan && plan.helicopters) || [];
+        var types = this.HumanHelicopterSpriteTypes();
+        for(var index = 0; index < helicopters.length; ++index) {
+            var placement = helicopters[index];
+            if(placement.role !== "human_helicopters" || !placement.point ||
+                types.indexOf(placement.spriteType) < 0)
+                continue;
+            var point = this.SnapGroundActorToReachable(pContext,
+                placement.point.x, placement.point.y, 0, 0);
+            if(!point)
+                continue;
+
+            Session.Helicopter = Helicopters.Human.Random(placement.spriteType, this.TileToPosition(point));
+            return;
+        }
     };
 
     pIntegration.PlaceCampaignPickups = function(pGrenadeCount, pRocketCount) {

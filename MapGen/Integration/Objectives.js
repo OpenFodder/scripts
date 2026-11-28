@@ -350,12 +350,20 @@ MapGen.Integration = MapGen.Integration || {};
         return true;
     };
 
+    pIntegration.CivilianHomeSpriteTypes = function() {
+        return [SpriteTypes.Civilian, SpriteTypes.Civilian_Fast, SpriteTypes.Civilian_Spear];
+    };
+
     pIntegration.PlaceCampaignCivilianHome = function(pCivilianCount) {
         var context = Session.MapGenContext;
         var count = Math.max(1, Math.floor(pCivilianCount || 1));
         var civilianOffsets = this.ObjectiveOffsets(1);
         var civilianPoints = [];
         var civilianPositions = [];
+        var spritePlan = this.GrammarSpritePlan();
+        var plannedCivilians = (spritePlan && spritePlan.civilians) || [];
+        var civilianTypes = this.CivilianHomeSpriteTypes();
+        var selectedTypes = [];
         var rescueSpec = {
             building: "hut",
             sprite: "civilian_rescue"
@@ -388,6 +396,9 @@ MapGen.Integration = MapGen.Integration || {};
 
             civilianPoints.push(point);
             civilianPositions.push(this.TileToPosition(point));
+            var plannedType = plannedCivilians[index] && plannedCivilians[index].spriteType;
+            selectedTypes.push(civilianTypes.indexOf(plannedType) >= 0 ?
+                plannedType : SpriteTypes.Civilian_Spear);
         }
 
         if(!civilianPositions.length)
@@ -465,7 +476,7 @@ MapGen.Integration = MapGen.Integration || {};
             var civilianPosition = civilianPositions[civilianIndex];
 
             Session.CivilianPositions.push(civilianPosition);
-            Map.SpriteAdd(SpriteTypes.Civilian_Spear, civilianPosition.x, civilianPosition.y);
+            Map.SpriteAdd(selectedTypes[civilianIndex], civilianPosition.x, civilianPosition.y);
             this.ReserveObjectiveOffsets(context, "objectives", "live_civilian_home_actor", civilianPoints[civilianIndex], civilianOffsets, 2);
         }
 

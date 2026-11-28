@@ -131,6 +131,9 @@ MapGen.Intent = MapGen.Intent || {};
 
         MapGen.Layout.SettlementDetails.Repaint(pContext);
 
+        if(MapGen.Integration && MapGen.Integration.RepaintLiveIceTurretBases)
+            MapGen.Integration.RepaintLiveIceTurretBases(pContext);
+
         var validation = pIntent.Validate && pIntent.Validate.RunRenderedHard ?
             pIntent.Validate.RunRenderedHard(
                 pContext, concept || { renderedHardValidators: [] },

@@ -967,10 +967,21 @@ MapGen.Profiles = (function() {
         }
     };
 
+    // Supplement the observed sprite types for generated campaigns.
+    var campaignSpriteVariants = {
+        enemy_turrets: { "Turret_HomingMissile_Enemy(105)": 2 },
+        enemy_helicopters: { "Helicopter_Missile_Enemy(43)": 1, "Helicopter_Homing_Enemy(44)": 1 },
+        human_turrets: { "Turret_Cannon_Human(78)": 1, "Turret_Missile_Human(79)": 1 },
+        human_helicopters: { "Helicopter_Grenade_Human(49)": 2,
+            "Helicopter_Missile_Human(51)": 1, "Helicopter_Homing_Human(52)": 1 }
+    };
+
     var profiles = {
         grammar_jungle: {
             GeneratorCore: "official_grammar",
             TargetPackProfile: "grammar_jungle",
+            CampaignSpriteVariants: campaignSpriteVariants,
+            CampaignSupportTurretChance: 0.15,
             TerrainVariant: "jun_sub0",
             TerrainTypeSub: 0,
             // Generic jungle chooses a procedural route/archetype for each
@@ -1355,6 +1366,8 @@ MapGen.Profiles = (function() {
         grammar_ice: {
             GeneratorCore: "official_grammar",
             TargetPackProfile: "grammar_ice",
+            CampaignSpriteVariants: campaignSpriteVariants,
+            CampaignSupportTurretChance: 0.15,
             TerrainVariant: "ice_sub0",
             TerrainType: Terrain.Types.Ice,
             // The random profile still selects a concrete ice layout style

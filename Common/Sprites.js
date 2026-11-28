@@ -48,9 +48,9 @@ var SpriteTypes = {
     MissileHoming: 46,
     Sparks: 47,
     FireTrail: 48,
-    Helicopter_Grenade2_Human: 49,
+    Helicopter_Grenade_Human: 49,
 
-    Helicopter_Grenade_Human: 50,
+    Helicopter_Unarmed_Human: 50,
     Helicopter_Missile_Human: 51,
     Helicopter_Homing_Human: 52,
     Helicopter_PropCrash: 53,
@@ -80,8 +80,8 @@ var SpriteTypes = {
     Door_Civilian_Fast: 75,
     Door_Civilian_Spear: 76,
     Cannon: 77,
-    Turret_Missile_Human: 78,
-    Turret_Missile2_Human: 79,
+    Turret_Cannon_Human: 78,
+    Turret_Missile_Human: 79,
 
     VehicleNoGun_Enemy: 80,
     VehicleGun_Enemy: 81,
@@ -106,8 +106,8 @@ var SpriteTypes = {
     Helicopter_CallPad: 99,
 
     BunkerDoor_ReinforcedHeavyExplosionOnly: 100,
-    Helicopter_Grenade2_Human_Called: 101,
-    Helicopter_Grenade_Human_Called: 102,
+    Helicopter_Grenade_Human_Called: 101,
+    Helicopter_Unarmed_Human_Called: 102,
     Helicopter_Missile_Human_Called: 103,
     Helicopter_Homing_Human_Called: 104,
     Turret_HomingMissile_Enemy: 105,
